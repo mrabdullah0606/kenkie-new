@@ -1,0 +1,154 @@
+<header class="header-3">
+    <div class="top-nav sticky-header sticky-header-2">
+        <div class="container-fluid-lg">
+            <div class="row">
+                <div class="col-12">
+                    <div class="navbar-top">
+                        <button class="navbar-toggler d-xl-none d-block p-0 me-3" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#primaryMenu">
+                            <span class="navbar-toggler-icon">
+                                <i class="iconly-Category icli"></i>
+                            </span>
+                        </button>
+                        <a href="{{ route('home') }}" class="web-logo nav-logo">
+                            <img src="{{ asset('assets/images/logo/kenkie-logo.png') }}" class="img-fluid blur-up lazyload" alt="Kenkie">
+                        </a>
+
+                        <div class="search-full live-search-container position-relative">
+                            <form action="{{ route('shop.category') }}" method="GET" class="input-group" autocomplete="off">
+                                <span class="input-group-text">
+                                    <i data-feather="search" class="font-light"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control search-type js-live-search-input" value="{{ request('search') }}" placeholder="Search here.." autocomplete="off">
+                                <span class="input-group-text close-search">
+                                    <i data-feather="x" class="font-light"></i>
+                                </span>
+                            </form>
+                            <div class="js-live-search-dropdown live-search-dropdown live-search-dropdown--mobile d-none"></div>
+                        </div>
+
+                        <div class="middle-box">
+                            <div class="center-box w-100 live-search-container position-relative">
+                                <form action="{{ route('shop.category') }}" method="GET" class="searchbar-box-2 input-group d-xl-flex d-none w-100" autocomplete="off">
+                                    <button class="btn search-icon" type="submit" aria-label="Search">
+                                        <i class="iconly-Search icli"></i>
+                                    </button>
+                                    <input type="text" name="search" class="form-control js-live-search-input"
+                                        value="{{ request('search') }}"
+                                        placeholder="Search for products, styles, brands..."
+                                        autocomplete="off">
+                                    <button class="btn search-button" type="submit">Search</button>
+                                </form>
+                                <div class="js-live-search-dropdown live-search-dropdown d-none"></div>
+                            </div>
+                        </div>
+
+                        <div class="rightside-menu support-sidemenu">
+                            <div class="support-box">
+                                <div class="support-image">
+                                    <img src="{{ asset('assets/images/icon/support.png') }}" class="img-fluid blur-up lazyload"
+                                        alt="">
+                                </div>
+                                <div class="support-number">
+                                    <h2>(123) 456 7890</h2>
+                                    <h4>24/7 Support Center</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid-lg">
+        <div class="row">
+            <div class="col-12 position-relative">
+                <div class="main-nav nav-left-align">
+                    <div class="main-nav navbar navbar-expand-xl navbar-light navbar-sticky p-0">
+                        <div class="offcanvas offcanvas-collapse order-xl-2" id="primaryMenu">
+                            <div class="offcanvas-header navbar-shadow">
+                                <h5>Menu</h5>
+                                <button class="btn-close lead" type="button" data-bs-dismiss="offcanvas"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body">
+                                <ul class="navbar-nav">
+                                    <li class="nav-item">
+                                        <a class="nav-link nav-link-single ps-0" href="{{ route('home') }}">Home</a>
+                                    </li>
+
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="javascript:void(0)"
+                                            data-bs-toggle="dropdown">Shop</a>
+
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('shop.category') }}">All Products</a>
+                                            </li>
+                                            @foreach ($headerCategories ?? $categories ?? [] as $cat)
+                                                <li>
+                                                    <a class="dropdown-item" href="{{ route('shop.category', ['category' => $cat->slug]) }}">{{ $cat->name }}</a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rightside-menu">
+                        <ul class="option-list-2">
+                            <li>
+                                <a href="javascript:void(0)" class="header-icon search-box search-icon">
+                                    <i class="iconly-Search icli"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('wishlist.index') }}" class="header-icon swap-icon position-relative">
+                                    @if (($headerWishlistCount ?? 0) > 0)
+                                        <small class="badge-number badge-light">{{ $headerWishlistCount }}</small>
+                                    @endif
+                                    <i class="iconly-Heart icli"></i>
+                                </a>
+                            </li>
+
+                            <li>
+                                <a href="{{ route('cart.index') }}" class="header-icon bag-icon position-relative">
+                                    @if (($headerCartCount ?? 0) > 0)
+                                        <small class="badge-number badge-light">{{ $headerCartCount }}</small>
+                                    @endif
+                                    <i class="iconly-Bag-2 icli"></i>
+                                </a>
+                            </li>
+                        </ul>
+
+                        @auth
+                            <a href="{{ route('dashboard') }}" class="user-box">
+                                <span class="header-icon">
+                                    <i class="iconly-Profile icli"></i>
+                                </span>
+                                <div class="user-name">
+                                    <h6 class="text-content">My Account</h6>
+                                    <h4 class="mt-1">{{ auth()->user()->name }}</h4>
+                                </div>
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" class="user-box">
+                                <span class="header-icon">
+                                    <i class="iconly-Profile icli"></i>
+                                </span>
+                                <div class="user-name">
+                                    <h6 class="text-content">Hello,</h6>
+                                    <h4 class="mt-1">Sign In</h4>
+                                </div>
+                            </a>
+                        @endauth
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

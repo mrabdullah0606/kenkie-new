@@ -1,0 +1,1 @@
+@include('website.content.wishlist')

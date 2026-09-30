@@ -1,0 +1,1 @@
+@include('website.content.product-4-image')
