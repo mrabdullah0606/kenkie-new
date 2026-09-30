@@ -19,10 +19,10 @@ it('requires authentication for the admin dashboard', function () {
     $this->get('/admin')->assertRedirect('/login');
 });
 
-it('renders the admin dashboard for authenticated users', function () {
-    $this->actingAs(User::factory()->create())
+it('renders the admin dashboard for authenticated admin users', function () {
+    $this->actingAs(User::factory()->admin()->create())
         ->get('/admin')
         ->assertOk()
         ->assertViewIs('admin.dashboard')
-        ->assertSee('Admin dashboard');
+        ->assertSee('Admin Dashboard');
 });

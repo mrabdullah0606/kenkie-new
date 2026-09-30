@@ -325,6 +325,11 @@
                                 <a href="{{ route('checkout.index') }}" class="btn theme-bg-color text-white py-2 fw-bold text-center">
                                     Process To Checkout <i class="fa-solid fa-arrow-right ms-2"></i>
                                 </a>
+                                @guest
+                                    <small class="text-muted text-center d-block">
+                                        <i class="fa-solid fa-user-lock me-1 text-secondary"></i> Sign in or register is required to place your order.
+                                    </small>
+                                @endguest
                                 <a href="{{ route('shop.category') }}" class="btn btn-light py-2 text-dark text-center fw-medium border">
                                     <i class="fa-solid fa-arrow-left-long me-2"></i>Return To Shopping
                                 </a>

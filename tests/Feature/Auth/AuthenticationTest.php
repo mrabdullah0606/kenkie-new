@@ -8,16 +8,28 @@ test('login screen can be rendered', function () {
     $response->assertStatus(200);
 });
 
-test('users can authenticate using the login screen', function () {
-    $user = User::factory()->create();
+test('admin users are redirected to admin dashboard upon login', function () {
+    $admin = User::factory()->admin()->create();
 
     $response = $this->post('/login', [
-        'email' => $user->email,
+        'email' => $admin->email,
         'password' => 'password',
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('admin.dashboard', absolute: false));
+});
+
+test('customer users are redirected to home upon login', function () {
+    $customer = User::factory()->customer()->create();
+
+    $response = $this->post('/login', [
+        'email' => $customer->email,
+        'password' => 'password',
+    ]);
+
+    $this->assertAuthenticated();
+    $response->assertRedirect(route('home', absolute: false));
 });
 
 test('users can not authenticate with invalid password', function () {

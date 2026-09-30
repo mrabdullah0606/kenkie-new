@@ -172,14 +172,21 @@
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
-            min-height: 270px !important;
-            background: #f8f8f8 !important;
+            min-height: 290px !important;
+            background: #f8fafc !important;
+            border: 1px solid #f0f0f0 !important;
             border-radius: 12px !important;
             padding: 20px !important;
+            transition: all 0.3s ease !important;
+        }
+        .category-box-list:hover {
+            border-color: #22c55e !important;
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.12) !important;
+            transform: translateY(-2px);
         }
         .category-box-list .category-name {
             display: block !important;
-            min-height: 64px !important;
+            min-height: 56px !important;
         }
         .category-box-list .category-name h4 {
             font-size: 15px !important;
@@ -205,9 +212,15 @@
         }
         .category-box-list .category-box-view a img {
             width: 100% !important;
-            height: 125px !important;
-            object-fit: cover !important;
+            height: 150px !important;
+            object-fit: contain !important;
+            background: #ffffff !important;
             border-radius: 8px !important;
+            padding: 10px !important;
+            transition: transform 0.3s ease !important;
+        }
+        .category-box-list:hover .category-box-view a img {
+            transform: scale(1.05) !important;
         }
         .category-box-list .category-box-view .shop-button {
             display: none !important;
@@ -240,33 +253,54 @@
             justify-content: space-between !important;
             background: #ffffff !important;
             border: 1px solid #f0f0f0 !important;
-            border-radius: 10px !important;
-            padding: 16px !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+            border-radius: 12px !important;
+            padding: 14px !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+            transition: all 0.3s ease !important;
+        }
+        .product-box-3:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
+            border-color: #22c55e !important;
         }
         .product-box-3 .product-header {
             width: 100% !important;
         }
         .product-box-3 .product-header .product-image {
             width: 100% !important;
-            height: 180px !important;
+            height: 230px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             overflow: hidden !important;
             position: relative !important;
+            background: #f8fafc !important;
+            border-radius: 10px !important;
+            padding: 12px !important;
+            margin-bottom: 12px !important;
+        }
+        .product-box-3 .product-header .product-image a {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
         .product-box-3 .product-header .product-image img {
-            max-height: 170px !important;
+            max-height: 205px !important;
+            max-width: 100% !important;
             width: 100% !important;
+            height: 100% !important;
             object-fit: contain !important;
+            transition: transform 0.35s ease !important;
+        }
+        .product-box-3:hover .product-header .product-image img {
+            transform: scale(1.06) !important;
         }
         .product-box-3 .product-footer {
             display: flex !important;
             flex-direction: column !important;
             justify-content: space-between !important;
             flex-grow: 1 !important;
-            margin-top: 12px !important;
         }
         .product-box-3 .product-footer .product-detail {
             display: flex !important;
@@ -301,6 +335,114 @@
         }
         .product-box-3 .product-footer .product-detail .add-to-cart-box {
             margin-top: auto !important;
+        }
+
+        /* Hot Deal / Special Offer Custom Styles */
+        .product-bg-image {
+            background: #ffffff !important;
+            border: 1px solid #f0f0f0 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04) !important;
+            height: 100% !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .product-bg-image .product-title.product-warning {
+            background: #22c55e !important;
+            padding: 14px 20px !important;
+        }
+        .product-bg-image .product-title.product-warning h2 {
+            color: #ffffff !important;
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            margin: 0 !important;
+        }
+        .product-bg-image .product-box-4 {
+            border: none !important;
+            background: transparent !important;
+            padding: 20px !important;
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            position: relative !important;
+        }
+        .product-bg-image .product-box-4 .product-image {
+            width: 100% !important;
+            height: 310px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: #f8fafc !important;
+            border-radius: 12px !important;
+            padding: 20px !important;
+            margin-bottom: 18px !important;
+            overflow: hidden !important;
+        }
+        .product-bg-image .product-box-4 .product-image a {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .product-bg-image .product-box-4 .product-image img {
+            max-height: 270px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            transition: transform 0.35s ease !important;
+        }
+        .product-bg-image .product-box-4:hover .product-image img {
+            transform: scale(1.05) !important;
+        }
+        .product-bg-image .deal-box {
+            position: absolute !important;
+            top: 10px !important;
+            left: 10px !important;
+            z-index: 4 !important;
+            margin: 0 !important;
+            pointer-events: none !important;
+        }
+        .product-bg-image .deal-box .circle-box {
+            position: relative !important;
+            width: 52px !important;
+            height: 52px !important;
+            margin: 0 !important;
+        }
+        .product-bg-image .deal-box .shape-circle {
+            position: relative !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 52px !important;
+            height: 52px !important;
+            margin: 0 !important;
+        }
+        .product-bg-image .deal-box .shape-circle img {
+            width: 52px !important;
+            height: 52px !important;
+            max-width: 52px !important;
+            display: block !important;
+            animation: rounded 15s linear infinite;
+        }
+        .product-bg-image .deal-box .shape-text {
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            text-align: center !important;
+            color: #ffffff !important;
+            width: 100% !important;
+        }
+        .product-bg-image .deal-box .shape-text h6 {
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            margin: 0 !important;
+            line-height: 1.1 !important;
+            text-transform: uppercase !important;
         }
 
         /* 5-Box Service Benefits Section */
@@ -438,18 +580,24 @@
                     <div class="slider-animate">
                         <div>
                             <div class="home-contain rounded-0 p-0 position-relative">
-                                <img src="{{ asset('assets/images/banner/kenkie-hero-banner.jpg') }}"
+                                <img src="{{ asset($homeSettings->hero_image ?? 'assets/images/banner/kenkie-hero-banner.jpg') }}"
                                     class="img-fluid bg-img blur-up lazyload" alt="Kenkie Collection Banner">
                                 <div class="home-detail home-big-space p-center-left position-relative" style="z-index: 2;">
                                     <div class="container-fluid-lg">
                                         <div class="hero-glass-card">
-                                            <span class="badge hero-badge mb-2 px-3 py-2 fw-bold text-uppercase">Weekend Special Offer</span>
-                                            <h1 class="heding-2 hero-title">Premium Quality Home & Garden Collection</h1>
-                                            <h2 class="content-2 hero-subtitle">Online Shopping Made Easy & Fast</h2>
-                                            <h5 class="text-content hero-desc">Discover our curated selection of quality essentials at best prices!</h5>
-                                            <a href="{{ route('shop.category') }}"
+                                            @if (!empty($homeSettings->hero_badge))
+                                                <span class="badge hero-badge mb-2 px-3 py-2 fw-bold text-uppercase">{{ $homeSettings->hero_badge }}</span>
+                                            @endif
+                                            <h1 class="heding-2 hero-title">{{ $homeSettings->hero_title ?? 'Premium Quality Home & Garden Collection' }}</h1>
+                                            @if (!empty($homeSettings->hero_subtitle))
+                                                <h2 class="content-2 hero-subtitle">{{ $homeSettings->hero_subtitle }}</h2>
+                                            @endif
+                                            @if (!empty($homeSettings->hero_description))
+                                                <h5 class="text-content hero-desc">{{ $homeSettings->hero_description }}</h5>
+                                            @endif
+                                            <a href="{{ $homeSettings->hero_button_url ? url($homeSettings->hero_button_url) : route('shop.category') }}"
                                                 class="btn theme-bg-color btn-md text-white fw-bold mt-md-4 mt-2 mend-auto d-inline-flex align-items-center gap-2 hero-btn">
-                                                Shop Collection <i class="fa-solid fa-arrow-right icon"></i>
+                                                {{ $homeSettings->hero_button_text ?? 'Shop Collection' }} <i class="fa-solid fa-arrow-right icon"></i>
                                             </a>
                                         </div>
                                     </div>
@@ -467,69 +615,42 @@
     <section class="banner-section banner-small ratio_65">
         <div class="container-fluid-lg">
             <div class="slider-4-banner no-arrow slick-height">
-                <div>
-                    <div class="banner-contain-3 hover-effect promo-card-styled">
-                        <a href="{{ route('shop.category', ['category' => 'home-furniture-diy']) }}">
-                            <img src="{{ asset('assets/images/banner/kenkie-promo-home.jpg') }}" class="bg-img blur-up lazyload" alt="Home & Furniture">
-                        </a>
-                        <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto">
-                            <div>
-                                <h5 class="fw-light mb-2">New Arrivals</h5>
-                                <h4 class="fw-bold mb-0">Home & Furniture</h4>
-                                <a href="{{ route('shop.category', ['category' => 'home-furniture-diy']) }}"
-                                    class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold">Shop Now <i class="fa-solid fa-chevron-right"></i></a>
+                @forelse ($homeBanners as $banner)
+                    <div>
+                        <div class="banner-contain-3 hover-effect promo-card-styled">
+                            <a href="{{ $banner->button_url ? url($banner->button_url) : route('shop.category') }}">
+                                <img src="{{ asset($banner->image ?: 'assets/images/banner/kenkie-promo-home.jpg') }}" class="bg-img blur-up lazyload" alt="{{ $banner->title }}">
+                            </a>
+                            <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto">
+                                <div>
+                                    @if ($banner->subtitle)
+                                        <h5 class="fw-light mb-2">{{ $banner->subtitle }}</h5>
+                                    @endif
+                                    <h4 class="fw-bold mb-0">{{ $banner->title }}</h4>
+                                    <a href="{{ $banner->button_url ? url($banner->button_url) : route('shop.category') }}"
+                                        class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold">
+                                        {{ $banner->button_text ?: 'Shop Now' }} <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div>
-                    <div class="banner-contain-3 hover-effect promo-card-styled">
-                        <a href="{{ route('shop.category', ['category' => 'garden-patio']) }}">
-                            <img src="{{ asset('assets/images/banner/kenkie-promo-garden.jpg') }}" class="img-fluid bg-img blur-up lazyload" alt="Garden & Patio">
-                        </a>
-                        <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto">
-                            <div>
-                                <h5 class="fw-light mb-2">Outdoor Living</h5>
-                                <h4 class="fw-bold mb-0">Garden & Patio</h4>
-                                <a href="{{ route('shop.category', ['category' => 'garden-patio']) }}"
-                                    class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold">Shop Now <i class="fa-solid fa-chevron-right"></i></a>
+                @empty
+                    <div>
+                        <div class="banner-contain-3 hover-effect promo-card-styled">
+                            <a href="{{ route('shop.category', ['category' => 'home-furniture-diy']) }}">
+                                <img src="{{ asset('assets/images/banner/kenkie-promo-home.jpg') }}" class="bg-img blur-up lazyload" alt="Home & Furniture">
+                            </a>
+                            <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto">
+                                <div>
+                                    <h5 class="fw-light mb-2">New Arrivals</h5>
+                                    <h4 class="fw-bold mb-0">Home & Furniture</h4>
+                                    <a href="{{ route('shop.category', ['category' => 'home-furniture-diy']) }}" class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold">Shop Now <i class="fa-solid fa-chevron-right"></i></a>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div>
-                    <div class="banner-contain-3 hover-effect promo-card-styled">
-                        <a href="{{ route('shop.category', ['category' => 'health-beauty']) }}">
-                            <img src="{{ asset('assets/images/banner/kenkie-promo-home.jpg') }}" class="blur-up lazyload bg-img" alt="Health & Beauty">
-                        </a>
-                        <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto">
-                            <div>
-                                <h5 class="fw-light mb-2">Personal Care</h5>
-                                <h4 class="fw-bold mb-0">Health & Beauty</h4>
-                                <a href="{{ route('shop.category', ['category' => 'health-beauty']) }}"
-                                    class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold">Shop Now <i class="fa-solid fa-chevron-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <div class="banner-contain-3 hover-effect promo-card-styled">
-                        <a href="{{ route('shop.category', ['category' => 'sound-vision']) }}">
-                            <img src="{{ asset('assets/images/banner/kenkie-promo-garden.jpg') }}" class="blur-up lazyload bg-img" alt="Sound & Vision">
-                        </a>
-                        <div class="banner-detail p-center-left w-75 banner-p-sm mend-auto">
-                            <div>
-                                <h5 class="fw-light mb-2">Electronics</h5>
-                                <h4 class="fw-bold mb-0">Sound & Vision</h4>
-                                <a href="{{ route('shop.category', ['category' => 'sound-vision']) }}"
-                                    class="btn shop-now-button mt-3 ps-0 mend-auto theme-color fw-bold">Shop Now <i class="fa-solid fa-chevron-right"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                @endforelse
             </div>
         </div>
     </section>
@@ -618,80 +739,79 @@
                 <h2>Bank & Wallet Offers</h2>
             </div>
             <div class="slider-bank-3 arrow-slider slick-height">
-                <div>
-                    <div class="bank-offer">
-                        <div class="bank-header">
-                            <div class="bank-left w-100">
-                                <div class="bank-image">
-                                    <img src="{{ asset('assets/images/grocery/bank/name/1.png') }}" class="img-fluid" alt="">
+                @forelse ($bankOffers as $index => $offer)
+                    @php
+                        $footerClass = match ($offer->color_theme) {
+                            'theme-2' => 'bank-footer-2',
+                            'theme-3' => 'bank-footer-3',
+                            'theme-4' => 'bank-footer-4',
+                            default => 'bank-footer-1',
+                        };
+                        $titleClass = match ($offer->color_theme) {
+                            'theme-2' => 'bank-offer-2',
+                            'theme-3' => 'bank-offer-3',
+                            'theme-4' => 'text-success',
+                            default => '',
+                        };
+                        $defaultBankImg = match ($offer->color_theme) {
+                            'theme-2' => 'assets/images/grocery/bank/name/2.png',
+                            'theme-3' => 'assets/images/grocery/bank/name/3.png',
+                            default => 'assets/images/grocery/bank/name/1.png',
+                        };
+                    @endphp
+                    <div>
+                        <div class="bank-offer">
+                            <div class="bank-header">
+                                <div class="bank-left w-100">
+                                    <div class="bank-image">
+                                        <img src="{{ asset($offer->bank_image ?: $defaultBankImg) }}" class="img-fluid" alt="{{ $offer->title }}">
+                                    </div>
+                                    <div class="bank-name">
+                                        <h2 class="{{ $titleClass }}">{{ $offer->title }}</h2>
+                                        @if ($offer->subtitle)
+                                            <h5 class="discount text-content">{{ $offer->subtitle }}</h5>
+                                        @endif
+                                        <h5 class="valid text-content">{{ $offer->validity ?: 'Valid for 30 days' }}</h5>
+                                    </div>
                                 </div>
-                                <div class="bank-name">
-                                    <h2>GET 10% OFF</h2>
-                                    <h5 class="discount text-content">When you spend $20</h5>
-                                    <h5 class="valid text-content">Valid for 30 days</h5>
+                                <div class="bank-right w-100">
+                                    <img src="{{ asset('assets/images/grocery/bank/price/' . (($index % 3) + 1) . '.svg') }}" class="img-fluid" alt="">
                                 </div>
                             </div>
-                            <div class="bank-right w-100">
-                                <img src="{{ asset('assets/images/grocery/bank/price/1.svg') }}" class="img-fluid" alt="">
+                            <div class="bank-footer {{ $footerClass }}">
+                                <h4>Code : <input id="clipboardexample_{{ $offer->id }}" value="{{ $offer->code }}" readonly /></h4>
+                                <button type="button" class="bank-coupon btn copy-coupon-btn"
+                                    onclick="navigator.clipboard ? navigator.clipboard.writeText('{{ $offer->code }}').then(() => alert('Copied coupon code: {{ $offer->code }}')) : null">
+                                    Copy Code
+                                </button>
                             </div>
-                        </div>
-                        <div class="bank-footer bank-footer-1">
-                            <h4>Code : <input id="clipboardexample" value="KENKIE10" readonly /></h4>
-                            <button type="button" class="bank-coupon btn" id="copyText" data-clipboard-action="copy"
-                                data-clipboard-target="#clipboardexample">Copy Code</button>
                         </div>
                     </div>
-                </div>
-
-                <div>
-                    <div class="bank-offer">
-                        <div class="bank-header">
-                            <div class="bank-left w-100">
-                                <div class="bank-image">
-                                    <img src="{{ asset('assets/images/grocery/bank/name/2.png') }}" class="img-fluid" alt="">
+                @empty
+                    <div>
+                        <div class="bank-offer">
+                            <div class="bank-header">
+                                <div class="bank-left w-100">
+                                    <div class="bank-image">
+                                        <img src="{{ asset('assets/images/grocery/bank/name/1.png') }}" class="img-fluid" alt="">
+                                    </div>
+                                    <div class="bank-name">
+                                        <h2>GET 10% OFF</h2>
+                                        <h5 class="discount text-content">When you spend $20</h5>
+                                        <h5 class="valid text-content">Valid for 30 days</h5>
+                                    </div>
                                 </div>
-                                <div class="bank-name">
-                                    <h2 class="bank-offer-2">FREE SHIPPING</h2>
-                                    <h5 class="discount text-content">On orders over $50</h5>
-                                    <h5 class="valid text-content">Valid for 30 days</h5>
+                                <div class="bank-right w-100">
+                                    <img src="{{ asset('assets/images/grocery/bank/price/1.svg') }}" class="img-fluid" alt="">
                                 </div>
                             </div>
-                            <div class="bank-right w-100">
-                                <img src="{{ asset('assets/images/grocery/bank/price/2.svg') }}" class="img-fluid" alt="">
+                            <div class="bank-footer bank-footer-1">
+                                <h4>Code : <input value="KENKIE10" readonly /></h4>
+                                <button type="button" class="bank-coupon btn" onclick="navigator.clipboard.writeText('KENKIE10')">Copy Code</button>
                             </div>
-                        </div>
-                        <div class="bank-footer bank-footer-2">
-                            <h4>Code : <input id="clipboardexample1" value="FREESHIP" readonly /></h4>
-                            <button class="bank-coupon btn" id="copyText1" data-clipboard-action="copy"
-                                data-clipboard-target="#clipboardexample1">Copy Code</button>
                         </div>
                     </div>
-                </div>
-
-                <div>
-                    <div class="bank-offer">
-                        <div class="bank-header">
-                            <div class="bank-left w-100">
-                                <div class="bank-image">
-                                    <img src="{{ asset('assets/images/grocery/bank/name/3.png') }}" class="img-fluid" alt="">
-                                </div>
-                                <div class="bank-name">
-                                    <h2 class="bank-offer-3">SAVE $15</h2>
-                                    <h5 class="discount text-content">When you spend $100</h5>
-                                    <h5 class="valid text-content">Valid for 30 days</h5>
-                                </div>
-                            </div>
-                            <div class="bank-right w-100">
-                                <img src="{{ asset('assets/images/grocery/bank/price/3.svg') }}" class="img-fluid" alt="">
-                            </div>
-                        </div>
-                        <div class="bank-footer bank-footer-3">
-                            <h4>Code : <input id="clipboardexample2" value="SAVE15" readonly /></h4>
-                            <button class="bank-coupon btn" id="copyText2" data-clipboard-action="copy"
-                                data-clipboard-target="#clipboardexample2">Copy Code</button>
-                        </div>
-                    </div>
-                </div>
+                @endforelse
             </div>
         </div>
     </section>
@@ -711,23 +831,22 @@
                         </div>
 
                         <div class="product-box-4 product-box-3 rounded-0">
-                            <div class="deal-box">
-                                <div class="circle-box">
-                                    <div class="shape-circle">
-                                        <img src="{{ asset('assets/images/grocery/circle.svg') }}" class="blur-up lazyload" alt="">
-                                        <div class="shape-text">
-                                            <h6>Hot <br> Deal</h6>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
                             @if ($featuredDealProduct)
                                 <div class="p-3 text-center">
-                                    <div class="product-image mb-3">
+                                    <div class="product-image position-relative mb-3">
+                                        <div class="deal-box">
+                                            <div class="circle-box">
+                                                <div class="shape-circle">
+                                                    <img src="{{ asset('assets/images/grocery/circle.svg') }}" class="blur-up lazyload" alt="">
+                                                    <div class="shape-text">
+                                                        <h6>Hot <br> Deal</h6>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                         <a href="{{ route('products.show', $featuredDealProduct->slug) }}">
-                                            <img src="{{ asset($featuredDealProduct->image ?: 'assets/images/product/category/1.jpg') }}"
-                                                 class="img-fluid blur-up lazyload rounded" style="max-height: 220px; object-fit: contain;" alt="{{ $featuredDealProduct->name }}">
+                                            <img src="{{ asset($featuredDealProduct->image ?: 'assets/images/furniture/1.png') }}"
+                                                 class="img-fluid blur-up lazyload rounded" alt="{{ $featuredDealProduct->name }}">
                                         </a>
                                     </div>
                                     <div class="product-detail">
@@ -735,7 +854,7 @@
                                         <a href="{{ route('products.show', $featuredDealProduct->slug) }}">
                                             <h4 class="name fw-bold mb-2">{{ $featuredDealProduct->name }}</h4>
                                         </a>
-                                        <h3 class="price theme-color mb-3">${{ number_format($featuredDealProduct->price, 2) }}</h3>
+                                        <h3 class="price theme-color mb-3">${{ number_format((float) $featuredDealProduct->price, 2) }}</h3>
                                         <form method="POST" action="{{ route('cart.store', $featuredDealProduct->slug) }}">
                                             @csrf
                                             <input type="hidden" name="quantity" value="1">
@@ -752,7 +871,7 @@
 
                 <div class="col-xxl-8 col-lg-7 order-lg-1">
                     <div class="row g-3 row-cols-md-3 row-cols-2">
-                        @foreach ($featuredProducts->take(6) as $product)
+                        @foreach ($topDealProducts->take(6) as $product)
                             <div class="col">
                                 @include('website.includes.product-card', ['product' => $product])
                             </div>

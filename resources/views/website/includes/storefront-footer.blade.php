@@ -49,160 +49,119 @@
             </div>
 
             <div class="main-footer section-b-space section-t-space">
-                <div class="row g-md-4 g-3">
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
-                        <div class="footer-logo">
-                            <div class="theme-logo">
-                                <a href="{{ route('home') }}">
-                                    <img src="{{ asset('assets/images/logo/kenkie-logo.png') }}" class="blur-up lazyload" alt="Kenkie">
-                                </a>
-                            </div>
-
-                            <div class="footer-logo-contain">
-                                <p>We are a friendly bar serving a variety of cocktails, wines and beers. Our bar is a
-                                    perfect place for a couple.</p>
-
-                                <ul class="address">
-                                    <li>
-                                        <i data-feather="home"></i>
-                                        <a href="javascript:void(0)">1418 Riverwood Drive, CA 96052, US</a>
-                                    </li>
-                                    <li>
-                                        <i data-feather="mail"></i>
-                                        <a href="javascript:void(0)">support@fastkart.com</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                <div class="row g-md-4 gy-4 row-cols-xxl-5 row-cols-lg-5 row-cols-md-3 row-cols-sm-2 row-cols-1">
+                    <!-- Column 1: KENKIE -->
+                    <div class="col">
                         <div class="footer-title">
-                            <h4>Categories</h4>
+                            <h4 class="fw-bold mb-3">KENKIE</h4>
                         </div>
-
                         <div class="footer-contain">
                             <ul>
                                 <li>
-                                    <a href="{{ route('shop.category') }}" class="text-content">Vegetables & Fruit</a>
+                                    <a href="{{ route('about') }}" class="text-content">About Us</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('shop.category') }}" class="text-content">Beverages</a>
+                                    <a href="https://www.ebay.co.uk/usr/kenkie-official" target="_blank" rel="noopener noreferrer" class="text-content">Kenkie Ebay</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('shop.category') }}" class="text-content">Meats & Seafood</a>
+                                    <a href="{{ route('privacy.policy') }}" class="text-content">Privacy Policy</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('shop.category') }}" class="text-content">Frozen Foods</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('shop.category') }}" class="text-content">Biscuits & Snacks</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('shop.category') }}" class="text-content">Grocery & Staples</a>
+                                    <a href="https://step4humanity.com/" target="_blank" rel="noopener noreferrer" class="text-content">Charity</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
-                    <div class="col-xl col-lg-2 col-sm-3">
+                    <!-- Column 2: CUSTOMER SERVICE -->
+                    <div class="col">
                         <div class="footer-title">
-                            <h4>Useful Links</h4>
+                            <h4 class="fw-bold mb-3">CUSTOMER SERVICE</h4>
                         </div>
-
                         <div class="footer-contain">
                             <ul>
                                 <li>
-                                    <a href="{{ route('home') }}" class="text-content">Home</a>
+                                    <a href="{{ route('contact.us') }}" class="text-content">Contact Us</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('shop.category') }}" class="text-content">Shop</a>
+                                    <a href="{{ route('about') }}" class="text-content">Payments</a>
                                 </li>
                                 <li>
-                                    <a href="about-us.html" class="text-content">About Us</a>
+                                    <a href="{{ auth()->check() ? route('account.index') : route('login') }}" class="text-content">Track My Order</a>
                                 </li>
                                 <li>
-                                    <a href="blog-list.html" class="text-content">Blog</a>
-                                </li>
-                                <li>
-                                    <a href="contact-us.html" class="text-content">Contact Us</a>
+                                    <a href="{{ route('return.policy') }}" class="text-content">Returns &amp; Refund Policy</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
-                    <div class="col-xl-2 col-sm-3">
+                    <!-- Column 3: PERSONALISE -->
+                    <div class="col">
                         <div class="footer-title">
-                            <h4>Help Center</h4>
+                            <h4 class="fw-bold mb-3">PERSONALISE</h4>
                         </div>
-
                         <div class="footer-contain">
                             <ul>
                                 <li>
-                                    <a href="order-success.html" class="text-content">Your Order</a>
+                                    <a href="{{ auth()->check() ? (auth()->user()->isAdmin() ? route('admin.dashboard') : route('home')) : route('login') }}" class="text-content">My Account</a>
                                 </li>
                                 <li>
-                                    <a href="user-dashboard.html" class="text-content">Your Account</a>
+                                    <a href="{{ route('wishlist.index') }}" class="text-content">My wishlist</a>
                                 </li>
                                 <li>
-                                    <a href="order-tracking.html" class="text-content">Track Order</a>
-                                </li>
-                                <li>
-                                    <a href="{{ route('wishlist.index') }}" class="text-content">Your Wishlist</a>
-                                </li>
-                                <li>
-                                    <a href="search.html" class="text-content">Search</a>
-                                </li>
-                                <li>
-                                    <a href="faq.html" class="text-content">FAQ</a>
+                                    <a href="{{ route('cart.index') }}" class="text-content">My Orders</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
 
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
+                    <!-- Column 4: TOP LINKS -->
+                    <div class="col">
                         <div class="footer-title">
-                            <h4>Contact Us</h4>
+                            <h4 class="fw-bold mb-3">TOP LINKS</h4>
                         </div>
-
-                        <div class="footer-contact">
+                        <div class="footer-contain">
                             <ul>
                                 <li>
-                                    <div class="footer-number">
-                                        <i data-feather="phone"></i>
-                                        <div class="contact-number">
-                                            <h6 class="text-content">Hotline 24/7 :</h6>
-                                            <h5>+91 888 104 2340</h5>
-                                        </div>
-                                    </div>
+                                    <a href="{{ route('shop.category', ['category' => 'sound-vision']) }}" class="text-content">Electronics</a>
                                 </li>
-
                                 <li>
-                                    <div class="footer-number">
-                                        <i data-feather="mail"></i>
-                                        <div class="contact-number">
-                                            <h6 class="text-content">Email Address :</h6>
-                                            <h5>fastkart@hotmail.com</h5>
-                                        </div>
-                                    </div>
+                                    <a href="{{ route('shop.category', ['category' => 'home-furniture-diy']) }}" class="text-content">Accessories</a>
                                 </li>
+                                <li>
+                                    <a href="{{ route('shop.category') }}" class="text-content">New Arrivals</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
 
-                                <li class="social-app">
-                                    <h5 class="mb-2 text-content">Download App :</h5>
-                                    <ul>
-                                        <li class="mb-0">
-                                            <a href="https://play.google.com/store/apps" target="_blank">
-                                                <img src="{{ asset('assets/images/playstore.svg') }}" class="blur-up lazyload"
-                                                    alt="">
-                                            </a>
-                                        </li>
-                                        <!-- <li class="mb-0">
-                                            <a href="https://www.apple.com/in/app-store/" target="_blank">
-                                                <img src="{{ asset('assets/images/appstore.svg') }}" class="blur-up lazyload"
-                                                    alt="">
-                                            </a>
-                                        </li> -->
-                                    </ul>
+                    <!-- Column 5: FOLLOW US -->
+                    <div class="col">
+                        <div class="footer-title">
+                            <h4 class="fw-bold mb-3">FOLLOW US</h4>
+                        </div>
+                        <div class="footer-contain">
+                            <ul>
+                                <li>
+                                    <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="text-content d-inline-flex align-items-center gap-2">
+                                        <i class="fa-brands fa-facebook-f" style="width: 16px;"></i> Facebook
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="text-content d-inline-flex align-items-center gap-2">
+                                        <i class="fa-brands fa-instagram" style="width: 16px;"></i> Instagram
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" class="text-content d-inline-flex align-items-center gap-2">
+                                        <i class="fa-brands fa-tiktok" style="width: 16px;"></i> Tiktok
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="text-content d-inline-flex align-items-center gap-2">
+                                        <i class="fa-brands fa-youtube text-danger" style="width: 16px;"></i> Youtube
+                                    </a>
                                 </li>
                             </ul>
                         </div>
@@ -210,39 +169,16 @@
                 </div>
             </div>
 
-            <div class="sub-footer section-small-space">
-                <div class="reserve">
-                    <h6 class="text-content">©2022 Fastkart All rights reserved</h6>
+            <div class="sub-footer section-small-space text-center">
+                <div class="mb-2">
+                    <p class="text-content mb-1">
+                        <a href="{{ route('privacy.policy') }}" class="text-content text-decoration-none">Privacy Policy</a> |
+                        <a href="{{ route('return.policy') }}" class="text-content text-decoration-none">Returns &amp; Refund Policy</a> |
+                        <a href="{{ route('about') }}" class="text-content text-decoration-none">About Us</a>
+                    </p>
                 </div>
-
-                <div class="payment">
-                    <img src="{{ asset('assets/images/payment/1.png') }}" class="blur-up lazyload" alt="">
-                </div>
-
-                <div class="social-link">
-                    <h6 class="text-content">Stay connected :</h6>
-                    <ul>
-                        <li>
-                            <a href="https://www.facebook.com/" target="_blank">
-                                <i class="fa-brands fa-facebook-f"></i>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://twitter.com/" target="_blank">
-                                <i class="fa-brands fa-twitter"></i>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://www.instagram.com/" target="_blank">
-                                <i class="fa-brands fa-instagram"></i>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="https://in.pinterest.com/" target="_blank">
-                                <i class="fa-brands fa-pinterest-p"></i>
-                            </a>
-                        </li>
-                    </ul>
+                <div>
+                    <p class="text-content mb-0">&copy; KENKIE LTD 2026. All Rights Reserved.</p>
                 </div>
             </div>
         </div>

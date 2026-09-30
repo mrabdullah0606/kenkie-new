@@ -2,7 +2,7 @@
     <div class="product-header">
         <div class="product-image">
             <a href="{{ route('products.show', $product->slug) }}">
-                <img src="{{ asset($product->image ?: 'assets/images/vegetable/product/1.png') }}"
+                <img src="{{ asset($product->image ?: 'assets/images/furniture/1.png') }}"
                     class="img-fluid blur-up lazyload" alt="{{ $product->name }}">
             </a>
 
@@ -11,7 +11,7 @@
                     <a href="javascript:void(0)" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#view" data-product="{{ json_encode([
                         'name' => $product->name,
                         'price' => number_format($product->price, 2),
-                        'image' => asset($product->image ?: 'assets/images/vegetable/product/1.png'),
+                        'image' => asset($product->image ?: 'assets/images/furniture/1.png'),
                         'category' => $product->category?->name ?? 'General',
                         'sku' => $product->sku ?? 'N/A',
                         'unit' => $product->unit ?? '1 Unit',

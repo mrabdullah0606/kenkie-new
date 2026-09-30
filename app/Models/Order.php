@@ -3,33 +3,36 @@
 namespace App\Models;
 
 use Database\Factories\OrderFactory;
-use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable([
-    'uuid',
-    'user_id',
-    'customer_name',
-    'email',
-    'phone',
-    'address_line',
-    'city',
-    'region',
-    'postal_code',
-    'country',
-    'status',
-    'payment_method',
-    'subtotal',
-    'shipping_fee',
-    'total',
-])]
 class Order extends Model
 {
     /** @use HasFactory<OrderFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'uuid',
+        'user_id',
+        'customer_name',
+        'email',
+        'phone',
+        'address_line',
+        'city',
+        'region',
+        'postal_code',
+        'country',
+        'status',
+        'payment_method',
+        'payment_status',
+        'stripe_session_id',
+        'stripe_payment_intent_id',
+        'subtotal',
+        'shipping_fee',
+        'total',
+    ];
 
     public function user(): BelongsTo
     {

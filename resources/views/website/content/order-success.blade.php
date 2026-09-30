@@ -190,7 +190,24 @@
 
                                     <li>
                                         <h4>Payment Method</h4>
-                                        <h4 class="price text-muted text-uppercase small">{{ str_replace('_', ' ', $order->payment_method) }}</h4>
+                                        <h4 class="price text-muted text-uppercase small">
+                                            @if ($order->payment_method === 'stripe')
+                                                <span class="badge bg-primary-subtle text-primary"><i class="fa-brands fa-stripe me-1"></i> Stripe Card</span>
+                                            @else
+                                                <span class="badge bg-secondary-subtle text-dark">Cash On Delivery</span>
+                                            @endif
+                                        </h4>
+                                    </li>
+
+                                    <li>
+                                        <h4>Payment Status</h4>
+                                        <h4 class="price text-capitalize small">
+                                            @if ($order->payment_status === 'paid')
+                                                <span class="badge bg-success-subtle text-success"><i class="fa-solid fa-check me-1"></i> Paid</span>
+                                            @else
+                                                <span class="badge bg-warning-subtle text-warning"><i class="fa-regular fa-clock me-1"></i> Pending</span>
+                                            @endif
+                                        </h4>
                                     </li>
 
                                     <li>

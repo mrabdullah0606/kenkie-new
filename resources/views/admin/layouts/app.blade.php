@@ -1,28 +1,62 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Admin')</title>
-    <link rel="stylesheet" href="{{ asset('assets/css/vendors/bootstrap.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
+    @include('admin.includes.head')
+    @stack('styles')
 </head>
 
 <body>
-    <header class="border-bottom bg-white">
-        <nav class="container-fluid-lg navbar navbar-expand-lg">
-            <a class="navbar-brand fw-bold" href="{{ route('admin.dashboard') }}">Kenkie Admin</a>
-            <div class="ms-auto d-flex gap-3">
-                <a href="{{ route('admin.products.index') }}">Products</a>
-                <a href="{{ route('home') }}">View storefront</a>
-            </div>
-        </nav>
-    </header>
+    <!-- tap on top start -->
+    <div class="tap-top">
+        <span class="lnr lnr-chevron-up"></span>
+    </div>
+    <!-- tap on tap end -->
 
-    <main class="container-fluid-lg py-4">
-        @yield('content')
-    </main>
+    <!-- page-wrapper Start-->
+    <div class="page-wrapper compact-wrapper" id="pageWrapper">
+        <!-- Page Header Start-->
+        @include('admin.includes.header')
+        <!-- Page Header Ends-->
+
+        <!-- Page Body Start-->
+        <div class="page-body-wrapper">
+            <!-- Page Sidebar Start-->
+            @include('admin.includes.sidebar')
+            <!-- Page Sidebar Ends-->
+
+            <!-- Container-fluid starts-->
+            <div class="page-body">
+                @if (session('status'))
+                    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                        <i class="fa-solid fa-circle-check me-2"></i> {{ session('status') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                @yield('content')
+
+                <!-- footer start-->
+                @include('admin.includes.footer')
+            </div>
+        </div>
+        <!-- Page Body End -->
+    </div>
+    <!-- page-wrapper End-->
+
+    @include('admin.includes.scripts')
+    @stack('scripts')
 </body>
 
 </html>

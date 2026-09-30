@@ -143,12 +143,39 @@
                                                 </div>
 
                                                 <div class="checkout-detail">
-                                                    <div class="form-check custom-form-check mb-3">
-                                                        <input class="form-check-input" type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery" checked>
-                                                        <label class="form-check-label fw-bold" for="cash_on_delivery">
-                                                            Cash On Delivery (COD)
-                                                        </label>
-                                                        <p class="text-content small mt-1 mb-0">Pay with cash upon delivery of your items to your doorstep.</p>
+                                                    <!-- Stripe Payment Option -->
+                                                    <div class="p-3 mb-3 border rounded-3 payment-method-option" id="stripe-option-box" style="background: #f8fafc; cursor: pointer;">
+                                                        <div class="form-check custom-form-check d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <input class="form-check-input" type="radio" name="payment_method" id="stripe" value="stripe" checked>
+                                                                <label class="form-check-label fw-bold fs-6 mb-0 text-dark" for="stripe" style="cursor: pointer;">
+                                                                    Credit / Debit Card (Stripe)
+                                                                </label>
+                                                            </div>
+                                                            <div class="d-flex align-items-center gap-2 text-secondary fs-5">
+                                                                <i class="fa-brands fa-cc-visa text-primary"></i>
+                                                                <i class="fa-brands fa-cc-mastercard text-warning"></i>
+                                                                <i class="fa-brands fa-cc-amex text-info"></i>
+                                                                <i class="fa-brands fa-apple text-dark"></i>
+                                                                <i class="fa-brands fa-google-pay text-primary"></i>
+                                                            </div>
+                                                        </div>
+                                                        <p class="text-muted small mt-2 mb-0 ps-4">
+                                                            <i class="fa-solid fa-lock text-success me-1"></i> Fast, secure 256-bit encrypted checkout via Stripe. Supports Visa, MasterCard, Amex, Apple Pay &amp; Google Pay.
+                                                        </p>
+                                                    </div>
+
+                                                    <!-- Cash on Delivery Option -->
+                                                    <div class="p-3 border rounded-3 payment-method-option" id="cod-option-box" style="background: #ffffff; cursor: pointer;">
+                                                        <div class="form-check custom-form-check">
+                                                            <input class="form-check-input" type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery">
+                                                            <label class="form-check-label fw-bold fs-6 mb-0 text-dark" for="cash_on_delivery" style="cursor: pointer;">
+                                                                Cash On Delivery (COD)
+                                                            </label>
+                                                        </div>
+                                                        <p class="text-muted small mt-2 mb-0 ps-4">
+                                                            Pay with cash upon delivery of your items to your doorstep.
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -202,8 +229,8 @@
                                     </ul>
                                 </div>
 
-                                <button type="submit" form="checkout-form" class="btn theme-bg-color text-white btn-md w-100 mt-4 fw-bold">
-                                    Place Cash On Delivery Order
+                                <button type="submit" form="checkout-form" id="checkout-submit-btn" class="btn theme-bg-color text-white btn-md w-100 mt-4 fw-bold py-3">
+                                    <i class="fa-solid fa-lock me-2"></i> Pay with Stripe (${{ number_format($orderTotalCents / 100, 2) }})
                                 </button>
                                 
                                 <div class="mt-3 text-center">
@@ -231,4 +258,60 @@
     <script src="{{ asset('assets/js/feather/feather-icon.js') }}"></script>
     <script src="{{ asset('assets/js/lazysizes.min.js') }}"></script>
     <script src="{{ asset('assets/js/script.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const stripeRadio = document.getElementById('stripe');
+            const codRadio = document.getElementById('cash_on_delivery');
+            const submitBtn = document.getElementById('checkout-submit-btn');
+            const stripeBox = document.getElementById('stripe-option-box');
+            const codBox = document.getElementById('cod-option-box');
+            const orderTotal = '{{ number_format($orderTotalCents / 100, 2) }}';
+
+            function updatePaymentUI() {
+                if (stripeRadio && stripeRadio.checked) {
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fa-solid fa-lock me-2"></i> Pay with Stripe ($' + orderTotal + ')';
+                        submitBtn.classList.remove('btn-secondary');
+                        submitBtn.classList.add('theme-bg-color');
+                    }
+                    if (stripeBox) stripeBox.style.background = '#f0fdf4';
+                    if (stripeBox) stripeBox.style.borderColor = '#22c55e';
+                    if (codBox) codBox.style.background = '#ffffff';
+                    if (codBox) codBox.style.borderColor = '#e2e8f0';
+                } else if (codRadio && codRadio.checked) {
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fa-solid fa-truck-ramp-box me-2"></i> Place Cash On Delivery Order';
+                    }
+                    if (codBox) codBox.style.background = '#f0fdf4';
+                    if (codBox) codBox.style.borderColor = '#22c55e';
+                    if (stripeBox) stripeBox.style.background = '#ffffff';
+                    if (stripeBox) stripeBox.style.borderColor = '#e2e8f0';
+                }
+            }
+
+            if (stripeRadio) stripeRadio.addEventListener('change', updatePaymentUI);
+            if (codRadio) codRadio.addEventListener('change', updatePaymentUI);
+
+            if (stripeBox) {
+                stripeBox.addEventListener('click', function(e) {
+                    if (e.target !== stripeRadio) {
+                        stripeRadio.checked = true;
+                        updatePaymentUI();
+                    }
+                });
+            }
+
+            if (codBox) {
+                codBox.addEventListener('click', function(e) {
+                    if (e.target !== codRadio) {
+                        codRadio.checked = true;
+                        updatePaymentUI();
+                    }
+                });
+            }
+
+            updatePaymentUI();
+        });
+    </script>
 @endsection

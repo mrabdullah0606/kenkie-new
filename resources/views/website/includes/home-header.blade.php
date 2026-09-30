@@ -4,32 +4,21 @@
             <div class="row">
                 <div class="col-12">
                     <div class="navbar-top">
-                        <button class="navbar-toggler d-xl-none d-block p-0 me-3" type="button"
-                            data-bs-toggle="offcanvas" data-bs-target="#primaryMenu">
-                            <span class="navbar-toggler-icon">
-                                <i class="iconly-Category icli"></i>
-                            </span>
-                        </button>
-                        <a href="{{ route('home') }}" class="web-logo nav-logo">
-                            <img src="{{ asset('assets/images/logo/kenkie-logo.png') }}" class="img-fluid blur-up lazyload" alt="Kenkie">
-                        </a>
-
-                        <div class="search-full live-search-container position-relative">
-                            <form action="{{ route('shop.category') }}" method="GET" class="input-group" autocomplete="off">
-                                <span class="input-group-text">
-                                    <i data-feather="search" class="font-light"></i>
+                        <div class="d-flex align-items-center">
+                            <button class="navbar-toggler d-xl-none d-block p-0 me-2" type="button"
+                                data-bs-toggle="offcanvas" data-bs-target="#primaryMenu" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-icon">
+                                    <i class="iconly-Category icli"></i>
                                 </span>
-                                <input type="text" name="search" class="form-control search-type js-live-search-input" value="{{ request('search') }}" placeholder="Search here.." autocomplete="off">
-                                <span class="input-group-text close-search">
-                                    <i data-feather="x" class="font-light"></i>
-                                </span>
-                            </form>
-                            <div class="js-live-search-dropdown live-search-dropdown live-search-dropdown--mobile d-none"></div>
+                            </button>
+                            <a href="{{ route('home') }}" class="web-logo nav-logo">
+                                <img src="{{ asset('assets/images/logo/kenkie-logo.png') }}" class="img-fluid blur-up lazyload" alt="Kenkie">
+                            </a>
                         </div>
 
-                        <div class="middle-box">
+                        <div class="middle-box d-none d-xl-block">
                             <div class="center-box w-100 live-search-container position-relative">
-                                <form action="{{ route('shop.category') }}" method="GET" class="searchbar-box-2 input-group d-xl-flex d-none w-100" autocomplete="off">
+                                <form action="{{ route('shop.category') }}" method="GET" class="searchbar-box-2 input-group w-100" autocomplete="off">
                                     <button class="btn search-icon" type="submit" aria-label="Search">
                                         <i class="iconly-Search icli"></i>
                                     </button>
@@ -43,17 +32,59 @@
                             </div>
                         </div>
 
-                        <div class="rightside-menu support-sidemenu">
+                        <div class="rightside-menu support-sidemenu d-none d-xl-flex">
                             <div class="support-box">
                                 <div class="support-image">
                                     <img src="{{ asset('assets/images/icon/support.png') }}" class="img-fluid blur-up lazyload"
                                         alt="">
                                 </div>
                                 <div class="support-number">
-                                    <h2>(123) 456 7890</h2>
-                                    <h4>24/7 Support Center</h4>
+                                    <h2>07898346397</h2>
+                                    <h4>Customer Support</h4>
                                 </div>
                             </div>
+                        </div>
+
+                        <!-- Mobile Header Quick Actions -->
+                        <div class="mobile-header-right d-xl-none d-flex align-items-center gap-2">
+                            <a href="{{ route('wishlist.index') }}" class="mobile-header-icon" aria-label="Wishlist">
+                                <i class="iconly-Heart icli"></i>
+                                @if (($headerWishlistCount ?? 0) > 0)
+                                    <span class="mobile-badge">{{ $headerWishlistCount }}</span>
+                                @endif
+                            </a>
+                            <a href="{{ route('cart.index') }}" class="mobile-header-icon" aria-label="Cart">
+                                <i class="iconly-Bag-2 icli"></i>
+                                @if (($headerCartCount ?? 0) > 0)
+                                    <span class="mobile-badge">{{ $headerCartCount }}</span>
+                                @endif
+                            </a>
+                            @auth
+                                <a href="{{ route('dashboard') }}" class="mobile-header-icon" aria-label="My Account">
+                                    <i class="iconly-Profile icli"></i>
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" class="mobile-header-icon" aria-label="Sign In">
+                                    <i class="iconly-Profile icli"></i>
+                                </a>
+                            @endauth
+                        </div>
+                    </div>
+
+                    <!-- Mobile Full-Width Search Bar -->
+                    <div class="mobile-search-row d-xl-none">
+                        <div class="live-search-container position-relative w-100">
+                            <form action="{{ route('shop.category') }}" method="GET" class="mobile-search-form" autocomplete="off">
+                                <span class="mobile-search-prefix">
+                                    <i class="iconly-Search icli"></i>
+                                </span>
+                                <input type="text" name="search" class="mobile-search-input js-live-search-input"
+                                    value="{{ request('search') }}"
+                                    placeholder="Search products, brands, styles..."
+                                    autocomplete="off">
+                                <button class="mobile-search-btn" type="submit">Search</button>
+                            </form>
+                            <div class="js-live-search-dropdown live-search-dropdown live-search-dropdown--mobile d-none"></div>
                         </div>
                     </div>
                 </div>
@@ -93,12 +124,20 @@
                                             @endforeach
                                         </ul>
                                     </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link nav-link-single" href="{{ route('about') }}">About Us</a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link nav-link-single" href="{{ route('contact.us') }}">Contact Us</a>
+                                    </li>
                                 </ul>
                             </div>
                         </div>
                     </div>
 
-                    <div class="rightside-menu">
+                    <div class="rightside-menu d-none d-xl-flex">
                         <ul class="option-list-2">
                             <li>
                                 <a href="javascript:void(0)" class="header-icon search-box search-icon">

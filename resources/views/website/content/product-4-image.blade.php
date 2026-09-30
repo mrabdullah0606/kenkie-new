@@ -6,6 +6,29 @@
 @section('page-styles')
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        .rich-description-area {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+        .rich-description-area h1, .rich-description-area h2, .rich-description-area h3, .rich-description-area h4 {
+            color: #222;
+            font-weight: 700;
+            margin-top: 12px;
+            margin-bottom: 8px;
+        }
+        .rich-description-area h1 { font-size: 1.4rem; }
+        .rich-description-area h2 { font-size: 1.25rem; }
+        .rich-description-area h3 { font-size: 1.1rem; }
+        .rich-description-area ul, .rich-description-area ol {
+            padding-left: 20px;
+            margin-bottom: 12px;
+        }
+        .rich-description-area ul { list-style-type: disc; }
+        .rich-description-area ol { list-style-type: decimal; }
+        .rich-description-area li { margin-bottom: 4px; }
+        .rich-description-area p { margin-bottom: 8px; }
+    </style>
 @endsection
 
 @section('body')
@@ -102,8 +125,8 @@
                             <h3 class="theme-color price fs-2 fw-bold">${{ number_format($product->price, 2) }}</h3>
                         </div>
 
-                        <div class="product-contain text-content mb-3">
-                            <p>{{ $product->description ?: 'Fresh and premium quality product delivered directly to your door.' }}</p>
+                        <div class="product-contain text-content mb-3 rich-description-area">
+                            {!! $product->description ?: '<p>Fresh and premium quality product delivered directly to your door.</p>' !!}
                         </div>
 
                         <div class="product-info border-top border-bottom py-3 my-3">
@@ -176,9 +199,9 @@
 
                         <div class="tab-content custom-tab p-4 border border-top-0 rounded-bottom bg-white" id="myTabContent">
                             <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
-                                <div class="product-description">
-                                    <p>{{ $product->description ?: 'Fresh and premium quality product delivered directly to your door.' }}</p>
-                                    <p class="text-muted">Packaged with care to ensure the highest freshness, hygiene, and taste. Store in a cool, dry place.</p>
+                                <div class="product-description rich-description-area">
+                                    {!! $product->description ?: '<p>Fresh and premium quality product delivered directly to your door.</p>' !!}
+                                    <p class="text-muted mt-3">Packaged with care to ensure the highest freshness, hygiene, and taste. Store in a cool, dry place.</p>
                                 </div>
                             </div>
                             <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">

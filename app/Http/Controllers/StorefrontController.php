@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankOffer;
 use App\Models\Category;
+use App\Models\HomeBanner;
+use App\Models\HomeSetting;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -84,6 +87,10 @@ class StorefrontController extends Controller
 
         $categoriesBySlug = $categories->keyBy('slug');
 
+        $homeSettings = HomeSetting::getSettings();
+        $homeBanners = HomeBanner::query()->where('is_active', true)->orderBy('position')->get();
+        $bankOffers = BankOffer::query()->where('is_active', true)->orderBy('position')->get();
+
         $featuredProducts = Product::query()
             ->with('category')
             ->where('is_active', true)
@@ -92,13 +99,33 @@ class StorefrontController extends Controller
             ->take(12)
             ->get();
 
-        $featuredDealProduct = $featuredProducts->first() ?? Product::query()->where('is_active', true)->first();
+        $topDealProducts = Product::query()
+            ->with('category')
+            ->where('is_active', true)
+            ->where('is_top_deal', true)
+            ->orderBy('name')
+            ->take(12)
+            ->get();
+
+        if ($topDealProducts->isEmpty()) {
+            $topDealProducts = $featuredProducts->take(6);
+        }
+
+        $hotDealProduct = Product::query()
+            ->with('category')
+            ->where('is_active', true)
+            ->where('is_hot_deal', true)
+            ->first() ?? $topDealProducts->first() ?? $featuredProducts->first() ?? Product::query()->where('is_active', true)->first();
 
         return view('website.pages.home', [
             'categories' => $categories,
             'categoriesBySlug' => $categoriesBySlug,
+            'homeSettings' => $homeSettings,
+            'homeBanners' => $homeBanners,
+            'bankOffers' => $bankOffers,
             'featuredProducts' => $featuredProducts,
-            'featuredDealProduct' => $featuredDealProduct,
+            'topDealProducts' => $topDealProducts,
+            'featuredDealProduct' => $hotDealProduct,
             'homeFurnitureProducts' => $categoriesBySlug->get('home-furniture-diy')?->products ?? collect(),
             'gardenPatioProducts' => $categoriesBySlug->get('garden-patio')?->products ?? collect(),
             'healthBeautyProducts' => $categoriesBySlug->get('health-beauty')?->products ?? collect(),
@@ -199,5 +226,25 @@ class StorefrontController extends Controller
                 ->take(4)
                 ->get(),
         ]);
+    }
+
+    public function about(): View
+    {
+        return view('website.content.about-us');
+    }
+
+    public function privacyPolicy(): View
+    {
+        return view('website.content.privacy-policy');
+    }
+
+    public function returnPolicy(): View
+    {
+        return view('website.content.return-policy');
+    }
+
+    public function contact(): View
+    {
+        return view('website.content.contact-us');
     }
 }

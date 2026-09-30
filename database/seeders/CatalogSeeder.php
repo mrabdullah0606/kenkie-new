@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\BankOffer;
 use App\Models\Category;
+use App\Models\HomeBanner;
+use App\Models\HomeSetting;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
 
@@ -22,17 +25,17 @@ class CatalogSeeder extends Seeder
         $fallbackSource = public_path('assets/images/product/category/1.jpg');
 
         $categoriesData = [
-            ['name' => 'Home, Furniture & DIY', 'slug' => 'home-furniture-diy', 'image' => 'assets/uploads/2026/01/Bathroom_1.jpg'],
-            ['name' => 'Garden & Patio', 'slug' => 'garden-patio', 'image' => 'assets/uploads/2026/01/Living_1.jpg'],
-            ['name' => 'Vehicle Parts & Accessories', 'slug' => 'vehicle-parts-accessories', 'image' => 'assets/uploads/2026/01/Office_1.jpg'],
-            ['name' => 'Sporting Goods', 'slug' => 'sporting-goods', 'image' => 'assets/uploads/2026/01/Office_2.jpg'],
-            ['name' => 'Pet Supplies', 'slug' => 'pet-supplies', 'image' => 'assets/uploads/2026/01/Bathroom_2.jpg'],
-            ['name' => 'Mobile Phones & Communication', 'slug' => 'mobile-phones-communication', 'image' => 'assets/uploads/2026/01/Office_3.jpg'],
-            ['name' => 'Health & Beauty', 'slug' => 'health-beauty', 'image' => 'assets/uploads/2026/01/Bathroom_3.jpg'],
-            ['name' => 'Computers/Tablets & Networking', 'slug' => 'computers-tablets-networking', 'image' => 'assets/uploads/2026/01/Office_4.jpg'],
-            ['name' => 'Collectables', 'slug' => 'collectables', 'image' => 'assets/uploads/2026/01/Living_2.jpg'],
-            ['name' => 'Crafts', 'slug' => 'crafts', 'image' => 'assets/uploads/2026/01/Living_3.jpg'],
-            ['name' => 'Sound & Vision', 'slug' => 'sound-vision', 'image' => 'assets/uploads/2026/01/Office_5.jpg'],
+            ['name' => 'Home, Furniture & DIY', 'slug' => 'home-furniture-diy', 'image' => 'assets/images/furniture/1.png'],
+            ['name' => 'Garden & Patio', 'slug' => 'garden-patio', 'image' => 'assets/images/furniture/8.png'],
+            ['name' => 'Vehicle Parts & Accessories', 'slug' => 'vehicle-parts-accessories', 'image' => 'assets/images/furniture/14.png'],
+            ['name' => 'Sporting Goods', 'slug' => 'sporting-goods', 'image' => 'assets/images/grocery/product/kichen/4.png'],
+            ['name' => 'Pet Supplies', 'slug' => 'pet-supplies', 'image' => 'assets/images/furniture/2.png'],
+            ['name' => 'Mobile Phones & Communication', 'slug' => 'mobile-phones-communication', 'image' => 'assets/images/grocery/product/personal-care/2.png'],
+            ['name' => 'Health & Beauty', 'slug' => 'health-beauty', 'image' => 'assets/images/grocery/product/personal-care/6.png'],
+            ['name' => 'Computers/Tablets & Networking', 'slug' => 'computers-tablets-networking', 'image' => 'assets/images/furniture/10.png'],
+            ['name' => 'Collectables', 'slug' => 'collectables', 'image' => 'assets/images/furniture/9.png'],
+            ['name' => 'Crafts', 'slug' => 'crafts', 'image' => 'assets/images/furniture/6.png'],
+            ['name' => 'Sound & Vision', 'slug' => 'sound-vision', 'image' => 'assets/images/furniture/11.png'],
         ];
 
         // Wipe old categories that are not in the new list
@@ -57,7 +60,7 @@ class CatalogSeeder extends Seeder
                 'price' => 58.00,
                 'unit' => '1 Set',
                 'description' => 'Crafted from 100% organic cotton gauze, this ultra-soft sheet set is gentle on sensitive skin and perfect for warm nights.',
-                'image' => 'assets/uploads/2026/01/Bathroom_3.jpg',
+                'image' => 'assets/images/furniture/1.png',
                 'is_featured' => true,
             ],
             [
@@ -67,7 +70,7 @@ class CatalogSeeder extends Seeder
                 'price' => 88.00,
                 'unit' => '1 Set',
                 'description' => 'Elevate your bathroom with this elegant blue and white ceramic accessory set. Includes dispenser, toothbrush holder, soap dish, and tumbler.',
-                'image' => 'assets/uploads/2026/01/Bathroom_4.jpg',
+                'image' => 'assets/images/furniture/2.png',
                 'is_featured' => true,
             ],
             [
@@ -77,7 +80,7 @@ class CatalogSeeder extends Seeder
                 'price' => 112.00,
                 'unit' => '1 Unit',
                 'description' => 'Handcrafted from sustainably sourced teak wood, this bath mat adds a spa-like feel with non-slip rubber feet.',
-                'image' => 'assets/uploads/2026/01/Bathroom_1.jpg',
+                'image' => 'assets/images/furniture/3.png',
                 'is_featured' => false,
             ],
             [
@@ -87,7 +90,7 @@ class CatalogSeeder extends Seeder
                 'price' => 22.99,
                 'unit' => '1 Unit',
                 'description' => 'Heavy duty reversible cast iron griddle plate for BBQ stove, hob, and oven cooking with ribbed and flat sides.',
-                'image' => 'assets/uploads/2026/01/Kitchen_8.jpg',
+                'image' => 'assets/images/grocery/product/kichen/1.png',
                 'is_featured' => true,
             ],
             [
@@ -97,7 +100,7 @@ class CatalogSeeder extends Seeder
                 'price' => 4.99,
                 'unit' => '2 Pack',
                 'description' => 'Convenient durable 31cm unisex shoe horn pair made from high grade smooth ABS with ergonomic loop grip.',
-                'image' => 'assets/uploads/2026/01/Bathroom_6.jpg',
+                'image' => 'assets/images/furniture/4.png',
                 'is_featured' => true,
             ],
             [
@@ -107,7 +110,7 @@ class CatalogSeeder extends Seeder
                 'price' => 16.99,
                 'unit' => '1 Set',
                 'description' => 'All-in-one kitchen vegetable chopper and mandoline slicer with container, draining basket, and sharp stainless steel blades.',
-                'image' => 'assets/uploads/2026/01/Kitchen_2.jpg',
+                'image' => 'assets/images/grocery/product/kichen/2.png',
                 'is_featured' => true,
             ],
             [
@@ -117,7 +120,7 @@ class CatalogSeeder extends Seeder
                 'price' => 299.00,
                 'unit' => '1 Unit',
                 'description' => 'Curved bowtie accent chair upholstered in plush green boucle fabric with solid wood tapered legs.',
-                'image' => 'assets/uploads/2026/01/Bedroom_1.jpg',
+                'image' => 'assets/images/furniture/6.png',
                 'is_featured' => false,
             ],
             [
@@ -127,7 +130,7 @@ class CatalogSeeder extends Seeder
                 'price' => 55.00,
                 'unit' => '4 Pack',
                 'description' => 'Artisanal aged brass hardware knobs for kitchen and bathroom cabinets with durable antiqued patina finish.',
-                'image' => 'assets/uploads/2026/01/Kitchen_6.jpg',
+                'image' => 'assets/images/furniture/7.png',
                 'is_featured' => false,
             ],
 
@@ -139,7 +142,7 @@ class CatalogSeeder extends Seeder
                 'price' => 75.00,
                 'unit' => '1 Unit',
                 'description' => 'Auto-rewind retractable garden hose reel with multi-pattern spray nozzle and 180-degree swivel wall bracket.',
-                'image' => 'assets/uploads/2026/01/Office_7.jpg',
+                'image' => 'assets/images/furniture/8.png',
                 'is_featured' => true,
             ],
             [
@@ -149,7 +152,7 @@ class CatalogSeeder extends Seeder
                 'price' => 34.99,
                 'unit' => '1 Unit',
                 'description' => 'Solid cedar wood rectangular planter trough for flowers, herbs, and patio greenery with drainage holes.',
-                'image' => 'assets/uploads/2026/01/Living_5.jpg',
+                'image' => 'assets/images/furniture/9.png',
                 'is_featured' => true,
             ],
             [
@@ -159,7 +162,7 @@ class CatalogSeeder extends Seeder
                 'price' => 28.50,
                 'unit' => '6 Pack',
                 'description' => 'Waterproof stainless steel solar stake lights for garden pathways, borders, and lawn lighting with dusk-to-dawn sensors.',
-                'image' => 'assets/uploads/2026/01/Lighting_2.jpg',
+                'image' => 'assets/images/furniture/10.png',
                 'is_featured' => false,
             ],
             [
@@ -169,7 +172,7 @@ class CatalogSeeder extends Seeder
                 'price' => 24.99,
                 'unit' => '5 Piece Set',
                 'description' => 'Cast aluminum garden hand tools with comfortable soft rubber grips, including trowel, transplanter, cultivator, and pruner.',
-                'image' => 'assets/uploads/2026/01/Living_7.jpg',
+                'image' => 'assets/images/furniture/11.png',
                 'is_featured' => false,
             ],
             [
@@ -179,7 +182,7 @@ class CatalogSeeder extends Seeder
                 'price' => 32.00,
                 'unit' => '1 Unit',
                 'description' => '600D Oxford fabric waterproof cover with windproof buckle straps for outdoor table and chair sets.',
-                'image' => 'assets/uploads/2026/01/Office_8.jpg',
+                'image' => 'assets/images/furniture/12.png',
                 'is_featured' => false,
             ],
 
@@ -191,7 +194,7 @@ class CatalogSeeder extends Seeder
                 'price' => 21.99,
                 'unit' => '1 Unit',
                 'description' => 'Compact car vacuum cleaner with strong cyclonic suction, washable HEPA filter, and crevice extension tools.',
-                'image' => 'assets/uploads/2026/01/Office_5.jpg',
+                'image' => 'assets/images/grocery/product/kichen/3.png',
                 'is_featured' => true,
             ],
             [
@@ -201,7 +204,7 @@ class CatalogSeeder extends Seeder
                 'price' => 18.50,
                 'unit' => '1 Unit',
                 'description' => '15W fast wireless charging magnetic air vent mount with 360-degree ball rotation for smartphones.',
-                'image' => 'assets/uploads/2026/01/Office_6.jpg',
+                'image' => 'assets/images/furniture/13.png',
                 'is_featured' => true,
             ],
             [
@@ -211,7 +214,7 @@ class CatalogSeeder extends Seeder
                 'price' => 12.99,
                 'unit' => '1 Unit',
                 'description' => 'Accurate 150 PSI digital tire gauge with lighted nozzle and non-slip grip for cars, bikes, and vans.',
-                'image' => 'assets/uploads/2026/01/Office_1.jpg',
+                'image' => 'assets/images/furniture/14.png',
                 'is_featured' => false,
             ],
             [
@@ -221,7 +224,7 @@ class CatalogSeeder extends Seeder
                 'price' => 55.00,
                 'unit' => '4 Piece Set',
                 'description' => 'Heavy duty transport dollies supporting up to 330 lbs each with 360-degree rotating wheels.',
-                'image' => 'assets/uploads/2026/01/Office_2.jpg',
+                'image' => 'assets/images/furniture/5.png',
                 'is_featured' => false,
             ],
 
@@ -233,7 +236,7 @@ class CatalogSeeder extends Seeder
                 'price' => 26.00,
                 'unit' => '1 Unit',
                 'description' => 'Eco-friendly TPE yoga mat with dual-sided non-slip texture and alignment guides for workouts.',
-                'image' => 'assets/uploads/2026/01/Bedroom_9.jpg',
+                'image' => 'assets/images/grocery/product/kichen/4.png',
                 'is_featured' => true,
             ],
             [
@@ -243,7 +246,7 @@ class CatalogSeeder extends Seeder
                 'price' => 19.99,
                 'unit' => '11 Piece Set',
                 'description' => 'Stackable resistance workout bands up to 150 lbs for strength training, physical therapy, and home fitness.',
-                'image' => 'assets/uploads/2026/01/Bedroom_7.jpg',
+                'image' => 'assets/images/grocery/product/kichen/5.png',
                 'is_featured' => true,
             ],
             [
@@ -253,7 +256,7 @@ class CatalogSeeder extends Seeder
                 'price' => 16.50,
                 'unit' => '1 Unit',
                 'description' => 'Double-wall vacuum insulated flask keeping drinks cold for 24h or hot for 12h with leakproof straw lid.',
-                'image' => 'assets/uploads/2026/01/Bathroom_5.jpg',
+                'image' => 'assets/images/grocery/product/drink/1.png',
                 'is_featured' => false,
             ],
             [
@@ -263,7 +266,7 @@ class CatalogSeeder extends Seeder
                 'price' => 27.50,
                 'unit' => '1 Unit',
                 'description' => 'Heavy-duty aluminum portable camping chair with cup holder and compact storage bag.',
-                'image' => 'assets/uploads/2026/01/Living_6.jpg',
+                'image' => 'assets/images/furniture/6.png',
                 'is_featured' => false,
             ],
 
@@ -275,7 +278,7 @@ class CatalogSeeder extends Seeder
                 'price' => 45.00,
                 'unit' => '1 Unit',
                 'description' => 'Plush orthopedic dog and cat bed with supportive memory foam base and removable water-resistant cover.',
-                'image' => 'assets/uploads/2026/01/Bedroom_4.jpg',
+                'image' => 'assets/images/furniture/2.png',
                 'is_featured' => true,
             ],
             [
@@ -285,7 +288,7 @@ class CatalogSeeder extends Seeder
                 'price' => 17.99,
                 'unit' => '1 Unit',
                 'description' => 'Hands-free automatic 360-degree laser pointer toy with random patterns and timer modes for cats.',
-                'image' => 'assets/uploads/2026/01/Office_9.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/1.png',
                 'is_featured' => true,
             ],
             [
@@ -295,7 +298,7 @@ class CatalogSeeder extends Seeder
                 'price' => 15.50,
                 'unit' => '1 Set',
                 'description' => 'Non-skid silicone base with two removable rust-proof stainless steel feeding dishes.',
-                'image' => 'assets/uploads/2026/01/Bathroom_8.jpg',
+                'image' => 'assets/images/grocery/product/kichen/6.png',
                 'is_featured' => false,
             ],
             [
@@ -305,7 +308,7 @@ class CatalogSeeder extends Seeder
                 'price' => 13.99,
                 'unit' => '1 Unit',
                 'description' => 'Tangle-free 360-degree nylon ribbon lead with quick-lock single-button braking mechanism.',
-                'image' => 'assets/uploads/2026/01/Bathroom_7.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/3.png',
                 'is_featured' => false,
             ],
 
@@ -317,7 +320,7 @@ class CatalogSeeder extends Seeder
                 'price' => 39.99,
                 'unit' => '1 Unit',
                 'description' => 'Simultaneous fast charging station for phone, smartwatch, and earbuds with LED charging indicator.',
-                'image' => 'assets/uploads/2026/01/Lighting_1.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/2.png',
                 'is_featured' => true,
             ],
             [
@@ -327,7 +330,7 @@ class CatalogSeeder extends Seeder
                 'price' => 28.00,
                 'unit' => '1 Unit',
                 'description' => 'High capacity ultra-compact external battery pack with dual USB-A and USB-C output ports.',
-                'image' => 'assets/uploads/2026/01/Office_3.jpg',
+                'image' => 'assets/images/grocery/product/kichen/7.png',
                 'is_featured' => true,
             ],
             [
@@ -337,7 +340,7 @@ class CatalogSeeder extends Seeder
                 'price' => 14.99,
                 'unit' => '1 Unit',
                 'description' => 'Sturdy weighted metal desk cradle with anti-slip rubber pads for iPhone, iPad, and Android devices.',
-                'image' => 'assets/uploads/2026/01/Lighting_4.jpg',
+                'image' => 'assets/images/furniture/9.png',
                 'is_featured' => false,
             ],
             [
@@ -347,7 +350,7 @@ class CatalogSeeder extends Seeder
                 'price' => 24.99,
                 'unit' => '1 Unit',
                 'description' => 'Next-gen GaN fast charging brick with 2x Type-C and 1x USB-A ports for laptops, phones, and tablets.',
-                'image' => 'assets/uploads/2026/01/Lighting_5.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/4.png',
                 'is_featured' => false,
             ],
 
@@ -359,7 +362,7 @@ class CatalogSeeder extends Seeder
                 'price' => 8.99,
                 'unit' => '1 Unit',
                 'description' => 'Professional precision 9300 RPM micro-motor trimmer with painless stainless steel dual-edge blades and LED light.',
-                'image' => 'assets/uploads/2026/01/Bathroom_9.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/5.png',
                 'is_featured' => true,
             ],
             [
@@ -369,7 +372,7 @@ class CatalogSeeder extends Seeder
                 'price' => 32.00,
                 'unit' => '1 Set',
                 'description' => '40,000 VPM sonic motor rechargeable toothbrush with 5 cleaning modes and 2-minute smart timer.',
-                'image' => 'assets/uploads/2026/01/Bathroom_2.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/6.png',
                 'is_featured' => true,
             ],
             [
@@ -379,7 +382,7 @@ class CatalogSeeder extends Seeder
                 'price' => 27.50,
                 'unit' => '1 Kit',
                 'description' => 'Rechargeable precision hair grooming set with titanium ceramic blades and multiple guide combs.',
-                'image' => 'assets/uploads/2026/01/Bathroom_5.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/7.png',
                 'is_featured' => false,
             ],
             [
@@ -389,7 +392,7 @@ class CatalogSeeder extends Seeder
                 'price' => 22.00,
                 'unit' => '1 Unit',
                 'description' => 'Cool mist aroma humidifier with 7 soothing ambient LED light colours and auto shut-off function.',
-                'image' => 'assets/uploads/2026/01/Lighting_6.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/8.png',
                 'is_featured' => false,
             ],
 
@@ -401,7 +404,7 @@ class CatalogSeeder extends Seeder
                 'price' => 34.99,
                 'unit' => '1 Unit',
                 'description' => 'Multi-functional aluminum foldable laptop bed table with non-slip legs, tablet slot, and carry handle.',
-                'image' => 'assets/uploads/2026/01/Office_4.jpg',
+                'image' => 'assets/images/furniture/1.png',
                 'is_featured' => true,
             ],
             [
@@ -411,7 +414,7 @@ class CatalogSeeder extends Seeder
                 'price' => 25.00,
                 'unit' => '1 Unit',
                 'description' => 'Foldable ventilated riser supporting up to 17-inch laptops with 6-level height adjustment.',
-                'image' => 'assets/uploads/2026/01/Office_7.jpg',
+                'image' => 'assets/images/furniture/10.png',
                 'is_featured' => true,
             ],
             [
@@ -421,7 +424,7 @@ class CatalogSeeder extends Seeder
                 'price' => 29.99,
                 'unit' => '1 Unit',
                 'description' => 'High speed dongle with dual 4K HDMI ports, 100W PD charging, SD/TF card reader, and USB 3.0 ports.',
-                'image' => 'assets/uploads/2026/01/Office_8.jpg',
+                'image' => 'assets/images/furniture/13.png',
                 'is_featured' => false,
             ],
             [
@@ -431,7 +434,7 @@ class CatalogSeeder extends Seeder
                 'price' => 32.50,
                 'unit' => '1 Set',
                 'description' => 'Quiet low-profile keys with multi-device Bluetooth and 2.4GHz wireless connectivity for Mac and Windows.',
-                'image' => 'assets/uploads/2026/01/Office_9.jpg',
+                'image' => 'assets/images/furniture/14.png',
                 'is_featured' => false,
             ],
 
@@ -443,7 +446,7 @@ class CatalogSeeder extends Seeder
                 'price' => 188.00,
                 'unit' => '1 Unit',
                 'description' => '12-inch minimalist wall clock with clean numerals and whisper-quiet sweep mechanism.',
-                'image' => 'assets/uploads/2026/01/Living_7.jpg',
+                'image' => 'assets/images/furniture/8.png',
                 'is_featured' => true,
             ],
             [
@@ -453,7 +456,7 @@ class CatalogSeeder extends Seeder
                 'price' => 145.00,
                 'unit' => '1 Unit',
                 'description' => 'Handcrafted wall clock featuring painted floral motifs and rustic wrought iron frame.',
-                'image' => 'assets/uploads/2026/01/Living_8.jpg',
+                'image' => 'assets/images/furniture/9.png',
                 'is_featured' => true,
             ],
             [
@@ -463,7 +466,7 @@ class CatalogSeeder extends Seeder
                 'price' => 95.00,
                 'unit' => '1 Unit',
                 'description' => 'Solid aluminum square tray with hand-rubbed antique bronze finish for coffee tables and consoles.',
-                'image' => 'assets/uploads/2026/01/Living_6.jpg',
+                'image' => 'assets/images/furniture/7.png',
                 'is_featured' => false,
             ],
             [
@@ -473,7 +476,7 @@ class CatalogSeeder extends Seeder
                 'price' => 38.50,
                 'unit' => '1 Unit',
                 'description' => 'Heavy antique-style mechanical money box with moving lever action and hand-painted finish.',
-                'image' => 'assets/uploads/2026/01/Living_9.jpg',
+                'image' => 'assets/images/furniture/4.png',
                 'is_featured' => false,
             ],
 
@@ -485,7 +488,7 @@ class CatalogSeeder extends Seeder
                 'price' => 195.00,
                 'unit' => '1 Unit',
                 'description' => 'Decorative 4-panel folding partition screen with intricate laser-cut floral filigree pattern.',
-                'image' => 'assets/uploads/2026/01/Office_8.jpg',
+                'image' => 'assets/images/furniture/6.png',
                 'is_featured' => true,
             ],
             [
@@ -495,7 +498,7 @@ class CatalogSeeder extends Seeder
                 'price' => 18.50,
                 'unit' => '24 Tube Set',
                 'description' => 'Richly pigmented artist grade non-toxic acrylic paints for canvas, wood, fabric, and ceramic art.',
-                'image' => 'assets/uploads/2026/01/Living_3.jpg',
+                'image' => 'assets/images/grocery/product/chemist/2.png',
                 'is_featured' => true,
             ],
             [
@@ -505,7 +508,7 @@ class CatalogSeeder extends Seeder
                 'price' => 14.50,
                 'unit' => '5 Piece Set',
                 'description' => 'Traditional artisan wooden printing blocks for textile, pottery, clay, and scrapbooking designs.',
-                'image' => 'assets/uploads/2026/01/Living_1.jpg',
+                'image' => 'assets/images/furniture/3.png',
                 'is_featured' => false,
             ],
             [
@@ -515,7 +518,7 @@ class CatalogSeeder extends Seeder
                 'price' => 12.99,
                 'unit' => '200m Roll',
                 'description' => 'Soft 4-strand twisted unbleached natural cotton rope for plant hangers, wall hangings, and craft projects.',
-                'image' => 'assets/uploads/2026/01/Bathroom_7.jpg',
+                'image' => 'assets/images/grocery/product/chemist/3.png',
                 'is_featured' => false,
             ],
 
@@ -527,7 +530,7 @@ class CatalogSeeder extends Seeder
                 'price' => 68.00,
                 'unit' => '1 Unit',
                 'description' => 'Hybrid ANC Bluetooth 5.3 headphones with deep bass, 40-hour battery life, and crystal clear built-in mic.',
-                'image' => 'assets/uploads/2026/01/Lighting_7.jpg',
+                'image' => 'assets/images/furniture/11.png',
                 'is_featured' => true,
             ],
             [
@@ -537,7 +540,7 @@ class CatalogSeeder extends Seeder
                 'price' => 36.50,
                 'unit' => '1 Unit',
                 'description' => 'IPX7 waterproof outdoor wireless speaker with 360-degree surround sound and 24-hour playtime.',
-                'image' => 'assets/uploads/2026/01/Lighting_3.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/2.png',
                 'is_featured' => true,
             ],
             [
@@ -547,7 +550,7 @@ class CatalogSeeder extends Seeder
                 'price' => 42.00,
                 'unit' => '1 Kit',
                 'description' => 'Cardioid podcasting mic with shock mount, pop filter, desk clamp arm, and zero-latency monitoring.',
-                'image' => 'assets/uploads/2026/01/Lighting_8.jpg',
+                'image' => 'assets/images/grocery/product/personal-care/4.png',
                 'is_featured' => false,
             ],
             [
@@ -557,7 +560,7 @@ class CatalogSeeder extends Seeder
                 'price' => 89.00,
                 'unit' => '1 Unit',
                 'description' => 'Compact 9000 lumens movie projector with HDMI, USB, and screen mirroring support up to 200 inches.',
-                'image' => 'assets/uploads/2026/01/Lighting_2.jpg',
+                'image' => 'assets/images/furniture/10.png',
                 'is_featured' => false,
             ],
         ];
@@ -595,6 +598,9 @@ class CatalogSeeder extends Seeder
                 }
             }
 
+            $isTopDeal = $index < 6;
+            $isHotDeal = $index === 0;
+
             Product::updateOrCreate(
                 ['slug' => $item['slug']],
                 [
@@ -608,9 +614,96 @@ class CatalogSeeder extends Seeder
                     'image' => $mainImage,
                     'images' => $galleryImages,
                     'is_featured' => $item['is_featured'] ?? false,
+                    'is_top_deal' => $isTopDeal,
+                    'is_hot_deal' => $isHotDeal,
                     'is_active' => true,
                 ]
             );
+        }
+
+        // Initialize Home Settings
+        HomeSetting::getSettings();
+
+        // Initialize Home Banners
+        $defaultBanners = [
+            [
+                'title' => 'Home & Furniture',
+                'subtitle' => 'New Arrivals',
+                'button_text' => 'Shop Now',
+                'button_url' => '/shop-category?category=home-furniture-diy',
+                'image' => 'assets/images/banner/kenkie-promo-home.jpg',
+                'position' => 0,
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Garden & Patio',
+                'subtitle' => 'Outdoor Living',
+                'button_text' => 'Shop Now',
+                'button_url' => '/shop-category?category=garden-patio',
+                'image' => 'assets/images/banner/kenkie-promo-garden.jpg',
+                'position' => 1,
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Health & Beauty',
+                'subtitle' => 'Personal Care',
+                'button_text' => 'Shop Now',
+                'button_url' => '/shop-category?category=health-beauty',
+                'image' => 'assets/images/banner/kenkie-promo-home.jpg',
+                'position' => 2,
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Sound & Vision',
+                'subtitle' => 'Electronics',
+                'button_text' => 'Shop Now',
+                'button_url' => '/shop-category?category=sound-vision',
+                'image' => 'assets/images/banner/kenkie-promo-garden.jpg',
+                'position' => 3,
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($defaultBanners as $banner) {
+            HomeBanner::firstOrCreate(['title' => $banner['title']], $banner);
+        }
+
+        // Initialize Bank Offers
+        $defaultOffers = [
+            [
+                'title' => 'GET 10% OFF',
+                'subtitle' => 'When you spend $20',
+                'validity' => 'Valid for 30 days',
+                'code' => 'KENKIE10',
+                'color_theme' => 'theme-1',
+                'bank_image' => 'assets/images/grocery/bank/name/1.png',
+                'position' => 0,
+                'is_active' => true,
+            ],
+            [
+                'title' => 'FREE SHIPPING',
+                'subtitle' => 'On orders over $50',
+                'validity' => 'Valid for 30 days',
+                'code' => 'FREESHIP',
+                'color_theme' => 'theme-2',
+                'bank_image' => 'assets/images/grocery/bank/name/2.png',
+                'position' => 1,
+                'is_active' => true,
+            ],
+            [
+                'title' => 'SAVE $15',
+                'subtitle' => 'When you spend $100',
+                'validity' => 'Valid for 30 days',
+                'code' => 'SAVE15',
+                'color_theme' => 'theme-3',
+                'bank_image' => 'assets/images/grocery/bank/name/3.png',
+                'position' => 2,
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($defaultOffers as $offer) {
+            BankOffer::firstOrCreate(['code' => $offer['code']], $offer);
         }
     }
 }

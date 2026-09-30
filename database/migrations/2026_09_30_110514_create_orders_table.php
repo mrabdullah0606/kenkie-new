@@ -25,6 +25,9 @@ return new class extends Migration
             $table->string('country');
             $table->string('status')->default('pending');
             $table->string('payment_method')->default('cash_on_delivery');
+            $table->string('payment_status')->default('pending');
+            $table->string('stripe_session_id')->nullable();
+            $table->string('stripe_payment_intent_id')->nullable();
             $table->decimal('subtotal', 10, 2);
             $table->decimal('shipping_fee', 10, 2)->default(0);
             $table->decimal('total', 10, 2);

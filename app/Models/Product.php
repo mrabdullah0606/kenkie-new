@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'image',
     'images',
     'is_featured',
+    'is_top_deal',
+    'is_hot_deal',
     'is_active',
 ])]
 class Product extends Model
@@ -55,6 +57,8 @@ class Product extends Model
             'price' => 'decimal:2',
             'stock' => 'integer',
             'is_featured' => 'boolean',
+            'is_top_deal' => 'boolean',
+            'is_hot_deal' => 'boolean',
             'is_active' => 'boolean',
         ];
     }

@@ -9,8 +9,8 @@
     <style>
         .shop-category-slider-box {
             background: #fff;
-            border-radius: 8px;
-            padding: 18px 12px;
+            border-radius: 10px;
+            padding: 16px 12px;
             text-align: center;
             display: block;
             border: 1px solid #f0f0f0;
@@ -25,11 +25,15 @@
             transform: translateY(-2px);
         }
         .shop-category-slider-box img {
-            width: 46px;
-            height: 46px;
+            width: 54px;
+            height: 54px;
             object-fit: contain;
             margin: 0 auto 10px;
             display: block;
+            transition: transform 0.3s ease;
+        }
+        .shop-category-slider-box:hover img {
+            transform: scale(1.1);
         }
         .shop-category-slider-box h5 {
             font-size: 14px;
@@ -42,6 +46,98 @@
         }
         .shop-category-slider-box.active h5 {
             color: #22c55e;
+        }
+
+        /* Unified Product Card Sizing in Shop */
+        .product-box-3 {
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            background: #ffffff !important;
+            border: 1px solid #f0f0f0 !important;
+            border-radius: 12px !important;
+            padding: 14px !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+            transition: all 0.3s ease !important;
+        }
+        .product-box-3:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08) !important;
+            border-color: #22c55e !important;
+        }
+        .product-box-3 .product-header {
+            width: 100% !important;
+        }
+        .product-box-3 .product-header .product-image {
+            width: 100% !important;
+            height: 230px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            overflow: hidden !important;
+            position: relative !important;
+            background: #f8fafc !important;
+            border-radius: 10px !important;
+            padding: 12px !important;
+            margin-bottom: 12px !important;
+        }
+        .product-box-3 .product-header .product-image a {
+            width: 100% !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        .product-box-3 .product-header .product-image img {
+            max-height: 205px !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            transition: transform 0.35s ease !important;
+        }
+        .product-box-3:hover .product-header .product-image img {
+            transform: scale(1.06) !important;
+        }
+        .product-box-3 .product-footer {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            flex-grow: 1 !important;
+        }
+        .product-box-3 .product-footer .product-detail {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+        }
+        .product-box-3 .product-footer .product-detail .span-name {
+            font-size: 13px !important;
+            color: #888888 !important;
+            margin-bottom: 2px !important;
+        }
+        .product-box-3 .product-footer .product-detail .name {
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            line-height: 1.35 !important;
+            height: 42px !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            margin-bottom: 6px !important;
+        }
+        .product-box-3 .product-footer .product-detail .product-content {
+            font-size: 13px !important;
+            color: #888888 !important;
+            margin-bottom: 6px !important;
+        }
+        .product-box-3 .product-footer .product-detail .price {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            margin-bottom: 12px !important;
+        }
+        .product-box-3 .product-footer .product-detail .add-to-cart-box {
+            margin-top: auto !important;
         }
         .filter-tags {
             display: flex;
