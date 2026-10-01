@@ -16,7 +16,7 @@
                             </a>
                         </div>
 
-                        <div class="middle-box d-none d-xl-block">
+                        <div class="middle-box d-none d-xl-block ms-auto">
                             <div class="center-box w-100 live-search-container position-relative">
                                 <form action="{{ route('shop.category') }}" method="GET" class="searchbar-box-2 input-group w-100" autocomplete="off">
                                     <button class="btn search-icon" type="submit" aria-label="Search">
@@ -29,19 +29,6 @@
                                     <button class="btn search-button" type="submit">Search</button>
                                 </form>
                                 <div class="js-live-search-dropdown live-search-dropdown d-none"></div>
-                            </div>
-                        </div>
-
-                        <div class="rightside-menu support-sidemenu d-none d-xl-flex">
-                            <div class="support-box">
-                                <div class="support-image">
-                                    <img src="{{ asset('assets/images/icon/support.png') }}" class="img-fluid blur-up lazyload"
-                                        alt="">
-                                </div>
-                                <div class="support-number">
-                                    <h2>07898346397</h2>
-                                    <h4>Customer Support</h4>
-                                </div>
                             </div>
                         </div>
 

@@ -104,10 +104,20 @@ header.header-3 .sticky-header {
 }
 
 @media (min-width: 1200px) {
+    .header-3 .navbar-top {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
     .header-3 .middle-box {
-        flex: 1 1 auto;
-        max-width: 620px;
-        margin: 0 28px;
+        margin-left: auto !important;
+        margin-right: 0 !important;
+        max-width: 560px !important;
+        width: 100% !important;
+        flex: 0 1 560px !important;
+    }
+    .header-3 .support-sidemenu {
+        display: none !important;
     }
     .header-3 .searchbar-box-2 {
         display: flex !important;
