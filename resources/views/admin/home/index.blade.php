@@ -114,7 +114,82 @@
         </div>
     </div>
 
-    <!-- SECTION 2: PROMO BANNER CARDS -->
+    <!-- SECTION 2: HERO SLIDER SLIDES (MULTI-IMAGE CAROUSEL) -->
+    <div class="card mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-sliders text-primary fs-5"></i>
+                <div>
+                    <h5 class="fw-bold mb-0">Hero Slider Slides (Multi-Image Carousel)</h5>
+                    <small class="text-muted">Add multiple slides with images and custom text. If empty, the default hero banner from Section 1 is displayed.</small>
+                </div>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addSlideModal">
+                <i class="fa-solid fa-plus"></i> Add New Slide
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                @forelse ($slides as $slide)
+                    <div class="col-xl-4 col-md-6">
+                        <div class="card h-100 border shadow-sm">
+                            <div class="position-relative overflow-hidden" style="height: 160px; background: #f1f5f9;">
+                                <img src="{{ asset($slide->image ?: 'assets/images/banner/kenkie-hero-banner.jpg') }}" class="w-100 h-100 object-fit-cover" alt="{{ $slide->title }}">
+                                <span class="position-absolute top-0 start-0 m-2 badge {{ $slide->is_active ? 'bg-success' : 'bg-secondary' }}">
+                                    {{ $slide->is_active ? 'Active' : 'Disabled' }}
+                                </span>
+                                <span class="position-absolute top-0 end-0 m-2 badge bg-dark opacity-75">
+                                    #{{ $slide->position + 1 }}
+                                </span>
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                @if ($slide->badge)
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle align-self-start mb-2 px-2 py-1 text-uppercase fw-semibold" style="font-size: 11px;">{{ $slide->badge }}</span>
+                                @endif
+                                <h5 class="fw-bold text-dark mb-1">{{ $slide->title }}</h5>
+                                @if ($slide->subtitle)
+                                    <p class="text-success fw-semibold small mb-2">{{ $slide->subtitle }}</p>
+                                @endif
+                                @if ($slide->description)
+                                    <p class="text-muted small mb-3 text-truncate">{{ $slide->description }}</p>
+                                @endif
+                                <div class="mt-auto pt-2 border-top">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-light text-primary border">{{ $slide->button_text ?: 'Shop Collection' }}</span>
+                                        <div class="d-flex gap-1">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSlideModal{{ $slide->id }}" title="Edit Slide">
+                                                <i class="fa-solid fa-pen"></i>
+                                            </button>
+                                            <form method="POST" action="{{ route('admin.home.slides.destroy', $slide) }}" onsubmit="return confirm('Delete this hero slide?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Slide">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-12">
+                        <div class="text-center py-4 px-3 bg-light rounded-3 border">
+                            <i class="fa-solid fa-images text-muted fs-2 mb-2 d-block"></i>
+                            <h6 class="fw-semibold text-secondary mb-1">No Extra Carousel Slides Added</h6>
+                            <p class="text-muted small mb-3">Your storefront is currently displaying the single hero banner configured in Section 1. Click "Add New Slide" to add multiple rotating images.</p>
+                            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addSlideModal">
+                                <i class="fa-solid fa-plus me-1"></i> Add First Slide
+                            </button>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 3: PROMO BANNER CARDS -->
     <div class="card">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
@@ -285,6 +360,142 @@
                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary px-4 fw-semibold">
                         <i class="fa-solid fa-plus me-1"></i> Create Card
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Hero Slide Modals -->
+@foreach ($slides as $slide)
+    <div class="modal fade" id="editSlideModal{{ $slide->id }}" tabindex="-1" aria-labelledby="editSlideModalLabel{{ $slide->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content shadow-lg border-0 rounded-4">
+                <form method="POST" action="{{ route('admin.home.slides.update', $slide) }}" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-header bg-light border-bottom px-4 py-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-pen-to-square text-primary fs-5"></i>
+                            <h5 class="modal-title fw-bold mb-0" id="editSlideModalLabel{{ $slide->id }}">Edit Hero Slide #{{ $slide->position + 1 }}</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Badge / Tagline</label>
+                                <input class="form-control" name="badge" value="{{ $slide->badge }}" placeholder="e.g. Weekend Special Offer">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Button Text</label>
+                                <input class="form-control" name="button_text" value="{{ $slide->button_text }}" placeholder="Shop Collection">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Heading Title <span class="text-danger">*</span></label>
+                                <input class="form-control" name="title" value="{{ $slide->title }}" placeholder="e.g. Modern Minimalist Furniture" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Subtitle / Highlight Text</label>
+                                <input class="form-control" name="subtitle" value="{{ $slide->subtitle }}" placeholder="e.g. Crafted For Everyday Elegance">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Short Description</label>
+                                <textarea class="form-control" name="description" rows="2" placeholder="Discover timeless essentials crafted to elevate your home.">{{ $slide->description }}</textarea>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label fw-semibold">Button Destination URL</label>
+                                <input class="form-control" name="button_url" value="{{ $slide->button_url }}" placeholder="/shop-category">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Sort Position</label>
+                                <input class="form-control" type="number" name="position" value="{{ $slide->position }}" min="0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Slide Background Image</label>
+                                <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light mb-2">
+                                    <img src="{{ asset($slide->image ?: 'assets/images/banner/kenkie-hero-banner.jpg') }}" id="slidePreview{{ $slide->id }}" class="rounded-3 border object-fit-cover shadow-sm" style="width: 120px; height: 75px;" alt="{{ $slide->title }}">
+                                    <div class="flex-grow-1">
+                                        <input class="form-control banner-file-input" type="file" name="slide_image_file" data-target="slidePreview{{ $slide->id }}" accept="image/*">
+                                        <small class="text-muted d-block mt-1">Recommended 1920x650px. Accepts PNG, JPG, JPEG, WEBP. Max 10MB.</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch p-3 border rounded-3 bg-light">
+                                    <input class="form-check-input ms-0 me-2" type="checkbox" id="slideActive{{ $slide->id }}" name="is_active" value="1" @checked($slide->is_active)>
+                                    <label class="form-check-label fw-semibold" for="slideActive{{ $slide->id }}">Active & Visible in Slider</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top px-4 py-3">
+                        <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endforeach
+
+<!-- Add Slide Modal -->
+<div class="modal fade" id="addSlideModal" tabindex="-1" aria-labelledby="addSlideModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content shadow-lg border-0 rounded-4">
+            <form method="POST" action="{{ route('admin.home.slides.store') }}" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-header bg-light border-bottom px-4 py-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-plus text-primary fs-5"></i>
+                        <h5 class="modal-title fw-bold mb-0" id="addSlideModalLabel">Add New Hero Slider Slide</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Badge / Tagline</label>
+                            <input class="form-control" name="badge" placeholder="e.g. New Season Arrivals">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Button Text</label>
+                            <input class="form-control" name="button_text" value="Shop Collection" placeholder="Shop Collection">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Heading Title <span class="text-danger">*</span></label>
+                            <input class="form-control" name="title" placeholder="e.g. Modern Outdoor Living" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Subtitle / Highlight Text</label>
+                            <input class="form-control" name="subtitle" placeholder="e.g. Comfort Meets Durability">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Short Description</label>
+                            <textarea class="form-control" name="description" rows="2" placeholder="Explore top rated garden and patio essentials with fast delivery."></textarea>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Button Destination URL</label>
+                            <input class="form-control" name="button_url" value="/shop-category" placeholder="/shop-category">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Sort Position</label>
+                            <input class="form-control" type="number" name="position" value="{{ $slides->count() }}" min="0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Slide Background Image</label>
+                            <input class="form-control" type="file" name="slide_image_file" accept="image/*">
+                            <small class="text-muted d-block mt-1">Recommended 1920x650px. Accepts JPG, PNG, WEBP. Max 10MB.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top px-4 py-3">
+                    <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="fa-solid fa-plus me-1"></i> Add Slide
                     </button>
                 </div>
             </form>

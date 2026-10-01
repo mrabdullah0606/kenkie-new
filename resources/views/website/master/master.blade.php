@@ -1,7 +1,7 @@
 @extends('website.layouts.storefront')
 
 @section('title', 'Home')
-@section('favicon', asset('assets/images/favicon/5.png'))
+@section('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))
 @section('body-class', 'theme-color-3 dark')
 @section('page-styles')
     <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -41,54 +41,196 @@
             display: flex;
             align-items: center;
         }
-        .hero-glass-card {
-            background: rgba(255, 255, 255, 0.94) !important;
-            backdrop-filter: blur(12px) !important;
-            -webkit-backdrop-filter: blur(12px) !important;
-            padding: 38px 44px !important;
-            border-radius: 16px !important;
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08) !important;
-            max-width: 580px !important;
-            border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        .hero-content-wrap {
+            max-width: 620px !important;
+            padding: 20px 0 !important;
+            position: relative;
+            z-index: 2;
         }
         .hero-badge {
             background: #dcfce7 !important;
             color: #15803d !important;
-            font-size: 12px !important;
-            letter-spacing: 0.5px !important;
+            font-size: 13px !important;
+            letter-spacing: 0.6px !important;
             border-radius: 6px !important;
             display: inline-block !important;
+            font-weight: 700 !important;
         }
         .hero-title {
-            font-size: 36px !important;
-            font-weight: 800 !important;
-            line-height: 1.22 !important;
-            color: #0f172a !important;
-            margin-top: 10px !important;
+            font-size: 40px !important;
+            font-weight: 900 !important;
+            line-height: 1.18 !important;
+            color: #000000 !important;
+            margin-top: 12px !important;
             margin-bottom: 8px !important;
+            letter-spacing: -0.5px !important;
         }
         .hero-subtitle {
-            font-size: 18px !important;
-            font-weight: 600 !important;
-            color: #22c55e !important;
-            margin-bottom: 12px !important;
+            font-size: 19px !important;
+            font-weight: 700 !important;
+            color: #16a34a !important;
+            margin-bottom: 10px !important;
         }
         .hero-desc {
-            font-size: 15px !important;
-            color: #475569 !important;
-            margin-bottom: 22px !important;
+            font-size: 16px !important;
+            color: #1e293b !important;
+            margin-bottom: 24px !important;
             line-height: 1.55 !important;
+            max-width: 520px !important;
+            font-weight: 500 !important;
         }
         .hero-btn {
-            padding: 12px 28px !important;
+            padding: 13px 30px !important;
             border-radius: 8px !important;
             font-size: 15px !important;
+            font-weight: 700 !important;
             box-shadow: 0 6px 18px rgba(34, 197, 94, 0.35) !important;
             transition: all 0.25s ease !important;
         }
         .hero-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 22px rgba(34, 197, 94, 0.45) !important;
+        }
+
+        /* Hero Slider Arrow Navigation Controls */
+        .slider-animate {
+            position: relative;
+        }
+        .hero-arrow {
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            z-index: 10 !important;
+            width: 46px !important;
+            height: 46px !important;
+            border-radius: 50% !important;
+            background: rgba(255, 255, 255, 0.92) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            color: #0f172a !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 16px !important;
+            cursor: pointer !important;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14) !important;
+            transition: all 0.22s ease !important;
+            padding: 0 !important;
+        }
+        .hero-arrow:hover {
+            background: #22c55e !important;
+            color: #ffffff !important;
+            border-color: #22c55e !important;
+            box-shadow: 0 6px 18px rgba(34, 197, 94, 0.4) !important;
+            transform: translateY(-50%) scale(1.08) !important;
+        }
+        .hero-prev {
+            left: 24px !important;
+        }
+        .hero-next {
+            right: 24px !important;
+        }
+
+        @media (max-width: 768px) {
+            .home-section-2 .home-contain,
+            .home-section-2 .home-contain.bg-size {
+                min-height: 480px !important;
+                background-position: 85% center !important;
+            }
+            .home-section-2 .home-contain::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: linear-gradient(90deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.82) 55%, rgba(255, 255, 255, 0.2) 100%);
+                pointer-events: none;
+                z-index: 1;
+            }
+            .home-section-2 .home-detail {
+                z-index: 2 !important;
+                position: relative !important;
+                padding-left: 16px !important;
+                padding-right: 16px !important;
+            }
+            .hero-title {
+                font-size: 28px !important;
+                line-height: 1.22 !important;
+            }
+            .hero-subtitle {
+                font-size: 16px !important;
+            }
+            .hero-desc {
+                font-size: 14px !important;
+            }
+            .hero-arrow {
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 13px !important;
+                background: rgba(255, 255, 255, 0.9) !important;
+            }
+            .hero-prev {
+                left: 10px !important;
+            }
+            .hero-next {
+                right: 10px !important;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .home-section-2 .home-contain,
+            .home-section-2 .home-contain.bg-size {
+                min-height: 440px !important;
+                background-position: 88% center !important;
+            }
+            .hero-content-wrap {
+                padding: 10px 0 !important;
+            }
+            .hero-title {
+                font-size: 22px !important;
+                line-height: 1.25 !important;
+                margin-top: 8px !important;
+                margin-bottom: 6px !important;
+            }
+            .hero-subtitle {
+                font-size: 14px !important;
+                margin-bottom: 8px !important;
+            }
+            .hero-desc {
+                font-size: 12.5px !important;
+                line-height: 1.4 !important;
+                margin-bottom: 16px !important;
+            }
+            .hero-btn {
+                padding: 9px 18px !important;
+                font-size: 13px !important;
+            }
+            .mobile-header-right {
+                gap: 4px !important;
+            }
+            .mobile-header-icon {
+                width: 31px !important;
+                height: 31px !important;
+                font-size: 14px !important;
+            }
+            .nav-logo img {
+                max-height: 26px !important;
+                max-width: 110px !important;
+            }
+            .mobile-search-form {
+                height: 38px !important;
+                padding: 2px 3px 2px 10px !important;
+            }
+            .mobile-search-prefix {
+                font-size: 14px !important;
+                margin-right: 5px !important;
+            }
+            .mobile-search-input {
+                font-size: 12px !important;
+            }
+            .mobile-search-btn {
+                height: 30px !important;
+                min-height: 30px !important;
+                padding: 0 10px !important;
+                font-size: 11.5px !important;
+            }
         }
 
         /* Promo 4-Cards Styling */
@@ -578,32 +720,63 @@
             <div class="row">
                 <div class="col-12">
                     <div class="slider-animate">
-                        <div>
-                            <div class="home-contain rounded-0 p-0 position-relative">
-                                <img src="{{ asset($homeSettings->hero_image ?? 'assets/images/banner/kenkie-hero-banner.jpg') }}"
-                                    class="img-fluid bg-img blur-up lazyload" alt="Kenkie Collection Banner">
-                                <div class="home-detail home-big-space p-center-left position-relative" style="z-index: 2;">
-                                    <div class="container-fluid-lg">
-                                        <div class="hero-glass-card">
-                                            @if (!empty($homeSettings->hero_badge))
-                                                <span class="badge hero-badge mb-2 px-3 py-2 fw-bold text-uppercase">{{ $homeSettings->hero_badge }}</span>
-                                            @endif
-                                            <h1 class="heding-2 hero-title">{{ $homeSettings->hero_title ?? 'Premium Quality Home & Garden Collection' }}</h1>
-                                            @if (!empty($homeSettings->hero_subtitle))
-                                                <h2 class="content-2 hero-subtitle">{{ $homeSettings->hero_subtitle }}</h2>
-                                            @endif
-                                            @if (!empty($homeSettings->hero_description))
-                                                <h5 class="text-content hero-desc">{{ $homeSettings->hero_description }}</h5>
-                                            @endif
-                                            <a href="{{ $homeSettings->hero_button_url ? url($homeSettings->hero_button_url) : route('shop.category') }}"
-                                                class="btn theme-bg-color btn-md text-white fw-bold mt-md-4 mt-2 mend-auto d-inline-flex align-items-center gap-2 hero-btn">
-                                                {{ $homeSettings->hero_button_text ?? 'Shop Collection' }} <i class="fa-solid fa-arrow-right icon"></i>
-                                            </a>
+                        @if (isset($heroSlides) && $heroSlides->isNotEmpty())
+                            @foreach ($heroSlides as $slide)
+                                <div>
+                                    <div class="home-contain rounded-0 p-0 position-relative">
+                                        <img src="{{ asset($slide->image ?: 'assets/images/banner/kenkie-hero-banner.jpg') }}"
+                                            class="img-fluid bg-img blur-up lazyload" alt="{{ $slide->title }}">
+                                        <div class="home-detail home-big-space p-center-left position-relative" style="z-index: 2;">
+                                            <div class="container-fluid-lg">
+                                                <div class="hero-content-wrap">
+                                                    @if (!empty($slide->badge))
+                                                        <span class="badge hero-badge mb-2 px-3 py-2 text-uppercase">{{ $slide->badge }}</span>
+                                                    @endif
+                                                    <h1 class="heding-2 hero-title">{{ $slide->title }}</h1>
+                                                    @if (!empty($slide->subtitle))
+                                                        <h2 class="content-2 hero-subtitle">{{ $slide->subtitle }}</h2>
+                                                    @endif
+                                                    @if (!empty($slide->description))
+                                                        <h5 class="text-content hero-desc">{{ $slide->description }}</h5>
+                                                    @endif
+                                                    <a href="{{ $slide->button_url ? url($slide->button_url) : route('shop.category') }}"
+                                                        class="btn theme-bg-color btn-md text-white fw-bold mt-md-4 mt-2 mend-auto d-inline-flex align-items-center gap-2 hero-btn">
+                                                        {{ $slide->button_text ?: 'Shop Collection' }} <i class="fa-solid fa-arrow-right icon"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div>
+                                <div class="home-contain rounded-0 p-0 position-relative">
+                                    <img src="{{ asset($homeSettings->hero_image ?? 'assets/images/banner/kenkie-hero-banner.jpg') }}"
+                                        class="img-fluid bg-img blur-up lazyload" alt="Kenkie Collection Banner">
+                                    <div class="home-detail home-big-space p-center-left position-relative" style="z-index: 2;">
+                                        <div class="container-fluid-lg">
+                                            <div class="hero-content-wrap">
+                                                @if (!empty($homeSettings->hero_badge))
+                                                    <span class="badge hero-badge mb-2 px-3 py-2 text-uppercase">{{ $homeSettings->hero_badge }}</span>
+                                                @endif
+                                                <h1 class="heding-2 hero-title">{{ $homeSettings->hero_title ?? 'Premium Quality Home & Garden Collection' }}</h1>
+                                                @if (!empty($homeSettings->hero_subtitle))
+                                                    <h2 class="content-2 hero-subtitle">{{ $homeSettings->hero_subtitle }}</h2>
+                                                @endif
+                                                @if (!empty($homeSettings->hero_description))
+                                                    <h5 class="text-content hero-desc">{{ $homeSettings->hero_description }}</h5>
+                                                @endif
+                                                <a href="{{ $homeSettings->hero_button_url ? url($homeSettings->hero_button_url) : route('shop.category') }}"
+                                                    class="btn theme-bg-color btn-md text-white fw-bold mt-md-4 mt-2 mend-auto d-inline-flex align-items-center gap-2 hero-btn">
+                                                    {{ $homeSettings->hero_button_text ?? 'Shop Collection' }} <i class="fa-solid fa-arrow-right icon"></i>
+                                                </a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

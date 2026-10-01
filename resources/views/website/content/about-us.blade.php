@@ -1,7 +1,7 @@
 @extends('website.layouts.storefront')
 
 @section('title', 'About Us - A Company You Can Trust - Kenkie')
-@section('favicon', asset('assets/images/favicon/5.png'))
+@section('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))
 @section('body-class', 'theme-color-3 dark')
 
 @section('page-styles')
@@ -127,7 +127,7 @@
             <div class="row justify-content-center">
                 <div class="col-xl-9 col-lg-10">
                     <p class="text-content fs-6 mb-4">
-                        The brand has developed rapidly in a short period. Our goal is to provide customers with a “reassuring” experience as we always strive to provide the highest quality products. KENKIE’s main focus is customer service, quality, value for money, and innovation from the very start.
+                        The brand has developed rapidly in a short period. Our goal is to provide customers with a â€œreassuringâ€ experience as we always strive to provide the highest quality products. KENKIEâ€™s main focus is customer service, quality, value for money, and innovation from the very start.
                     </p>
 
                     <div class="business-details-card mt-4">

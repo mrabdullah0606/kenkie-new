@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BankOffer;
 use App\Models\Category;
+use App\Models\HeroSlide;
 use App\Models\HomeBanner;
 use App\Models\HomeSetting;
 use App\Models\Product;
@@ -88,6 +89,11 @@ class StorefrontController extends Controller
         $categoriesBySlug = $categories->keyBy('slug');
 
         $homeSettings = HomeSetting::getSettings();
+        try {
+            $heroSlides = HeroSlide::query()->where('is_active', true)->orderBy('position')->get();
+        } catch (\Throwable) {
+            $heroSlides = collect();
+        }
         $homeBanners = HomeBanner::query()->where('is_active', true)->orderBy('position')->get();
         $bankOffers = BankOffer::query()->where('is_active', true)->orderBy('position')->get();
 
@@ -121,6 +127,7 @@ class StorefrontController extends Controller
             'categories' => $categories,
             'categoriesBySlug' => $categoriesBySlug,
             'homeSettings' => $homeSettings,
+            'heroSlides' => $heroSlides,
             'homeBanners' => $homeBanners,
             'bankOffers' => $bankOffers,
             'featuredProducts' => $featuredProducts,

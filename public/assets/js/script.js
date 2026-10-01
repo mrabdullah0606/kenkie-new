@@ -472,7 +472,7 @@ $(document).on("click", ".quick-view-btn", function (e) {
         $("#qvName").text(product.name);
         $("#qvPrice").text("$" + product.price);
         $("#qvStockText").text(product.stock > 0 ? (product.stock + " in stock") : "Out of Stock");
-        $("#qvDescription").text(product.description || "Fresh and high quality product from our store.");
+        $("#qvDescription").html(product.description || "Fresh and high quality product from our store.");
         $("#qvCategory").text(product.category || "General");
         $("#qvSku").text(product.sku || "N/A");
         $("#qvUnit").text(product.unit || "1 Unit");

@@ -1,7 +1,7 @@
 @extends('website.layouts.storefront')
 
 @section('title', 'Privacy Policy - Kenkie')
-@section('favicon', asset('assets/images/favicon/5.png'))
+@section('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))
 @section('body-class', 'theme-color-3 dark')
 
 @section('page-styles')
@@ -103,7 +103,7 @@
 
                         <h3>KENKIE Ltd Privacy Statement</h3>
                         <p>
-                            KENKIE Ltd together with any group companies (“we”, “us”, “our”) are committed to protecting and respecting your privacy. This privacy policy (including any other documents referred to in it) sets out the basis on which we process any personal data that we collect from you or about you that you provide to us or that we receive from other sources. By processing, we mean when we collect, use, store, delete and otherwise manipulate or access personal data.
+                            KENKIE Ltd together with any group companies (â€œweâ€, â€œusâ€, â€œourâ€) are committed to protecting and respecting your privacy. This privacy policy (including any other documents referred to in it) sets out the basis on which we process any personal data that we collect from you or about you that you provide to us or that we receive from other sources. By processing, we mean when we collect, use, store, delete and otherwise manipulate or access personal data.
                         </p>
                         <p>
                             Nonetheless, including as a result of using our website, our apps, if we ask you to hand information from which you can be identified.
@@ -119,7 +119,7 @@
 
                         <h3>The Data Controller</h3>
                         <p>
-                            KENKIE Limited is registered as a data controller with the Information Commissioner’s Office under Company registration number: <strong>11147305</strong>.
+                            KENKIE Limited is registered as a data controller with the Information Commissionerâ€™s Office under Company registration number: <strong>11147305</strong>.
                         </p>
 
                         <h3>The Data Protection Lead for KENKIE Limited</h3>
@@ -144,7 +144,7 @@
                             We use Google Analytics on our website to understand how you engage and interact with it. For information on how Google Analytics collects and processes data using cookies, please visit <a href="https://www.google.com/policies/privacy/partners/" target="_blank" rel="noopener noreferrer" class="theme-color">www.google.com/policies/privacy/partners/</a>. You can opt out of Google Analytics tracking by visiting: <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" class="theme-color">tools.google.com/dlpage/gaoptout</a>.
                         </p>
                         <p>
-                            <strong>Website Links</strong> – our Site may, from time to time, contain links to and from the websites of third parties. Please note that if you follow a link to any of these websites, such websites will apply different terms to the collection and privacy of your personal data and we do not accept any responsibility or liability for these policies. When you leave our Site, we encourage you to read the privacy notice/policy of every website you visit.
+                            <strong>Website Links</strong> â€“ our Site may, from time to time, contain links to and from the websites of third parties. Please note that if you follow a link to any of these websites, such websites will apply different terms to the collection and privacy of your personal data and we do not accept any responsibility or liability for these policies. When you leave our Site, we encourage you to read the privacy notice/policy of every website you visit.
                         </p>
 
                         <h3>Personal Information We Collect or Obtain About You</h3>

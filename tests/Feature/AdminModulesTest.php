@@ -44,7 +44,7 @@ it('allows admin to manage categories and upload category image', function () {
         ->assertOk()
         ->assertViewIs('admin.categories.index');
 
-    $file = UploadedFile::fake()->image('category_patio.png');
+    $file = UploadedFile::fake()->create('category_patio.png', 100, 'image/png');
 
     // Create & Store with image file
     $this->actingAs($admin)
@@ -89,9 +89,9 @@ it('allows admin to create products with rich text description and uploaded imag
     $admin = User::factory()->admin()->create();
     $category = Category::factory()->create();
 
-    $mainImage = UploadedFile::fake()->image('product_main.png');
-    $gallery1 = UploadedFile::fake()->image('gallery1.png');
-    $gallery2 = UploadedFile::fake()->image('gallery2.png');
+    $mainImage = UploadedFile::fake()->create('product_main.png', 100, 'image/png');
+    $gallery1 = UploadedFile::fake()->create('gallery1.png', 100, 'image/png');
+    $gallery2 = UploadedFile::fake()->create('gallery2.png', 100, 'image/png');
 
     $this->actingAs($admin)
         ->post(route('admin.products.store'), [
@@ -225,7 +225,7 @@ it('allows admin to manage homepage hero content and promo banner cards', functi
         ->assertViewIs('admin.home.index')
         ->assertSeeText('Homepage Content & Banners');
 
-    $heroImage = UploadedFile::fake()->image('custom_hero.jpg', 1920, 650);
+    $heroImage = UploadedFile::fake()->create('custom_hero.jpg', 100, 'image/jpeg');
 
     // Update Hero Banner
     $this->actingAs($admin)
@@ -247,7 +247,7 @@ it('allows admin to manage homepage hero content and promo banner cards', functi
     expect($setting->hero_image)->toStartWith('storage/banners/');
 
     // Store Promo Banner Card
-    $bannerImage = UploadedFile::fake()->image('promo_tech.jpg', 600, 400);
+    $bannerImage = UploadedFile::fake()->create('promo_tech.jpg', 100, 'image/jpeg');
     $this->actingAs($admin)
         ->post(route('admin.home.banners.store'), [
             'title' => 'Cutting-Edge Electronics',

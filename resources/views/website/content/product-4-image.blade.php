@@ -1,7 +1,7 @@
 @extends('website.layouts.storefront')
 
 @section('title', $product->name)
-@section('favicon', asset('assets/images/favicon/5.png'))
+@section('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))
 @section('body-class', 'theme-color-3 dark')
 @section('page-styles')
     <link rel="preconnect" href="https://fonts.gstatic.com">

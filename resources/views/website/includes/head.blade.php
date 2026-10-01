@@ -5,7 +5,8 @@
 <meta name="description" content="Fastkart">
 <meta name="keywords" content="Fastkart">
 <meta name="author" content="Fastkart">
-<link rel="icon" href="@yield('favicon', asset('assets/images/favicon/5.png'))" type="image/x-icon">
+<link rel="icon" href="@yield('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))" type="image/png">
+<link rel="apple-touch-icon" href="{{ asset('assets/images/logo/kenkie-favicon-180.png') }}">
 <title>@yield('title', config('app.name'))</title>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -293,6 +294,45 @@ header.header-3 .sticky-header {
 .mobile-search-btn:hover,
 .mobile-search-btn:active {
     background: #16a34a !important;
+}
+
+@media (max-width: 360px) {
+    .navbar-top {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+    }
+    .nav-logo img {
+        max-height: 26px !important;
+        max-width: 105px !important;
+    }
+    .mobile-header-right {
+        gap: 5px !important;
+    }
+    .mobile-header-icon {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 15px !important;
+    }
+    .mobile-search-form {
+        height: 38px !important;
+        padding: 2px 3px 2px 10px !important;
+    }
+    .mobile-search-prefix {
+        font-size: 15px !important;
+        margin-right: 4px !important;
+    }
+    .mobile-search-input {
+        font-size: 12.5px !important;
+    }
+    .mobile-search-input::placeholder {
+        font-size: 12px !important;
+    }
+    .mobile-search-btn {
+        height: 30px !important;
+        min-height: 30px !important;
+        padding: 0 11px !important;
+        font-size: 12px !important;
+    }
 }
 /* Bank & Wallet Offers Equal Sizing & Alignment */
 .bank-section {

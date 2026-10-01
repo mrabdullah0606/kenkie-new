@@ -4,8 +4,8 @@
 <meta name="csrf-token" content="{{ csrf_token() }}">
 <meta name="description" content="Kenkie Admin Dashboard">
 <meta name="author" content="Kenkie">
-<link rel="icon" href="{{ asset('assets/images/favicon/5.png') }}" type="image/x-icon">
-<link rel="shortcut icon" href="{{ asset('assets/images/favicon/5.png') }}" type="image/x-icon">
+<link rel="icon" href="{{ asset('assets/images/logo/kenkie-favicon-32.png') }}" type="image/png">
+<link rel="shortcut icon" href="{{ asset('assets/images/logo/kenkie-favicon-32.png') }}" type="image/png">
 <title>@yield('title', 'Admin Dashboard') | Kenkie</title>
 
 <!-- Google font-->

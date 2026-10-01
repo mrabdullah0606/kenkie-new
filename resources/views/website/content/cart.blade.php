@@ -1,7 +1,7 @@
 @extends('website.layouts.storefront')
 
 @section('title', 'Your cart')
-@section('favicon', asset('assets/images/favicon/5.png'))
+@section('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))
 @section('body-class', 'theme-color-3 dark')
 
 @section('page-styles')
@@ -230,7 +230,7 @@
                                                             </h6>
                                                             <div class="d-flex flex-wrap align-items-center gap-2 text-muted small">
                                                                 <span>Sold By: <strong class="text-secondary">{{ $product->category?->name ?? 'Kenkie' }}</strong></span>
-                                                                <span>•</span>
+                                                                <span>â€¢</span>
                                                                 <span>Unit: {{ $product->unit }}</span>
                                                             </div>
                                                         </div>

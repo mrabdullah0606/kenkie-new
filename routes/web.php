@@ -46,6 +46,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::post('/home-content/banners', [AdminHomeController::class, 'storeBanner'])->name('home.banners.store');
     Route::put('/home-content/banners/{banner}', [AdminHomeController::class, 'updateBanner'])->name('home.banners.update');
     Route::delete('/home-content/banners/{banner}', [AdminHomeController::class, 'destroyBanner'])->name('home.banners.destroy');
+    Route::post('/home-content/slides', [AdminHomeController::class, 'storeSlide'])->name('home.slides.store');
+    Route::put('/home-content/slides/{slide}', [AdminHomeController::class, 'updateSlide'])->name('home.slides.update');
+    Route::delete('/home-content/slides/{slide}', [AdminHomeController::class, 'destroySlide'])->name('home.slides.destroy');
     Route::resource('offers', AdminBankOfferController::class)->except('show');
     Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');

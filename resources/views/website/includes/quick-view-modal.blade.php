@@ -33,8 +33,8 @@
                             </div>
 
                             <div class="product-detail mb-3">
-                                <h4 class="mb-1">Product Details :</h4>
-                                <p class="text-content" id="qvDescription">Fresh and high quality product from our store.</p>
+                                <h4 class="mb-2">Product Details :</h4>
+                                <div class="text-content product-description-html" id="qvDescription" style="max-height: 160px; overflow-y: auto; font-size: 14px; line-height: 1.6;">Fresh and high quality product from our store.</div>
                             </div>
 
                             <ul class="brand-list list-unstyled mb-3">

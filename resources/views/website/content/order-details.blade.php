@@ -1,7 +1,7 @@
 @extends('website.layouts.storefront')
 
 @section('title', 'Order #' . strtoupper(substr($order->uuid, 0, 8)) . ' - Kenkie')
-@section('favicon', asset('assets/images/favicon/5.png'))
+@section('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))
 @section('body-class', 'theme-color-3 dark')
 
 @section('body')
