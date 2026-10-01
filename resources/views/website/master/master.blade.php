@@ -123,6 +123,22 @@
             box-shadow: 0 6px 18px rgba(34, 197, 94, 0.4) !important;
             transform: translateY(-50%) scale(1.08) !important;
         }
+        .hero-arrow::before,
+        .hero-arrow::after,
+        .hero-arrow:hover::before,
+        .hero-arrow:hover::after,
+        .hero-arrow:focus::before,
+        .hero-arrow:focus::after {
+            display: none !important;
+            content: none !important;
+            opacity: 0 !important;
+        }
+        .hero-arrow i {
+            font-size: 16px !important;
+            line-height: 1 !important;
+            display: inline-block !important;
+            margin: 0 !important;
+        }
         .hero-prev {
             left: 24px !important;
         }
