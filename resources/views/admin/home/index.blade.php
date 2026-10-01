@@ -317,17 +317,17 @@
 <!-- Add Banner Modal -->
 <div class="modal fade" id="addBannerModal" tabindex="-1" aria-labelledby="addBannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content shadow-lg border-0 rounded-4">
-            <form method="POST" action="{{ route('admin.home.banners.store') }}" enctype="multipart/form-data">
+        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+            <form method="POST" action="{{ route('admin.home.banners.store') }}" enctype="multipart/form-data" class="d-flex flex-column h-100 m-0">
                 @csrf
-                <div class="modal-header bg-light border-bottom px-4 py-3">
+                <div class="modal-header bg-light border-bottom px-4 py-3 flex-shrink-0">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fa-solid fa-plus text-primary fs-5"></i>
                         <h5 class="modal-title fw-bold mb-0" id="addBannerModalLabel">Add Promo Banner Card</h5>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
+                <div class="modal-body p-4" style="max-height: calc(85vh - 140px); overflow-y: auto;">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
@@ -356,7 +356,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top px-4 py-3">
+                <div class="modal-footer bg-light border-top px-4 py-3 flex-shrink-0">
                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary px-4 fw-semibold">
                         <i class="fa-solid fa-plus me-1"></i> Create Card
@@ -371,18 +371,18 @@
 @foreach ($slides as $slide)
     <div class="modal fade" id="editSlideModal{{ $slide->id }}" tabindex="-1" aria-labelledby="editSlideModalLabel{{ $slide->id }}" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-            <div class="modal-content shadow-lg border-0 rounded-4">
-                <form method="POST" action="{{ route('admin.home.slides.update', $slide) }}" enctype="multipart/form-data">
+            <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+                <form method="POST" action="{{ route('admin.home.slides.update', $slide) }}" enctype="multipart/form-data" class="d-flex flex-column h-100 m-0">
                     @csrf
                     @method('PUT')
-                    <div class="modal-header bg-light border-bottom px-4 py-3">
+                    <div class="modal-header bg-light border-bottom px-4 py-3 flex-shrink-0">
                         <div class="d-flex align-items-center gap-2">
                             <i class="fa-solid fa-pen-to-square text-primary fs-5"></i>
                             <h5 class="modal-title fw-bold mb-0" id="editSlideModalLabel{{ $slide->id }}">Edit Hero Slide #{{ $slide->position + 1 }}</h5>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body p-4">
+                    <div class="modal-body p-4" style="max-height: calc(85vh - 140px); overflow-y: auto;">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold">Badge / Tagline</label>
@@ -430,7 +430,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light border-top px-4 py-3">
+                    <div class="modal-footer bg-light border-top px-4 py-3 flex-shrink-0">
                         <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary px-4 fw-semibold">
                             <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
@@ -445,17 +445,17 @@
 <!-- Add Slide Modal -->
 <div class="modal fade" id="addSlideModal" tabindex="-1" aria-labelledby="addSlideModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-        <div class="modal-content shadow-lg border-0 rounded-4">
-            <form method="POST" action="{{ route('admin.home.slides.store') }}" enctype="multipart/form-data">
+        <div class="modal-content shadow-lg border-0 rounded-4 overflow-hidden">
+            <form method="POST" action="{{ route('admin.home.slides.store') }}" enctype="multipart/form-data" class="d-flex flex-column h-100 m-0">
                 @csrf
-                <div class="modal-header bg-light border-bottom px-4 py-3">
+                <div class="modal-header bg-light border-bottom px-4 py-3 flex-shrink-0">
                     <div class="d-flex align-items-center gap-2">
                         <i class="fa-solid fa-plus text-primary fs-5"></i>
                         <h5 class="modal-title fw-bold mb-0" id="addSlideModalLabel">Add New Hero Slider Slide</h5>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
+                <div class="modal-body p-4" style="max-height: calc(85vh - 140px); overflow-y: auto;">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Badge / Tagline</label>
@@ -492,7 +492,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer bg-light border-top px-4 py-3">
+                <div class="modal-footer bg-light border-top px-4 py-3 flex-shrink-0">
                     <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary px-4 fw-semibold">
                         <i class="fa-solid fa-plus me-1"></i> Add Slide
@@ -503,6 +503,33 @@
     </div>
 </div>
 @endsection
+
+@push('styles')
+<style>
+    .modal-dialog-scrollable .modal-content {
+        max-height: 88vh !important;
+        display: flex !important;
+        flex-direction: column !important;
+        overflow: hidden !important;
+    }
+    .modal-dialog-scrollable form {
+        display: flex !important;
+        flex-direction: column !important;
+        max-height: 88vh !important;
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+    .modal-dialog-scrollable .modal-body {
+        overflow-y: auto !important;
+        max-height: calc(88vh - 135px) !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    .modal-dialog-scrollable .modal-header,
+    .modal-dialog-scrollable .modal-footer {
+        flex-shrink: 0 !important;
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script>
