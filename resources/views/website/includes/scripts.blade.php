@@ -50,7 +50,7 @@
     <script src="{{ asset('assets/js/custom-wow.js') }}"></script>
 
     <!-- script js -->
-    <script src="{{ asset('assets/js/script.js') }}"></script>
+    <script src="{{ asset('assets/js/script.js') }}?v=1.2"></script>
 
     <!-- Live Search Js -->
     <script src="{{ asset('assets/js/live-search.js') }}"></script>

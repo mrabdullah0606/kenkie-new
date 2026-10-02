@@ -472,7 +472,11 @@ $(document).on("click", ".quick-view-btn", function (e) {
         $("#qvName").text(product.name);
         $("#qvPrice").text("$" + product.price);
         $("#qvStockText").text(product.stock > 0 ? (product.stock + " in stock") : "Out of Stock");
-        $("#qvDescription").html(product.description || "Fresh and high quality product from our store.");
+        var descRaw = product.description || "Fresh and high quality product from our store.";
+        var decodeHelper = document.createElement("textarea");
+        decodeHelper.innerHTML = descRaw;
+        var decodedDesc = decodeHelper.value;
+        $("#qvDescription").html(decodedDesc);
         $("#qvCategory").text(product.category || "General");
         $("#qvSku").text(product.sku || "N/A");
         $("#qvUnit").text(product.unit || "1 Unit");
