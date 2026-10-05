@@ -368,7 +368,7 @@
             <!-- FULL WIDTH ROW: Product Variations Card (Expandable) -->
             <div class="col-12">
                 <div class="card mb-4 shadow-sm border">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 card-header-toggle" data-bs-toggle="collapse" data-bs-target="#variationsCollapse" aria-expanded="true" aria-controls="variationsCollapse">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-3">
                             <span class="rounded-3 bg-primary-subtle text-primary p-2 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                                 <i class="fa-solid fa-layer-group fs-5"></i>
@@ -383,7 +383,7 @@
                                 <small class="text-muted">Manage attributes such as Color, Size, Dimensions, Material with custom SKU, Stock, and Pricing across full width.</small>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation();">
+                        <div class="d-flex align-items-center gap-2">
                             <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1" id="addVariationBtn">
                                 <i class="fa-solid fa-plus"></i> Add Variation
                             </button>
@@ -479,7 +479,7 @@
             <!-- FULL WIDTH ROW: Multiple Buyer Offers (Volume & Tiered Discounts) -->
             <div class="col-12">
                 <div class="card mb-4 shadow-sm border">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 card-header-toggle" data-bs-toggle="collapse" data-bs-target="#offersCollapse" aria-expanded="true" aria-controls="offersCollapse">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-3">
                             <span class="rounded-3 bg-warning-subtle text-warning p-2 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                                 <i class="fa-solid fa-tags fs-5"></i>
@@ -494,7 +494,7 @@
                                 <small class="text-muted">Configure bundle savings such as Buy 2 Get 10% Off or Buy 3+ Get 15% Off with optional start & end dates.</small>
                             </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation();">
+                        <div class="d-flex align-items-center gap-2">
                             <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-semibold d-inline-flex align-items-center gap-1" id="addOfferBtn">
                                 <i class="fa-solid fa-plus"></i> Add Multi-Buy Offer
                             </button>
@@ -578,7 +578,7 @@
             <!-- FULL WIDTH ROW: SEO & Search Engine Optimization Card (Expandable) -->
             <div class="col-12">
                 <div class="card mb-4 shadow-sm border">
-                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 card-header-toggle" data-bs-toggle="collapse" data-bs-target="#seoCollapse" aria-expanded="true" aria-controls="seoCollapse">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div class="d-flex align-items-center gap-3">
                             <span class="rounded-3 bg-info-subtle text-info p-2 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                                 <i class="fa-solid fa-magnifying-glass-chart fs-5"></i>
@@ -588,7 +588,7 @@
                                 <small class="text-muted">Customize search snippet preview, meta title, description, and keywords for search engines.</small>
                             </div>
                         </div>
-                        <div onclick="event.stopPropagation();">
+                        <div>
                             <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#seoCollapse" aria-expanded="true" aria-controls="seoCollapse" title="Click to collapse / expand SEO section">
                                 <i class="fa-solid fa-chevron-down chevron-rotate"></i>
                             </button>
@@ -828,6 +828,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (addVariationBtn && variationsBody) {
         addVariationBtn.addEventListener('click', function() {
+            const variationsCollapse = document.getElementById('variationsCollapse');
+            if (variationsCollapse && !variationsCollapse.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(variationsCollapse);
+                bsCollapse.show();
+            }
+
             if (noVariationsRow) noVariationsRow.remove();
 
             const tr = document.createElement('tr');
@@ -893,6 +899,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (addOfferBtn && offersBody) {
         addOfferBtn.addEventListener('click', function() {
+            const offersCollapse = document.getElementById('offersCollapse');
+            if (offersCollapse && !offersCollapse.classList.contains('show')) {
+                const bsCollapse = bootstrap.Collapse.getOrCreateInstance(offersCollapse);
+                bsCollapse.show();
+            }
+
             if (noOffersRow) noOffersRow.remove();
 
             const tr = document.createElement('tr');
