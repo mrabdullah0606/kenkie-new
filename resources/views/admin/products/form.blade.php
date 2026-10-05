@@ -239,14 +239,23 @@
                             <label class="form-label fw-semibold" for="category_id">Category <span class="text-danger">*</span></label>
                             <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
                                 <option value="">Select a category</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>
-                                        @if ($category->parent)
-                                            &nbsp;&nbsp;↳ {{ $category->parent->name }} &gt; {{ $category->name }}
-                                        @else
-                                            {{ $category->name }} (Main)
-                                        @endif
-                                    </option>
+                                @foreach ($categories as $cat)
+                                    @if ($cat->children && $cat->children->isNotEmpty())
+                                        <optgroup label="{{ $cat->name }}">
+                                            <option value="{{ $cat->id }}" @selected(old('category_id', $product->category_id) == $cat->id)>
+                                                {{ $cat->name }} (Main Category)
+                                            </option>
+                                            @foreach ($cat->children as $child)
+                                                <option value="{{ $child->id }}" @selected(old('category_id', $product->category_id) == $child->id)>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp;↳ {{ $child->name }}
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @else
+                                        <option value="{{ $cat->id }}" @selected(old('category_id', $product->category_id) == $cat->id)>
+                                            {{ $cat->name }}
+                                        </option>
+                                    @endif
                                 @endforeach
                             </select>
                             @error('category_id')

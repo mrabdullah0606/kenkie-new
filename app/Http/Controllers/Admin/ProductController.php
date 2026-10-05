@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -63,7 +64,7 @@ class ProductController extends Controller
     {
         return view('admin.products.form', [
             'product' => new Product,
-            'categories' => Category::query()->with('parent')->where('is_active', true)->orderBy('name')->get(),
+            'categories' => $this->getHierarchicalCategories(),
         ]);
     }
 
@@ -84,7 +85,7 @@ class ProductController extends Controller
 
         return view('admin.products.form', [
             'product' => $product,
-            'categories' => Category::query()->with('parent')->where('is_active', true)->orderBy('name')->get(),
+            'categories' => $this->getHierarchicalCategories(),
         ]);
     }
 
@@ -308,5 +309,19 @@ class ProductController extends Controller
         $validated['is_active'] = $request->boolean('is_active', $product?->is_active ?? true);
 
         return $validated;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    private function getHierarchicalCategories()
+    {
+        return Category::query()
+            ->main()
+            ->with(['children' => fn ($q) => $q->where('is_active', true)->orderBy('position')->orderBy('name')])
+            ->where('is_active', true)
+            ->orderBy('position')
+            ->orderBy('name')
+            ->get();
     }
 }
