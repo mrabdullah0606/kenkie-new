@@ -105,9 +105,29 @@
                                                 <a class="dropdown-item" href="{{ route('shop.category') }}">All Products</a>
                                             </li>
                                             @foreach ($headerCategories ?? $categories ?? [] as $cat)
-                                                <li>
-                                                    <a class="dropdown-item" href="{{ route('shop.category', ['category' => $cat->slug]) }}">{{ $cat->name }}</a>
-                                                </li>
+                                                @if (isset($cat->children) && $cat->children->isNotEmpty())
+                                                    <li class="dropdown-submenu position-relative">
+                                                        <div class="d-flex align-items-center justify-content-between pe-2">
+                                                            <a class="dropdown-item flex-grow-1" href="{{ route('shop.category', ['category' => $cat->slug]) }}">{{ $cat->name }}</a>
+                                                            <a class="text-muted px-2 py-1" data-bs-toggle="collapse" href="#subcat-{{ $cat->id }}" role="button" aria-expanded="false" title="Expand subcategories">
+                                                                <i class="fa-solid fa-chevron-down" style="font-size: 11px;"></i>
+                                                            </a>
+                                                        </div>
+                                                        <ul class="collapse list-unstyled ps-3 bg-light rounded-2 py-1 mx-2" id="subcat-{{ $cat->id }}">
+                                                            @foreach ($cat->children as $sub)
+                                                                <li>
+                                                                    <a class="dropdown-item py-1 small" href="{{ route('shop.category', ['category' => $sub->slug]) }}">
+                                                                        <i class="fa-solid fa-angle-right me-1 text-muted" style="font-size: 10px;"></i> {{ $sub->name }}
+                                                                    </a>
+                                                                </li>
+                                                            @endforeach
+                                                        </ul>
+                                                    </li>
+                                                @else
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('shop.category', ['category' => $cat->slug]) }}">{{ $cat->name }}</a>
+                                                    </li>
+                                                @endif
                                             @endforeach
                                         </ul>
                                     </li>

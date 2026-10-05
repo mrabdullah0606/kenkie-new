@@ -121,9 +121,51 @@
 
                         <h2 class="name fw-bold">{{ $product->name }}</h2>
 
-                        <div class="price-rating my-3">
-                            <h3 class="theme-color price fs-2 fw-bold">${{ number_format($product->price, 2) }}</h3>
+                        <div class="price-rating my-3 d-flex align-items-center flex-wrap gap-3">
+                            <h3 class="theme-color price fs-2 fw-bold mb-0" id="displayProductPrice">
+                                ${{ number_format((float) $product->price, 2) }}
+                            </h3>
+                            @if ($product->regular_price && (float) $product->regular_price > (float) $product->price)
+                                <del class="text-muted fs-5" id="displayRegularPrice">
+                                    ${{ number_format((float) $product->regular_price, 2) }}
+                                </del>
+                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 fs-6" id="displayDiscountBadge">
+                                    {{ $product->discount_percentage }}% OFF
+                                </span>
+                            @endif
+                            @if ($product->size_chart)
+                                <button type="button" class="btn btn-sm btn-outline-dark ms-auto d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#sizeChartModal">
+                                    <i class="fa-solid fa-ruler-combined"></i> Size Chart
+                                </button>
+                            @endif
                         </div>
+
+                        @if ($product->activeVariations && $product->activeVariations->isNotEmpty())
+                            <div class="product-variations-box bg-light rounded-3 p-3 my-3 border">
+                                <label class="fw-bold small text-dark d-block mb-2">Available Options & Variations:</label>
+                                <div class="d-flex flex-wrap gap-2" id="variationsContainer">
+                                    @foreach ($product->activeVariations as $var)
+                                        @php
+                                            $varPrice = $var->sale_price ?? $var->regular_price ?? $product->price;
+                                            $varLabel = $var->name ?: trim(($var->color ? $var->color . ' ' : '') . ($var->size ?: '') . ($var->material ? ' (' . $var->material . ')' : ''));
+                                        @endphp
+                                        <button type="button" 
+                                            class="btn btn-sm btn-outline-secondary variation-pill-btn {{ $loop->first ? 'active' : '' }}" 
+                                            data-price="{{ number_format((float) $varPrice, 2) }}"
+                                            data-regular="{{ $var->regular_price ? number_format((float) $var->regular_price, 2) : '' }}"
+                                            data-discount="{{ $var->discount_percentage }}"
+                                            data-sku="{{ $var->sku ?: $product->sku }}"
+                                            data-stock="{{ $var->stock }}"
+                                            data-name="{{ $varLabel }}">
+                                            {{ $varLabel }}
+                                            @if ($varPrice)
+                                                <span class="ms-1 small fw-bold">(${{ number_format((float) $varPrice, 2) }})</span>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
 
                         <div class="product-contain text-content mb-3 rich-description-area">
                             {!! $product->description ?: '<p>Fresh and premium quality product delivered directly to your door.</p>' !!}
@@ -132,9 +174,9 @@
                         <div class="product-info border-top border-bottom py-3 my-3">
                             <ul class="product-info-list list-unstyled mb-0 d-flex flex-column gap-2">
                                 <li><strong>Category:</strong> <a href="{{ route('shop.category', ['category' => $product->category->slug]) }}">{{ $product->category->name }}</a></li>
-                                <li><strong>SKU:</strong> {{ $product->sku }}</li>
+                                <li><strong>SKU:</strong> <span id="displaySku">{{ $product->sku }}</span></li>
                                 <li><strong>Unit:</strong> {{ $product->unit }}</li>
-                                <li><strong>Stock:</strong> {{ $product->stock }} items</li>
+                                <li><strong>Stock:</strong> <span id="displayStock">{{ $product->stock }}</span> items</li>
                             </ul>
                         </div>
 
@@ -262,6 +304,25 @@
     @include('website.includes.home-footer')
     <!-- Footer Section End -->
 
+    <!-- Size Chart Modal -->
+    @if ($product->size_chart)
+        <div class="modal fade" id="sizeChartModal" tabindex="-1" aria-labelledby="sizeChartModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="sizeChartModalLabel">
+                            <i class="fa-solid fa-ruler-combined me-2 text-primary"></i> Size Guide: {{ $product->name }}
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center p-4">
+                        <img src="{{ asset($product->size_chart) }}" class="img-fluid rounded border shadow-sm" alt="Size Chart">
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Tap to top start -->
     <div class="theme-option">
         <div class="back-to-top">
@@ -293,5 +354,44 @@
                 element.style.borderColor = '#22c55e';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Interactive Variations Switching
+            const variationButtons = document.querySelectorAll('.variation-pill-btn');
+            const displayPrice = document.getElementById('displayProductPrice');
+            const displayRegular = document.getElementById('displayRegularPrice');
+            const displayDiscount = document.getElementById('displayDiscountBadge');
+            const displaySku = document.getElementById('displaySku');
+            const displayStock = document.getElementById('displayStock');
+
+            variationButtons.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    variationButtons.forEach(b => b.classList.remove('active', 'btn-secondary'));
+                    this.classList.add('active');
+
+                    if (this.dataset.price && displayPrice) {
+                        displayPrice.textContent = '$' + this.dataset.price;
+                    }
+                    if (this.dataset.regular && displayRegular) {
+                        displayRegular.textContent = '$' + this.dataset.regular;
+                        displayRegular.classList.remove('d-none');
+                    } else if (displayRegular) {
+                        displayRegular.classList.add('d-none');
+                    }
+                    if (this.dataset.discount > 0 && displayDiscount) {
+                        displayDiscount.textContent = this.dataset.discount + '% OFF';
+                        displayDiscount.classList.remove('d-none');
+                    } else if (displayDiscount) {
+                        displayDiscount.classList.add('d-none');
+                    }
+                    if (this.dataset.sku && displaySku) {
+                        displaySku.textContent = this.dataset.sku;
+                    }
+                    if (this.dataset.stock && displayStock) {
+                        displayStock.textContent = this.dataset.stock;
+                    }
+                });
+            });
+        });
     </script>
 @endsection

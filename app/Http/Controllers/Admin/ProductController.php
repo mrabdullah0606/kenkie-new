@@ -14,7 +14,7 @@ class ProductController extends Controller
 {
     public function index(Request $request): View
     {
-        $query = Product::query()->with('category');
+        $query = Product::query()->with(['category', 'variations']);
 
         $search = $request->string('search')->trim()->value();
         if (! empty($search)) {
@@ -36,6 +36,8 @@ class ProductController extends Controller
                 $query->where('is_active', true);
             } elseif ($status === 'inactive') {
                 $query->where('is_active', false);
+            } elseif ($status === 'low_stock') {
+                $query->where('stock', '<=', 5);
             } elseif ($status === 'hot_deal') {
                 $query->where('is_hot_deal', true);
             } elseif ($status === 'top_deal') {
@@ -45,12 +47,15 @@ class ProductController extends Controller
             }
         }
 
+        $lowStockCount = Product::query()->where('stock', '<=', 5)->count();
+
         return view('admin.products.index', [
             'products' => $query->latest()->paginate(20)->withQueryString(),
-            'categories' => Category::query()->orderBy('name')->get(),
+            'categories' => Category::query()->with('parent')->orderBy('name')->get(),
             'search' => $search,
             'selectedCategory' => $categoryId,
             'selectedStatus' => $status,
+            'lowStockCount' => $lowStockCount,
         ]);
     }
 
@@ -58,30 +63,72 @@ class ProductController extends Controller
     {
         return view('admin.products.form', [
             'product' => new Product,
-            'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(),
+            'categories' => Category::query()->with('parent')->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
-        Product::query()->create($this->validatedData($request));
+        $data = $this->validatedData($request);
+        $product = Product::query()->create($data);
+
+        $this->syncVariations($product, $request->input('variations', []));
 
         return redirect()->route('admin.products.index')->with('status', 'Product created successfully.');
     }
 
     public function edit(Product $product): View
     {
+        $product->load('variations');
+
         return view('admin.products.form', [
             'product' => $product,
-            'categories' => Category::query()->where('is_active', true)->orderBy('name')->get(),
+            'categories' => Category::query()->with('parent')->where('is_active', true)->orderBy('name')->get(),
         ]);
     }
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        $product->update($this->validatedData($request, $product));
+        $data = $this->validatedData($request, $product);
+        $product->update($data);
+
+        $this->syncVariations($product, $request->input('variations', []));
 
         return redirect()->route('admin.products.index')->with('status', 'Product updated successfully.');
+    }
+
+    public function duplicate(Product $product): RedirectResponse
+    {
+        $product->load('variations');
+
+        $clone = $product->replicate(['slug', 'sku']);
+        $clone->name = $product->name.' (Copy)';
+        $clone->slug = $product->slug.'-copy-'.time();
+        $clone->sku = $product->sku.'-COPY-'.rand(100, 999);
+        $clone->is_active = false;
+        $clone->save();
+
+        foreach ($product->variations as $variation) {
+            $cloneVariation = $variation->replicate(['sku']);
+            $cloneVariation->product_id = $clone->id;
+            if ($variation->sku) {
+                $cloneVariation->sku = $variation->sku.'-COPY-'.rand(10, 99);
+            }
+            $cloneVariation->save();
+        }
+
+        return redirect()->route('admin.products.edit', $clone)->with('status', 'Product duplicated successfully. You are now editing the duplicate.');
+    }
+
+    public function toggleStatus(Product $product): RedirectResponse
+    {
+        $product->update([
+            'is_active' => ! $product->is_active,
+        ]);
+
+        $statusMsg = $product->is_active ? 'Product is now active.' : 'Product is now hidden/inactive.';
+
+        return back()->with('status', $statusMsg);
     }
 
     public function destroy(Product $product): RedirectResponse
@@ -89,6 +136,50 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect()->route('admin.products.index')->with('status', 'Product deleted successfully.');
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $variationsData
+     */
+    private function syncVariations(Product $product, array $variationsData): void
+    {
+        $validVariationIds = [];
+
+        foreach ($variationsData as $row) {
+            if (empty($row['name']) && empty($row['size']) && empty($row['color']) && empty($row['sku'])) {
+                continue;
+            }
+
+            $variationAttributes = [
+                'name' => $row['name'] ?? null,
+                'color' => $row['color'] ?? null,
+                'size' => $row['size'] ?? null,
+                'dimensions' => $row['dimensions'] ?? null,
+                'material' => $row['material'] ?? null,
+                'sku' => $row['sku'] ?? null,
+                'cost_price' => ! empty($row['cost_price']) ? (float) $row['cost_price'] : null,
+                'regular_price' => ! empty($row['regular_price']) ? (float) $row['regular_price'] : null,
+                'sale_price' => ! empty($row['sale_price']) ? (float) $row['sale_price'] : null,
+                'stock' => isset($row['stock']) ? (int) $row['stock'] : 0,
+                'is_active' => isset($row['is_active']) ? (bool) $row['is_active'] : true,
+            ];
+
+            if (! empty($row['id'])) {
+                $existing = $product->variations()->find($row['id']);
+                if ($existing) {
+                    $existing->update($variationAttributes);
+                    $validVariationIds[] = $existing->id;
+
+                    continue;
+                }
+            }
+
+            $created = $product->variations()->create($variationAttributes);
+            $validVariationIds[] = $created->id;
+        }
+
+        // Delete any variations that were removed in the form
+        $product->variations()->whereNotIn('id', $validVariationIds)->delete();
     }
 
     /**
@@ -103,11 +194,15 @@ class ProductController extends Controller
             'sku' => ['required', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($product)],
             'description' => ['nullable', 'string', 'max:50000'],
             'price' => ['required', 'numeric', 'min:0.01', 'max:99999999.99'],
+            'regular_price' => ['nullable', 'numeric', 'min:0.01', 'max:99999999.99'],
+            'cost_price' => ['nullable', 'numeric', 'min:0.01', 'max:99999999.99'],
             'stock' => ['required', 'integer', 'min:0', 'max:4294967295'],
             'unit' => ['required', 'string', 'max:80'],
             'image' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'image', 'max:10240'],
+            'size_chart_file' => ['nullable', 'image', 'max:10240'],
             'remove_primary_image' => ['sometimes', 'boolean'],
+            'remove_size_chart' => ['sometimes', 'boolean'],
             'keep_gallery_images' => ['nullable', 'array'],
             'keep_gallery_images.*' => ['string'],
             'gallery_files' => ['nullable', 'array'],
@@ -116,6 +211,9 @@ class ProductController extends Controller
             'is_top_deal' => ['sometimes', 'boolean'],
             'is_hot_deal' => ['sometimes', 'boolean'],
             'is_active' => ['sometimes', 'boolean'],
+            'meta_title' => ['nullable', 'string', 'max:255'],
+            'meta_description' => ['nullable', 'string', 'max:1000'],
+            'meta_keywords' => ['nullable', 'string', 'max:500'],
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -123,6 +221,13 @@ class ProductController extends Controller
             $validated['image'] = 'storage/'.$path;
         } elseif ($request->boolean('remove_primary_image')) {
             $validated['image'] = null;
+        }
+
+        if ($request->hasFile('size_chart_file')) {
+            $path = $request->file('size_chart_file')->store('products/size_charts', 'public');
+            $validated['size_chart'] = 'storage/'.$path;
+        } elseif ($request->boolean('remove_size_chart')) {
+            $validated['size_chart'] = null;
         }
 
         // Gallery handling: keep chosen existing images and append newly uploaded files
@@ -148,7 +253,7 @@ class ProductController extends Controller
 
         $validated['images'] = $galleryPaths;
 
-        unset($validated['image_file'], $validated['gallery_files'], $validated['remove_primary_image'], $validated['keep_gallery_images']);
+        unset($validated['image_file'], $validated['size_chart_file'], $validated['gallery_files'], $validated['remove_primary_image'], $validated['remove_size_chart'], $validated['keep_gallery_images']);
 
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['is_top_deal'] = $request->boolean('is_top_deal');

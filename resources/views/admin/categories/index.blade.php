@@ -47,6 +47,15 @@
                                         @endif
                                         <div>
                                             <span class="fw-bold text-dark d-block">{{ $category->name }}</span>
+                                            @if ($category->parent)
+                                                <span class="badge bg-secondary-subtle text-secondary border mt-1 small">
+                                                    <i class="fa-solid fa-arrow-turn-up fa-rotate-90 me-1"></i> Sub of: {{ $category->parent->name }}
+                                                </span>
+                                            @else
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1 small">
+                                                    <i class="fa-solid fa-layer-group me-1"></i> Main Category ({{ $category->children_count }} {{ Str::plural('sub-category', $category->children_count) }})
+                                                </span>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

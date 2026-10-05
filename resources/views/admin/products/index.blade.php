@@ -42,6 +42,7 @@
                         <option value="">All Statuses</option>
                         <option value="active" {{ ($selectedStatus ?? '') === 'active' ? 'selected' : '' }}>Active Only</option>
                         <option value="inactive" {{ ($selectedStatus ?? '') === 'inactive' ? 'selected' : '' }}>Hidden / Inactive</option>
+                        <option value="low_stock" {{ ($selectedStatus ?? '') === 'low_stock' ? 'selected' : '' }}>⚠️ Low Stock ({{ $lowStockCount ?? 0 }})</option>
                         <option value="hot_deal" {{ ($selectedStatus ?? '') === 'hot_deal' ? 'selected' : '' }}>🔥 Hot Deals</option>
                         <option value="top_deal" {{ ($selectedStatus ?? '') === 'top_deal' ? 'selected' : '' }}>⚡ Top Deals</option>
                         <option value="featured" {{ ($selectedStatus ?? '') === 'featured' ? 'selected' : '' }}>⭐ Featured</option>
@@ -73,6 +74,11 @@
                 @endif
             </div>
             <div class="d-flex gap-2">
+                @if (($lowStockCount ?? 0) > 0 && ($selectedStatus ?? '') !== 'low_stock')
+                    <a href="{{ route('admin.products.index', ['status' => 'low_stock']) }}" class="btn btn-sm btn-outline-danger">
+                        <i class="fa-solid fa-triangle-exclamation me-1"></i> {{ $lowStockCount }} Low Stock Alert
+                    </a>
+                @endif
                 <a href="{{ route('shop.category') }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                     <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Preview Storefront
                 </a>
@@ -108,21 +114,47 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-light text-dark border">{{ $product->category?->name ?? 'None' }}</span>
+                                    @if ($product->category)
+                                        <span class="badge bg-light text-dark border">
+                                            @if ($product->category->parent)
+                                                {{ $product->category->parent->name }} &gt; {{ $product->category->name }}
+                                            @else
+                                                {{ $product->category->name }}
+                                            @endif
+                                        </span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
                                 </td>
                                 <td>
                                     <code class="text-muted">{{ $product->sku }}</code>
                                 </td>
                                 <td>
-                                    <span class="fw-bold text-success">${{ number_format((float) $product->price, 2) }}</span>
+                                    @if ($product->regular_price && (float) $product->regular_price > (float) $product->price)
+                                        <div>
+                                            <span class="fw-bold text-success">${{ number_format((float) $product->price, 2) }}</span>
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 10px;">-{{ $product->discount_percentage }}%</span>
+                                        </div>
+                                        <del class="text-muted small">${{ number_format((float) $product->regular_price, 2) }}</del>
+                                    @else
+                                        <span class="fw-bold text-dark">${{ number_format((float) $product->price, 2) }}</span>
+                                    @endif
                                 </td>
                                 <td>
-                                    @if ($product->stock > 10)
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">{{ $product->stock }} in stock</span>
-                                    @elseif ($product->stock > 0)
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Low: {{ $product->stock }}</span>
+                                    @if ($product->stock <= 0)
+                                        <span class="badge bg-danger text-white px-2 py-1"><i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock</span>
+                                    @elseif ($product->stock <= 5)
+                                        <span class="badge bg-danger text-white px-2 py-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Low: {{ $product->stock }}</span>
+                                    @elseif ($product->stock <= 15)
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">{{ $product->stock }} left</span>
                                     @else
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">Out of Stock</span>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">{{ $product->stock }} in stock</span>
+                                    @endif
+
+                                    @if ($product->variations && $product->variations->isNotEmpty())
+                                        <small class="d-block text-muted mt-1" style="font-size: 11px;">
+                                            <i class="fa-solid fa-layer-group me-1"></i> {{ $product->variations->count() }} {{ Str::plural('variation', $product->variations->count()) }}
+                                        </small>
                                     @endif
                                 </td>
                                 <td>
@@ -149,17 +181,53 @@
                                     @endif
                                 </td>
                                 <td class="text-end">
-                                    <div class="d-inline-flex gap-2">
-                                        <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary" title="Edit Product">
-                                            <i class="fa-solid fa-pen-to-square"></i>
-                                        </a>
-                                        <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Are you sure you want to delete this product?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Product">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </form>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('products.show', $product->slug) }}" target="_blank">
+                                                    <i class="fa-solid fa-eye me-2 text-info"></i> View in Store
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" href="{{ route('admin.products.edit', $product) }}">
+                                                    <i class="fa-solid fa-pen-to-square me-2 text-primary"></i> Edit Product
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.products.duplicate', $product) }}">
+                                                    @csrf
+                                                    <button type="submit" class="dropdown-item">
+                                                        <i class="fa-solid fa-copy me-2 text-secondary"></i> Duplicate Product
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.products.toggle-status', $product) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit" class="dropdown-item">
+                                                        @if ($product->is_active)
+                                                            <i class="fa-solid fa-eye-slash me-2 text-warning"></i> Set as Inactive / Hide
+                                                        @else
+                                                            <i class="fa-solid fa-circle-check me-2 text-success"></i> Set as Active / Publish
+                                                        @endif
+                                                    </button>
+                                                </form>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form method="POST" action="{{ route('admin.products.destroy', $product) }}" onsubmit="return confirm('Are you sure you want to delete this product? This action cannot be undone.');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="dropdown-item text-danger">
+                                                        <i class="fa-solid fa-trash-can me-2"></i> Delete Product
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>

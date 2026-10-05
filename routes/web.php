@@ -37,8 +37,14 @@ Route::delete('/wishlist/{product:slug}', [WishlistController::class, 'destroy']
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', AdminDashboardController::class)->name('dashboard');
+    Route::post('products/{product}/duplicate', [AdminProductController::class, 'duplicate'])->name('products.duplicate');
+    Route::patch('products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus'])->name('products.toggle-status');
     Route::resource('products', AdminProductController::class)->except('show');
     Route::resource('categories', AdminCategoryController::class)->except('show');
+    Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+    Route::patch('orders/{order}/notes', [AdminOrderController::class, 'updateNotes'])->name('orders.update-notes');
+    Route::patch('orders/{order}/tracking', [AdminOrderController::class, 'updateTracking'])->name('orders.update-tracking');
+    Route::patch('orders/{order}/shipping-address', [AdminOrderController::class, 'updateShippingAddress'])->name('orders.update-shipping-address');
     Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::resource('users', AdminUserController::class)->except('show');
     Route::get('/home-content', [AdminHomeController::class, 'index'])->name('home.index');

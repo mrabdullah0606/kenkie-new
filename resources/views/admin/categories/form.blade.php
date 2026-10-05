@@ -52,6 +52,22 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="parent_id">Parent Category</label>
+                                <select class="form-select @error('parent_id') is-invalid @enderror" id="parent_id" name="parent_id">
+                                    <option value="">None (This is a Main Category)</option>
+                                    @foreach ($parentCategories ?? [] as $parent)
+                                        <option value="{{ $parent->id }}" @selected(old('parent_id', $category->parent_id) == $parent->id)>
+                                            {{ $parent->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Select a parent category to create a sub-category under it, or keep empty for a top-level main category.</small>
+                                @error('parent_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" for="name">Category Name <span class="text-danger">*</span></label>
                                 <input class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name', $category->name) }}" placeholder="e.g. Garden & Patio" required autofocus>

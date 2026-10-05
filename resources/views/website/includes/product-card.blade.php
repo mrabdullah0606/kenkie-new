@@ -10,7 +10,9 @@
                 <li data-bs-toggle="tooltip" data-bs-placement="top" title="Quick View">
                     <a href="javascript:void(0)" class="quick-view-btn" data-bs-toggle="modal" data-bs-target="#view" data-product="{{ json_encode([
                         'name' => $product->name,
-                        'price' => number_format($product->price, 2),
+                        'price' => number_format((float) $product->price, 2),
+                        'regular_price' => $product->regular_price ? number_format((float) $product->regular_price, 2) : null,
+                        'discount_percentage' => $product->discount_percentage,
                         'image' => asset($product->image ?: 'assets/images/furniture/1.png'),
                         'category' => $product->category?->name ?? 'General',
                         'sku' => $product->sku ?? 'N/A',
@@ -55,8 +57,12 @@
                 <h5 class="name">{{ $product->name }}</h5>
             </a>
             <p class="text-content mt-1 mb-2 product-content">{{ $product->unit }} · {{ $product->stock }} in stock</p>
-            <h5 class="price">
-                <span class="theme-color">${{ number_format($product->price, 2) }}</span>
+            <h5 class="price d-flex align-items-center flex-wrap">
+                <span class="theme-color fw-bold">${{ number_format((float) $product->price, 2) }}</span>
+                @if ($product->regular_price && (float) $product->regular_price > (float) $product->price)
+                    <del class="text-muted ms-2 small">${{ number_format((float) $product->regular_price, 2) }}</del>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-2 small" style="font-size: 10px;">-{{ $product->discount_percentage }}%</span>
+                @endif
             </h5>
             <div class="add-to-cart-box bg-white mt-2">
                 <button class="btn btn-add-cart addcart-button" type="button" @disabled($product->stock < 1) data-slug="{{ $product->slug }}">

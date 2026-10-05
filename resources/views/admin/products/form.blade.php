@@ -180,6 +180,162 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Size Chart Card -->
+                <div class="card mb-4 mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0"><i class="fa-solid fa-ruler-combined text-primary me-2"></i>Size Chart</h5>
+                    </div>
+                    <div class="card-body">
+                        <label class="form-label fw-semibold" for="size_chart_file">Upload Size Chart Guide (Optional)</label>
+                        <input class="form-control @error('size_chart_file') is-invalid @enderror" type="file" id="size_chart_file" name="size_chart_file" accept="image/*">
+                        <small class="text-muted d-block mt-1">Upload size reference chart or diagram (PNG, JPG, WEBP, Max 10MB).</small>
+                        @error('size_chart_file')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                        <input type="hidden" name="remove_size_chart" id="remove_size_chart" value="0">
+                        @if ($product->size_chart)
+                            <div class="d-flex align-items-center gap-3 mt-3" id="sizeChartCurrentBox">
+                                <img src="{{ asset($product->size_chart) }}" class="rounded border" style="width: 90px; height: 90px; object-fit: contain;" alt="Size Chart">
+                                <div>
+                                    <span class="fw-semibold text-dark d-block small">Current Size Chart Attached</span>
+                                    <button type="button" class="btn btn-outline-danger btn-sm mt-1" id="removeSizeChartBtn">
+                                        <i class="fa-solid fa-trash-can me-1"></i> Remove Size Chart
+                                    </button>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Product Variations Card -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <h5 class="fw-bold mb-0"><i class="fa-solid fa-layer-group text-primary me-2"></i>Product Variations</h5>
+                            <small class="text-muted">Manage attributes such as Color, Size, Dimensions, Material with custom SKU, Stock, and Pricing.</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="addVariationBtn">
+                            <i class="fa-solid fa-plus me-1"></i> Add Variation
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-bordered align-middle mb-0" id="variationsTable">
+                                <thead class="table-light">
+                                    <tr class="small text-nowrap">
+                                        <th style="min-width: 140px;">Name / Label</th>
+                                        <th style="min-width: 100px;">Color</th>
+                                        <th style="min-width: 90px;">Size</th>
+                                        <th style="min-width: 110px;">Dimensions</th>
+                                        <th style="min-width: 100px;">Material</th>
+                                        <th style="min-width: 110px;">SKU</th>
+                                        <th style="min-width: 100px;">Reg. Price ($)</th>
+                                        <th style="min-width: 100px;">Sale Price ($)</th>
+                                        <th style="min-width: 80px;">Stock</th>
+                                        <th style="min-width: 70px;">Active</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variationsBody">
+                                    @php
+                                        $existingVariations = old('variations', $product->variations ?? collect());
+                                    @endphp
+                                    @forelse ($existingVariations as $index => $variation)
+                                        @php
+                                            $v = is_array($variation) ? (object) $variation : $variation;
+                                        @endphp
+                                        <tr class="variation-row">
+                                            @if (!empty($v->id))
+                                                <input type="hidden" name="variations[{{ $index }}][id]" value="{{ $v->id }}">
+                                            @endif
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][name]" value="{{ $v->name ?? '' }}" placeholder="e.g. Red / XL">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][color]" value="{{ $v->color ?? '' }}" placeholder="e.g. Red">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][size]" value="{{ $v->size ?? '' }}" placeholder="e.g. XL">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][dimensions]" value="{{ $v->dimensions ?? '' }}" placeholder="e.g. 12x24 in">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][material]" value="{{ $v->material ?? '' }}" placeholder="e.g. Cotton">
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][sku]" value="{{ $v->sku ?? '' }}" placeholder="SKU">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.01" class="form-control form-control-sm" name="variations[{{ $index }}][regular_price]" value="{{ $v->regular_price ?? '' }}" placeholder="0.00">
+                                            </td>
+                                            <td>
+                                                <input type="number" step="0.01" class="form-control form-control-sm" name="variations[{{ $index }}][sale_price]" value="{{ $v->sale_price ?? '' }}" placeholder="0.00">
+                                            </td>
+                                            <td>
+                                                <input type="number" min="0" class="form-control form-control-sm" name="variations[{{ $index }}][stock]" value="{{ $v->stock ?? 0 }}">
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="hidden" name="variations[{{ $index }}][is_active]" value="0">
+                                                <input type="checkbox" class="form-check-input" name="variations[{{ $index }}][is_active]" value="1" @checked($v->is_active ?? true)>
+                                            </td>
+                                            <td class="text-center">
+                                                <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-variation-btn" title="Remove Variation">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr id="noVariationsRow">
+                                            <td colspan="11" class="text-center text-muted py-3 small">
+                                                No variations added yet. Click <strong>"Add Variation"</strong> above to configure sizes, colors, or materials.
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEO & Meta Information Card -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="fw-bold mb-0"><i class="fa-solid fa-magnifying-glass-chart text-primary me-2"></i>SEO & Search Engine Optimization</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="meta_title">Meta Title</label>
+                                <input class="form-control @error('meta_title') is-invalid @enderror" id="meta_title" name="meta_title" value="{{ old('meta_title', $product->meta_title) }}" placeholder="Custom browser title (Defaults to Product Name)">
+                                <small class="text-muted">Recommended: Up to 60 characters for optimal Google search appearance.</small>
+                                @error('meta_title')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="meta_description">Meta Description</label>
+                                <textarea class="form-control @error('meta_description') is-invalid @enderror" id="meta_description" name="meta_description" rows="3" placeholder="Brief summary of the product for search engine snippets">{{ old('meta_description', $product->meta_description) }}</textarea>
+                                <small class="text-muted">Recommended: Up to 160 characters.</small>
+                                @error('meta_description')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="meta_keywords">Meta Keywords</label>
+                                <input class="form-control @error('meta_keywords') is-invalid @enderror" id="meta_keywords" name="meta_keywords" value="{{ old('meta_keywords', $product->meta_keywords) }}" placeholder="e.g. bedding, organic cotton, sheets, luxury home">
+                                <small class="text-muted">Comma-separated keywords.</small>
+                                @error('meta_keywords')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Right Column: Category, Pricing, Stock & Status -->
@@ -194,7 +350,13 @@
                             <select class="form-select @error('category_id') is-invalid @enderror" id="category_id" name="category_id" required>
                                 <option value="">Select a category</option>
                                 @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>{{ $category->name }}</option>
+                                    <option value="{{ $category->id }}" @selected(old('category_id', $product->category_id) == $category->id)>
+                                        @if ($category->parent)
+                                            &nbsp;&nbsp;↳ {{ $category->parent->name }} &gt; {{ $category->name }}
+                                        @else
+                                            {{ $category->name }} (Main)
+                                        @endif
+                                    </option>
                                 @endforeach
                             </select>
                             @error('category_id')
@@ -202,20 +364,60 @@
                             @enderror
                         </div>
 
+                        <!-- Regular Price (Original / Strike-through) -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="price">Price ($ USD) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="regular_price">Regular / Compare Price ($ USD)</label>
                             <div class="input-group">
                                 <span class="input-group-text">$</span>
-                                <input class="form-control @error('price') is-invalid @enderror" id="price" type="number" name="price" min="0.01" step="0.01" value="{{ old('price', $product->price) }}" placeholder="0.00" required>
+                                <input class="form-control @error('regular_price') is-invalid @enderror" id="regular_price" type="number" name="regular_price" min="0.01" step="0.01" value="{{ old('regular_price', $product->regular_price) }}" placeholder="e.g. 59.99">
+                            </div>
+                            <small class="text-muted">Original list price before discount (shown struck through).</small>
+                            @error('regular_price')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Sale Price (Active Selling Price) -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="price">Sale / Selling Price ($ USD) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control @error('price') is-invalid @enderror" id="price" type="number" name="price" min="0.01" step="0.01" value="{{ old('price', $product->price) }}" placeholder="e.g. 44.99" required>
+                            </div>
+                            <div id="discountBadgeContainer" class="mt-2 {{ ($product->regular_price && $product->price && $product->regular_price > $product->price) ? '' : 'd-none' }}">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1" id="discountBadgeText">
+                                    <i class="fa-solid fa-tag me-1"></i>
+                                    Discount: {{ $product->discount_percentage }}% OFF
+                                </span>
                             </div>
                             @error('price')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
 
+                        <!-- Cost Price (Internal Margin) -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="stock">Stock Inventory <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="cost_price">Cost Price ($ USD - Private)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control @error('cost_price') is-invalid @enderror" id="cost_price" type="number" name="cost_price" min="0.01" step="0.01" value="{{ old('cost_price', $product->cost_price) }}" placeholder="e.g. 20.00">
+                            </div>
+                            <small class="text-muted">For internal profit calculation only (never displayed to customers).</small>
+                            @error('cost_price')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Stock Inventory -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label fw-semibold mb-0" for="stock">Stock Inventory <span class="text-danger">*</span></label>
+                                @if ($product->exists && $product->stock <= 5)
+                                    <span class="badge bg-danger text-white small"><i class="fa-solid fa-triangle-exclamation me-1"></i> Low Stock ({{ $product->stock }})</span>
+                                @endif
+                            </div>
                             <input class="form-control @error('stock') is-invalid @enderror" id="stock" type="number" name="stock" min="0" value="{{ old('stock', $product->stock ?? 0) }}" required>
+                            <small class="text-muted">Items with 5 or fewer in stock will trigger admin low-stock alerts.</small>
                             @error('stock')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -410,6 +612,107 @@ document.addEventListener('DOMContentLoaded', function() {
             galleryFileInput.value = '';
             document.querySelectorAll('.new-gallery-item').forEach(el => el.remove());
             clearNewGalleryBtn.classList.add('d-none');
+        });
+    }
+
+    // 5. Size Chart Removal
+    const removeSizeChartBtn = document.getElementById('removeSizeChartBtn');
+    const removeSizeChartInput = document.getElementById('remove_size_chart');
+    const sizeChartBox = document.getElementById('sizeChartCurrentBox');
+    if (removeSizeChartBtn) {
+        removeSizeChartBtn.addEventListener('click', function() {
+            if (confirm('Remove current size chart?')) {
+                removeSizeChartInput.value = '1';
+                if (sizeChartBox) sizeChartBox.remove();
+            }
+        });
+    }
+
+    // 6. Live Discount % Calculation
+    const regularPriceInput = document.getElementById('regular_price');
+    const priceInput = document.getElementById('price');
+    const discountContainer = document.getElementById('discountBadgeContainer');
+    const discountBadgeText = document.getElementById('discountBadgeText');
+
+    function updateDiscountBadge() {
+        const reg = parseFloat(regularPriceInput.value);
+        const sale = parseFloat(priceInput.value);
+        if (!isNaN(reg) && !isNaN(sale) && reg > sale && reg > 0) {
+            const pct = Math.round(((reg - sale) / reg) * 100);
+            discountBadgeText.innerHTML = `<i class="fa-solid fa-tag me-1"></i> Discount: ${pct}% OFF`;
+            discountContainer.classList.remove('d-none');
+        } else {
+            discountContainer.classList.add('d-none');
+        }
+    }
+
+    if (regularPriceInput && priceInput) {
+        regularPriceInput.addEventListener('input', updateDiscountBadge);
+        priceInput.addEventListener('input', updateDiscountBadge);
+    }
+
+    // 7. Dynamic Variations Management
+    const addVariationBtn = document.getElementById('addVariationBtn');
+    const variationsBody = document.getElementById('variationsBody');
+    const noVariationsRow = document.getElementById('noVariationsRow');
+    let variationIndex = document.querySelectorAll('.variation-row').length + 100;
+
+    if (addVariationBtn && variationsBody) {
+        addVariationBtn.addEventListener('click', function() {
+            if (noVariationsRow) noVariationsRow.remove();
+
+            const tr = document.createElement('tr');
+            tr.className = 'variation-row';
+            tr.innerHTML = `
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="variations[${variationIndex}][name]" placeholder="e.g. Red / XL">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="variations[${variationIndex}][color]" placeholder="Color">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="variations[${variationIndex}][size]" placeholder="Size">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="variations[${variationIndex}][dimensions]" placeholder="Dimensions">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="variations[${variationIndex}][material]" placeholder="Material">
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="variations[${variationIndex}][sku]" placeholder="SKU">
+                </td>
+                <td>
+                    <input type="number" step="0.01" class="form-control form-control-sm" name="variations[${variationIndex}][regular_price]" placeholder="0.00">
+                </td>
+                <td>
+                    <input type="number" step="0.01" class="form-control form-control-sm" name="variations[${variationIndex}][sale_price]" placeholder="0.00">
+                </td>
+                <td>
+                    <input type="number" min="0" class="form-control form-control-sm" name="variations[${variationIndex}][stock]" value="0">
+                </td>
+                <td class="text-center">
+                    <input type="hidden" name="variations[${variationIndex}][is_active]" value="0">
+                    <input type="checkbox" class="form-check-input" name="variations[${variationIndex}][is_active]" value="1" checked>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-variation-btn" title="Remove Variation">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            `;
+            variationsBody.appendChild(tr);
+            variationIndex++;
+        });
+
+        variationsBody.addEventListener('click', function(e) {
+            const btn = e.target.closest('.remove-variation-btn');
+            if (btn) {
+                const row = btn.closest('.variation-row');
+                if (row) {
+                    row.remove();
+                }
+            }
         });
     }
 });

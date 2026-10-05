@@ -123,6 +123,37 @@ class StorefrontController extends Controller
             ->where('is_hot_deal', true)
             ->first() ?? $topDealProducts->first() ?? $featuredProducts->first() ?? Product::query()->where('is_active', true)->first();
 
+        $topSellingProducts = Product::query()
+            ->with('category')
+            ->where('is_active', true)
+            ->orderByDesc('is_featured')
+            ->orderByDesc('is_top_deal')
+            ->take(10)
+            ->get();
+
+        if ($topSellingProducts->isEmpty()) {
+            $topSellingProducts = $featuredProducts->take(8);
+        }
+
+        $newArrivals = Product::query()
+            ->with('category')
+            ->where('is_active', true)
+            ->latest('id')
+            ->take(10)
+            ->get();
+
+        $specialOffers = Product::query()
+            ->with('category')
+            ->where('is_active', true)
+            ->whereNotNull('regular_price')
+            ->whereColumn('regular_price', '>', 'price')
+            ->take(10)
+            ->get();
+
+        if ($specialOffers->isEmpty()) {
+            $specialOffers = $topDealProducts->take(8);
+        }
+
         return view('website.pages.home', [
             'categories' => $categories,
             'categoriesBySlug' => $categoriesBySlug,
@@ -132,6 +163,9 @@ class StorefrontController extends Controller
             'bankOffers' => $bankOffers,
             'featuredProducts' => $featuredProducts,
             'topDealProducts' => $topDealProducts,
+            'topSellingProducts' => $topSellingProducts,
+            'newArrivals' => $newArrivals,
+            'specialOffers' => $specialOffers,
             'featuredDealProduct' => $hotDealProduct,
             'homeFurnitureProducts' => $categoriesBySlug->get('home-furniture-diy')?->products ?? collect(),
             'gardenPatioProducts' => $categoriesBySlug->get('garden-patio')?->products ?? collect(),
@@ -167,7 +201,12 @@ class StorefrontController extends Controller
             ->with('category')
             ->where('is_active', true)
             ->when(! empty($selectedCategorySlugs), function ($query) use ($selectedCategorySlugs) {
-                $query->whereHas('category', fn ($q) => $q->whereIn('slug', $selectedCategorySlugs));
+                $query->where(function ($q) use ($selectedCategorySlugs) {
+                    $q->whereHas('category', function ($catQ) use ($selectedCategorySlugs) {
+                        $catQ->whereIn('slug', $selectedCategorySlugs)
+                            ->orWhereHas('parent', fn ($pQ) => $pQ->whereIn('slug', $selectedCategorySlugs));
+                    });
+                });
             })
             ->when($search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
@@ -223,7 +262,7 @@ class StorefrontController extends Controller
         abort_unless($product->is_active, 404);
 
         return view('website.pages.product', [
-            'product' => $product->load('category'),
+            'product' => $product->load(['category', 'activeVariations']),
             'relatedProducts' => Product::query()
                 ->with('category')
                 ->where('is_active', true)

@@ -27,6 +27,7 @@ class AppServiceProvider extends ServiceProvider
                 if (! $view->offsetExists('categories')) {
                     $view->with('categories', Category::query()
                         ->where('is_active', true)
+                        ->with(['parent', 'children' => fn ($q) => $q->where('is_active', true)->withCount('products')])
                         ->withCount('products')
                         ->orderBy('position')
                         ->get()
@@ -51,7 +52,9 @@ class AppServiceProvider extends ServiceProvider
 
                 $view->with([
                     'headerCategories' => Category::query()
+                        ->whereNull('parent_id')
                         ->where('is_active', true)
+                        ->with(['children' => fn ($q) => $q->where('is_active', true)->withCount('products')->orderBy('position')])
                         ->orderBy('position')
                         ->get(),
                     'headerCartCount' => $cartCount,

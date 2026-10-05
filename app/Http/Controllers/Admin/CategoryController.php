@@ -15,10 +15,11 @@ class CategoryController extends Controller
     {
         return view('admin.categories.index', [
             'categories' => Category::query()
-                ->withCount('products')
+                ->with('parent')
+                ->withCount(['products', 'children'])
                 ->orderBy('position')
                 ->orderBy('name')
-                ->paginate(15),
+                ->paginate(20),
         ]);
     }
 
@@ -26,6 +27,7 @@ class CategoryController extends Controller
     {
         return view('admin.categories.form', [
             'category' => new Category,
+            'parentCategories' => Category::query()->whereNull('parent_id')->orderBy('name')->get(),
         ]);
     }
 
@@ -40,6 +42,11 @@ class CategoryController extends Controller
     {
         return view('admin.categories.form', [
             'category' => $category,
+            'parentCategories' => Category::query()
+                ->whereNull('parent_id')
+                ->where('id', '!=', $category->id)
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -63,6 +70,15 @@ class CategoryController extends Controller
     private function validatedData(Request $request, ?Category $category = null): array
     {
         $validated = $request->validate([
+            'parent_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('categories', 'id')->where(function ($query) use ($category) {
+                    if ($category) {
+                        $query->where('id', '!=', $category->id);
+                    }
+                }),
+            ],
             'name' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'alpha_dash', 'max:255', Rule::unique('categories', 'slug')->ignore($category)],
             'image' => ['nullable', 'string', 'max:255'],

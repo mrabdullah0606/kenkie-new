@@ -881,20 +881,20 @@
     </section>
     <!-- Categories Section End -->
 
-    <!-- Section 1: Home, Furniture & DIY Start -->
+    <!-- Top Selling Products & Hot Deals Section Start -->
     <section class="product-section-3">
         <div class="container-fluid-lg">
             <div class="title d-flex justify-content-between align-items-center">
-                <h2>Home, Furniture & DIY</h2>
+                <h2><i class="fa-solid fa-fire text-danger me-2"></i>Top Selling Products & Hot Deals</h2>
                 <div class="d-flex align-items-center gap-3">
-                    <a href="{{ route('shop.category', ['category' => 'home-furniture-diy']) }}" class="theme-color fw-bold text-decoration-none d-none d-sm-inline">
+                    <a href="{{ route('shop.category', ['sort' => 'popular']) }}" class="theme-color fw-bold text-decoration-none d-none d-sm-inline">
                         View All <i class="fa-solid fa-arrow-right ms-1"></i>
                     </a>
                     <div class="slider-nav-arrows">
-                        <button type="button" class="slider-nav-btn slider-prev-btn" data-target="#slider-home-furniture-diy" aria-label="Previous">
+                        <button type="button" class="slider-nav-btn slider-prev-btn" data-target="#slider-top-selling" aria-label="Previous">
                             <i class="fa-solid fa-chevron-left"></i>
                         </button>
-                        <button type="button" class="slider-nav-btn slider-next-btn" data-target="#slider-home-furniture-diy" aria-label="Next">
+                        <button type="button" class="slider-nav-btn slider-next-btn" data-target="#slider-top-selling" aria-label="Next">
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </div>
@@ -902,8 +902,8 @@
             </div>
             <div class="row">
                 <div class="col-12">
-                    <div class="slider-category-products product-box-slider-custom" id="slider-home-furniture-diy">
-                        @forelse ($homeFurnitureProducts as $product)
+                    <div class="slider-category-products product-box-slider-custom" id="slider-top-selling">
+                        @forelse ($topSellingProducts as $product)
                             <div>
                                 @include('website.includes.product-card', ['product' => $product])
                             </div>
@@ -919,7 +919,47 @@
             </div>
         </div>
     </section>
-    <!-- Section 1: Home, Furniture & DIY End -->
+    <!-- Top Selling Products & Hot Deals Section End -->
+
+    <!-- New Arrivals Section Start -->
+    <section class="product-section-3 pt-0">
+        <div class="container-fluid-lg">
+            <div class="title d-flex justify-content-between align-items-center">
+                <h2><i class="fa-solid fa-sparkles text-warning me-2"></i>New Arrivals</h2>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{{ route('shop.category') }}" class="theme-color fw-bold text-decoration-none d-none d-sm-inline">
+                        View All <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                    <div class="slider-nav-arrows">
+                        <button type="button" class="slider-nav-btn slider-prev-btn" data-target="#slider-new-arrivals" aria-label="Previous">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="slider-nav-btn slider-next-btn" data-target="#slider-new-arrivals" aria-label="Next">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="slider-category-products product-box-slider-custom" id="slider-new-arrivals">
+                        @forelse ($newArrivals as $product)
+                            <div>
+                                @include('website.includes.product-card', ['product' => $product])
+                            </div>
+                        @empty
+                            @foreach ($featuredProducts->take(6) as $product)
+                                <div>
+                                    @include('website.includes.product-card', ['product' => $product])
+                                </div>
+                            @endforeach
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- New Arrivals Section End -->
 
     <!-- Bank & Wallet Offers Section Start -->
     <section class="bank-section overflow-hidden">
