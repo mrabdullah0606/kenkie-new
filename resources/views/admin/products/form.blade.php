@@ -37,6 +37,21 @@
         height: 100%;
         object-fit: contain;
     }
+    .card-header-toggle {
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease;
+    }
+    .card-header-toggle:hover {
+        background-color: #f8fafc !important;
+    }
+    .chevron-rotate {
+        transition: transform 0.25s ease;
+        display: inline-block;
+    }
+    [aria-expanded="false"] .chevron-rotate {
+        transform: rotate(-90deg);
+    }
 </style>
 @endpush
 
@@ -51,6 +66,9 @@
             <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
                 <i class="fa-solid fa-arrow-left"></i> Back to Products
             </a>
+            <button type="submit" form="productForm" class="btn btn-primary d-inline-flex align-items-center gap-2 ms-2">
+                <i class="fa-solid fa-floppy-disk"></i> {{ $product->exists ? 'Save Changes' : 'Create Product' }}
+            </button>
         </div>
     </div>
 
@@ -208,141 +226,13 @@
                         @endif
                     </div>
                 </div>
-
-                <!-- Product Variations Card -->
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                        <div>
-                            <h5 class="fw-bold mb-0"><i class="fa-solid fa-layer-group text-primary me-2"></i>Product Variations</h5>
-                            <small class="text-muted">Manage attributes such as Color, Size, Dimensions, Material with custom SKU, Stock, and Pricing.</small>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="addVariationBtn">
-                            <i class="fa-solid fa-plus me-1"></i> Add Variation
-                        </button>
-                    </div>
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-bordered align-middle mb-0" id="variationsTable">
-                                <thead class="table-light">
-                                    <tr class="small text-nowrap">
-                                        <th style="min-width: 140px;">Name / Label</th>
-                                        <th style="min-width: 100px;">Color</th>
-                                        <th style="min-width: 90px;">Size</th>
-                                        <th style="min-width: 110px;">Dimensions</th>
-                                        <th style="min-width: 100px;">Material</th>
-                                        <th style="min-width: 110px;">SKU</th>
-                                        <th style="min-width: 100px;">Reg. Price ($)</th>
-                                        <th style="min-width: 100px;">Sale Price ($)</th>
-                                        <th style="min-width: 80px;">Stock</th>
-                                        <th style="min-width: 70px;">Active</th>
-                                        <th style="width: 40px;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="variationsBody">
-                                    @php
-                                        $existingVariations = old('variations', $product->variations ?? collect());
-                                    @endphp
-                                    @forelse ($existingVariations as $index => $variation)
-                                        @php
-                                            $v = is_array($variation) ? (object) $variation : $variation;
-                                        @endphp
-                                        <tr class="variation-row">
-                                            @if (!empty($v->id))
-                                                <input type="hidden" name="variations[{{ $index }}][id]" value="{{ $v->id }}">
-                                            @endif
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][name]" value="{{ $v->name ?? '' }}" placeholder="e.g. Red / XL">
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][color]" value="{{ $v->color ?? '' }}" placeholder="e.g. Red">
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][size]" value="{{ $v->size ?? '' }}" placeholder="e.g. XL">
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][dimensions]" value="{{ $v->dimensions ?? '' }}" placeholder="e.g. 12x24 in">
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][material]" value="{{ $v->material ?? '' }}" placeholder="e.g. Cotton">
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][sku]" value="{{ $v->sku ?? '' }}" placeholder="SKU">
-                                            </td>
-                                            <td>
-                                                <input type="number" step="0.01" class="form-control form-control-sm" name="variations[{{ $index }}][regular_price]" value="{{ $v->regular_price ?? '' }}" placeholder="0.00">
-                                            </td>
-                                            <td>
-                                                <input type="number" step="0.01" class="form-control form-control-sm" name="variations[{{ $index }}][sale_price]" value="{{ $v->sale_price ?? '' }}" placeholder="0.00">
-                                            </td>
-                                            <td>
-                                                <input type="number" min="0" class="form-control form-control-sm" name="variations[{{ $index }}][stock]" value="{{ $v->stock ?? 0 }}">
-                                            </td>
-                                            <td class="text-center">
-                                                <input type="hidden" name="variations[{{ $index }}][is_active]" value="0">
-                                                <input type="checkbox" class="form-check-input" name="variations[{{ $index }}][is_active]" value="1" @checked($v->is_active ?? true)>
-                                            </td>
-                                            <td class="text-center">
-                                                <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-variation-btn" title="Remove Variation">
-                                                    <i class="fa-solid fa-trash-can"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr id="noVariationsRow">
-                                            <td colspan="11" class="text-center text-muted py-3 small">
-                                                No variations added yet. Click <strong>"Add Variation"</strong> above to configure sizes, colors, or materials.
-                                            </td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SEO & Meta Information Card -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="fw-bold mb-0"><i class="fa-solid fa-magnifying-glass-chart text-primary me-2"></i>SEO & Search Engine Optimization</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12">
-                                <label class="form-label fw-semibold" for="meta_title">Meta Title</label>
-                                <input class="form-control @error('meta_title') is-invalid @enderror" id="meta_title" name="meta_title" value="{{ old('meta_title', $product->meta_title) }}" placeholder="Custom browser title (Defaults to Product Name)">
-                                <small class="text-muted">Recommended: Up to 60 characters for optimal Google search appearance.</small>
-                                @error('meta_title')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label fw-semibold" for="meta_description">Meta Description</label>
-                                <textarea class="form-control @error('meta_description') is-invalid @enderror" id="meta_description" name="meta_description" rows="3" placeholder="Brief summary of the product for search engine snippets">{{ old('meta_description', $product->meta_description) }}</textarea>
-                                <small class="text-muted">Recommended: Up to 160 characters.</small>
-                                @error('meta_description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label fw-semibold" for="meta_keywords">Meta Keywords</label>
-                                <input class="form-control @error('meta_keywords') is-invalid @enderror" id="meta_keywords" name="meta_keywords" value="{{ old('meta_keywords', $product->meta_keywords) }}" placeholder="e.g. bedding, organic cotton, sheets, luxury home">
-                                <small class="text-muted">Comma-separated keywords.</small>
-                                @error('meta_keywords')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Right Column: Category, Pricing, Stock & Status -->
             <div class="col-xxl-4 col-xl-5">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="fw-bold mb-0">Category & Pricing</h5>
+                <div class="card mb-4 shadow-sm border">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-tags text-primary me-2"></i>Category & Pricing</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
@@ -423,7 +313,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-0">
                             <label class="form-label fw-semibold" for="unit">Unit Measure <span class="text-danger">*</span></label>
                             <input class="form-control @error('unit') is-invalid @enderror" id="unit" name="unit" value="{{ old('unit', $product->unit ?? 'each') }}" placeholder="e.g. each, 500 g, 1 set" required>
                             @error('unit')
@@ -434,9 +324,9 @@
                 </div>
 
                 <!-- Visibility & Status -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="fw-bold mb-0">Publish & Promotion Status</h5>
+                <div class="card mb-4 shadow-sm border">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-bullhorn text-primary me-2"></i>Publish & Promotion Status</h5>
                     </div>
                     <div class="card-body">
                         <div class="form-check form-switch mb-3">
@@ -466,12 +356,192 @@
                     </div>
                 </div>
 
-                <!-- Save Action Buttons -->
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary btn-lg" type="submit">
+                <!-- Quick Action Buttons -->
+                <div class="card shadow-sm border p-3 mb-4 bg-light">
+                    <button class="btn btn-primary w-100 mb-2 py-2 fw-bold" type="submit">
                         <i class="fa-solid fa-floppy-disk me-2"></i> {{ $product->exists ? 'Update Product' : 'Create Product' }}
                     </button>
-                    <a class="btn btn-outline-secondary" href="{{ route('admin.products.index') }}">Cancel</a>
+                    <a class="btn btn-outline-secondary w-100" href="{{ route('admin.products.index') }}">Cancel</a>
+                </div>
+            </div>
+
+            <!-- FULL WIDTH ROW: Product Variations Card (Expandable) -->
+            <div class="col-12">
+                <div class="card mb-4 shadow-sm border">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 card-header-toggle" data-bs-toggle="collapse" data-bs-target="#variationsCollapse" aria-expanded="true" aria-controls="variationsCollapse">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="rounded-3 bg-primary-subtle text-primary p-2 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-layer-group fs-5"></i>
+                            </span>
+                            <div>
+                                <h5 class="fw-bold mb-0 text-dark">
+                                    Product Variations
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-2 font-monospace" id="variationsCountBadge">
+                                        {{ count(old('variations', $product->variations ?? collect())) }}
+                                    </span>
+                                </h5>
+                                <small class="text-muted">Manage attributes such as Color, Size, Dimensions, Material with custom SKU, Stock, and Pricing across full width.</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation();">
+                            <button type="button" class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1" id="addVariationBtn">
+                                <i class="fa-solid fa-plus"></i> Add Variation
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#variationsCollapse" aria-expanded="true" aria-controls="variationsCollapse" title="Click to collapse / expand variations">
+                                <i class="fa-solid fa-chevron-down chevron-rotate"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="variationsCollapse">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered align-middle mb-0 w-100" id="variationsTable">
+                                    <thead class="table-light">
+                                        <tr class="small text-nowrap">
+                                            <th style="min-width: 170px;">Name / Label</th>
+                                            <th style="min-width: 120px;">Color</th>
+                                            <th style="min-width: 110px;">Size</th>
+                                            <th style="min-width: 120px;">Dimensions</th>
+                                            <th style="min-width: 120px;">Material</th>
+                                            <th style="min-width: 130px;">SKU</th>
+                                            <th style="min-width: 115px;">Reg. Price ($)</th>
+                                            <th style="min-width: 115px;">Sale Price ($)</th>
+                                            <th style="min-width: 90px;">Stock</th>
+                                            <th style="min-width: 80px;" class="text-center">Active</th>
+                                            <th style="width: 50px;" class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="variationsBody">
+                                        @php
+                                            $existingVariations = old('variations', $product->variations ?? collect());
+                                        @endphp
+                                        @forelse ($existingVariations as $index => $variation)
+                                            @php
+                                                $v = is_array($variation) ? (object) $variation : $variation;
+                                            @endphp
+                                            <tr class="variation-row">
+                                                @if (!empty($v->id))
+                                                    <input type="hidden" name="variations[{{ $index }}][id]" value="{{ $v->id }}">
+                                                @endif
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][name]" value="{{ $v->name ?? '' }}" placeholder="e.g. Emerald Green / King">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][color]" value="{{ $v->color ?? '' }}" placeholder="e.g. Green">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][size]" value="{{ $v->size ?? '' }}" placeholder="e.g. King">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][dimensions]" value="{{ $v->dimensions ?? '' }}" placeholder="e.g. 76x80 in">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="variations[{{ $index }}][material]" value="{{ $v->material ?? '' }}" placeholder="e.g. Egyptian Cotton">
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm font-monospace" name="variations[{{ $index }}][sku]" value="{{ $v->sku ?? '' }}" placeholder="SKU-CODE">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variations[{{ $index }}][regular_price]" value="{{ $v->regular_price ?? '' }}" placeholder="0.00">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step="0.01" class="form-control form-control-sm" name="variations[{{ $index }}][sale_price]" value="{{ $v->sale_price ?? '' }}" placeholder="0.00">
+                                                </td>
+                                                <td>
+                                                    <input type="number" min="0" class="form-control form-control-sm text-center" name="variations[{{ $index }}][stock]" value="{{ $v->stock ?? 0 }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="hidden" name="variations[{{ $index }}][is_active]" value="0">
+                                                    <input type="checkbox" class="form-check-input" name="variations[{{ $index }}][is_active]" value="1" @checked($v->is_active ?? true)>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-variation-btn" title="Remove Variation">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr id="noVariationsRow">
+                                                <td colspan="11" class="text-center text-muted py-4 small">
+                                                    <i class="fa-solid fa-layer-group fs-3 text-muted d-block mb-2"></i>
+                                                    No variations added yet. Click <strong>"Add Variation"</strong> above to configure sizes, colors, or materials.
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FULL WIDTH ROW: SEO & Search Engine Optimization Card (Expandable) -->
+            <div class="col-12">
+                <div class="card mb-4 shadow-sm border">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 card-header-toggle" data-bs-toggle="collapse" data-bs-target="#seoCollapse" aria-expanded="true" aria-controls="seoCollapse">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="rounded-3 bg-info-subtle text-info p-2 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-magnifying-glass-chart fs-5"></i>
+                            </span>
+                            <div>
+                                <h5 class="fw-bold mb-0 text-dark">SEO & Search Engine Optimization</h5>
+                                <small class="text-muted">Customize search snippet preview, meta title, description, and keywords for search engines.</small>
+                            </div>
+                        </div>
+                        <div onclick="event.stopPropagation();">
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#seoCollapse" aria-expanded="true" aria-controls="seoCollapse" title="Click to collapse / expand SEO section">
+                                <i class="fa-solid fa-chevron-down chevron-rotate"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="seoCollapse">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="meta_title">Meta Title</label>
+                                    <input class="form-control @error('meta_title') is-invalid @enderror" id="meta_title" name="meta_title" value="{{ old('meta_title', $product->meta_title) }}" placeholder="Custom browser title (Defaults to Product Name)">
+                                    <small class="text-muted">Recommended: Up to 60 characters for optimal Google search appearance.</small>
+                                    @error('meta_title')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="meta_keywords">Meta Keywords</label>
+                                    <input class="form-control @error('meta_keywords') is-invalid @enderror" id="meta_keywords" name="meta_keywords" value="{{ old('meta_keywords', $product->meta_keywords) }}" placeholder="e.g. bedding, organic cotton, sheets, luxury home">
+                                    <small class="text-muted">Comma-separated search keywords.</small>
+                                    @error('meta_keywords')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold" for="meta_description">Meta Description</label>
+                                    <textarea class="form-control @error('meta_description') is-invalid @enderror" id="meta_description" name="meta_description" rows="3" placeholder="Brief summary of the product for search engine snippets">{{ old('meta_description', $product->meta_description) }}</textarea>
+                                    <small class="text-muted">Recommended: Up to 160 characters describing the product.</small>
+                                    @error('meta_description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Action Bar -->
+            <div class="col-12">
+                <div class="card bg-white border shadow-sm p-3 mb-4">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <span class="text-muted small">Ready to save? Verify product details and variations above before submitting.</span>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-outline-secondary" href="{{ route('admin.products.index') }}">Cancel</a>
+                            <button class="btn btn-primary px-4 fw-bold" type="submit">
+                                <i class="fa-solid fa-floppy-disk me-2"></i> {{ $product->exists ? 'Update Product' : 'Create Product' }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
