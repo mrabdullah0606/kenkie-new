@@ -262,7 +262,7 @@ class StorefrontController extends Controller
         abort_unless($product->is_active, 404);
 
         return view('website.pages.product', [
-            'product' => $product->load(['category', 'activeVariations']),
+            'product' => $product->load(['category.parent', 'activeVariations', 'activeOffers']),
             'relatedProducts' => Product::query()
                 ->with('category')
                 ->where('is_active', true)

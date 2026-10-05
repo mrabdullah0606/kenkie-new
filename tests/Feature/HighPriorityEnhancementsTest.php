@@ -3,6 +3,7 @@
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductOffer;
 use App\Models\ProductVariation;
 use App\Models\User;
 
@@ -251,4 +252,108 @@ it('manages order fulfillment status, auto timestamps, courier tracking, and sti
         ->and($order->email)->toBe('alice.jones@example.com')
         ->and($order->address_line)->toBe('221B Baker Street')
         ->and($order->postal_code)->toBe('NW1 6XE');
+});
+
+it('renders single product title, return policy tab, and multi-buy offers on storefront', function () {
+    $category = Category::factory()->create(['name' => 'Home Decor']);
+    $product = Product::factory()->create([
+        'category_id' => $category->id,
+        'name' => 'Artisan Ceramic Vase',
+        'slug' => 'artisan-ceramic-vase',
+        'price' => 50.00,
+        'regular_price' => 70.00,
+        'stock' => 20,
+        'is_active' => true,
+    ]);
+
+    ProductOffer::create([
+        'product_id' => $product->id,
+        'title' => 'Buy 2 Save 10%',
+        'min_quantity' => 2,
+        'discount_percentage' => 10.00,
+        'badge_label' => 'POPULAR',
+        'is_active' => true,
+    ]);
+
+    $response = $this->get(route('products.show', $product->slug));
+
+    $response->assertOk()
+        ->assertSee('Product Details')
+        ->assertSee('Artisan Ceramic Vase')
+        ->assertSee('Return Policy')
+        ->assertSee('14-Day Hassle-Free Returns & Exchanges', false)
+        ->assertSee('Multi-Buy Bundle Savings')
+        ->assertSee('Buy 2 Save 10%')
+        ->assertSee('POPULAR');
+});
+
+it('applies multi-buy volume discount in storefront cart', function () {
+    $category = Category::factory()->create();
+    $product = Product::factory()->create([
+        'category_id' => $category->id,
+        'price' => 100.00,
+        'stock' => 10,
+        'is_active' => true,
+    ]);
+
+    ProductOffer::create([
+        'product_id' => $product->id,
+        'title' => 'Buy 2 Get 20% Off',
+        'min_quantity' => 2,
+        'discount_percentage' => 20.00,
+        'is_active' => true,
+    ]);
+
+    // Add quantity 2 to cart
+    $response = $this->withSession([
+        'cart' => [$product->id => 2],
+    ])->get(route('cart.index'));
+
+    $response->assertOk()
+        ->assertSee('Buy 2 Get 20% Off')
+        ->assertSee('Multi-Buy Savings')
+        ->assertSee('160.00'); // (100 * 0.8) * 2 = 160.00
+});
+
+it('saves and duplicates multi-buy offers in admin product management', function () {
+    $admin = User::factory()->admin()->create();
+    $category = Category::factory()->create();
+
+    $this->actingAs($admin)
+        ->post(route('admin.products.store'), [
+            'category_id' => $category->id,
+            'name' => 'Premium Bath Towel',
+            'slug' => 'premium-bath-towel',
+            'sku' => 'TWL-PRM-01',
+            'price' => 30.00,
+            'stock' => 50,
+            'unit' => '1 piece',
+            'is_active' => '1',
+            'offers' => [
+                [
+                    'title' => 'Buy 3 Save 15%',
+                    'min_quantity' => 3,
+                    'discount_percentage' => 15.00,
+                    'badge_label' => 'HOT',
+                    'is_active' => '1',
+                ],
+            ],
+        ])
+        ->assertRedirect(route('admin.products.index'));
+
+    $product = Product::where('slug', 'premium-bath-towel')->first();
+    expect($product)->not->toBeNull()
+        ->and($product->offers)->toHaveCount(1)
+        ->and($product->offers->first()->title)->toBe('Buy 3 Save 15%')
+        ->and((float) $product->offers->first()->discount_percentage)->toBe(15.0);
+
+    // Test duplicate product replicates offers
+    $this->actingAs($admin)
+        ->post(route('admin.products.duplicate', $product))
+        ->assertRedirect();
+
+    $duplicate = Product::where('name', 'Premium Bath Towel (Copy)')->first();
+    expect($duplicate)->not->toBeNull()
+        ->and($duplicate->offers)->toHaveCount(1)
+        ->and($duplicate->offers->first()->title)->toBe('Buy 3 Save 15%');
 });

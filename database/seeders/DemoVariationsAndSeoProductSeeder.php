@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductOffer;
 use App\Models\ProductVariation;
 use Illuminate\Database\Seeder;
 
@@ -234,5 +235,42 @@ class DemoVariationsAndSeoProductSeeder extends Seeder
                 $varData
             );
         }
+
+        // 4. Seed Multi-Buy Offers for Product 1
+        $p1Offers = [
+            [
+                'title' => 'Buy 2 Duvet Sets - Save 10%',
+                'min_quantity' => 2,
+                'discount_percentage' => 10.00,
+                'badge_label' => 'POPULAR',
+                'is_active' => true,
+            ],
+            [
+                'title' => 'Buy 3+ Duvet Sets - Save 15%',
+                'min_quantity' => 3,
+                'discount_percentage' => 15.00,
+                'badge_label' => 'BEST VALUE',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($p1Offers as $offerData) {
+            ProductOffer::updateOrCreate(
+                ['product_id' => $product1->id, 'min_quantity' => $offerData['min_quantity']],
+                $offerData
+            );
+        }
+
+        // 5. Seed Multi-Buy Offers for Product 2
+        ProductOffer::updateOrCreate(
+            ['product_id' => $product2->id, 'min_quantity' => 2],
+            [
+                'title' => 'Buy 2 Coats - Save 12% Extra',
+                'min_quantity' => 2,
+                'discount_percentage' => 12.00,
+                'badge_label' => 'BUNDLE DEAL',
+                'is_active' => true,
+            ]
+        );
     }
 }

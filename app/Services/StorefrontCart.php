@@ -73,6 +73,7 @@ class StorefrontCart
 
         $products = Product::query()
             ->whereKey(array_keys($quantities))
+            ->with('activeOffers')
             ->get()
             ->keyBy('id');
 
@@ -85,11 +86,31 @@ class StorefrontCart
                 }
 
                 $unitPriceCents = (int) round((float) $product->price * 100);
+                $effectiveUnitPriceCents = $unitPriceCents;
+
+                $appliedOffer = $product->relationLoaded('activeOffers')
+                    ? $product->activeOffers
+                        ->filter(fn ($offer) => $quantity >= $offer->min_quantity)
+                        ->sortByDesc('discount_percentage')
+                        ->first()
+                    : null;
+
+                if ($appliedOffer) {
+                    $discountFactor = (100 - (float) $appliedOffer->discount_percentage) / 100;
+                    $effectiveUnitPriceCents = (int) round($unitPriceCents * $discountFactor);
+                }
+
+                $lineTotalCents = $effectiveUnitPriceCents * $quantity;
+                $savedCents = ($unitPriceCents * $quantity) - $lineTotalCents;
 
                 return [
                     'product' => $product,
                     'quantity' => $quantity,
-                    'lineTotalCents' => $unitPriceCents * $quantity,
+                    'unitPriceCents' => $unitPriceCents,
+                    'effectiveUnitPriceCents' => $effectiveUnitPriceCents,
+                    'appliedOffer' => $appliedOffer,
+                    'savedCents' => $savedCents,
+                    'lineTotalCents' => $lineTotalCents,
                 ];
             })
             ->filter()
@@ -99,6 +120,7 @@ class StorefrontCart
             'cartItems' => $cartItems,
             'cartItemCount' => $cartItems->sum('quantity'),
             'cartSubtotalCents' => $cartItems->sum('lineTotalCents'),
+            'cartSavingsCents' => $cartItems->sum('savedCents'),
         ];
     }
 

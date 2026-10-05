@@ -58,6 +58,7 @@ class CheckoutController extends Controller
         $order = DB::transaction(function () use ($request, $validated, $cart, &$lineItems, &$subtotalCents, &$shippingFeeCents): Order {
             $products = Product::query()
                 ->whereKey(array_keys($cart))
+                ->with('activeOffers')
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
@@ -76,12 +77,26 @@ class CheckoutController extends Controller
                 }
 
                 $unitPriceCents = (int) round((float) $product->price * 100);
-                $lineTotalCents = $unitPriceCents * $quantity;
+                $effectiveUnitPriceCents = $unitPriceCents;
+
+                $appliedOffer = $product->relationLoaded('activeOffers')
+                    ? $product->activeOffers
+                        ->filter(fn ($offer) => $quantity >= $offer->min_quantity)
+                        ->sortByDesc('discount_percentage')
+                        ->first()
+                    : null;
+
+                if ($appliedOffer) {
+                    $discountFactor = (100 - (float) $appliedOffer->discount_percentage) / 100;
+                    $effectiveUnitPriceCents = (int) round($unitPriceCents * $discountFactor);
+                }
+
+                $lineTotalCents = $effectiveUnitPriceCents * $quantity;
                 $subtotalCents += $lineTotalCents;
                 $lineItems[] = [
                     'product' => $product,
                     'quantity' => $quantity,
-                    'unitPriceCents' => $unitPriceCents,
+                    'unitPriceCents' => $effectiveUnitPriceCents,
                     'lineTotalCents' => $lineTotalCents,
                 ];
             }

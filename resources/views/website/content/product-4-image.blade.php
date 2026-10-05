@@ -53,7 +53,7 @@
             <div class="row">
                 <div class="col-12">
                     <div class="breadscrumb-contain">
-                        <h2>{{ $product->name }}</h2>
+                        <h2>Product Details</h2>
                         <nav>
                             <ol class="breadcrumb mb-0">
                                 <li class="breadcrumb-item">
@@ -61,6 +61,11 @@
                                         <i class="fa-solid fa-house"></i>
                                     </a>
                                 </li>
+                                @if ($product->category?->parent)
+                                    <li class="breadcrumb-item">
+                                        <a href="{{ route('shop.category', ['category' => $product->category->parent->slug]) }}">{{ $product->category->parent->name }}</a>
+                                    </li>
+                                @endif
                                 @if ($product->category)
                                     <li class="breadcrumb-item">
                                         <a href="{{ route('shop.category', ['category' => $product->category->slug]) }}">{{ $product->category->name }}</a>
@@ -119,7 +124,7 @@
                             @endif
                         </div>
 
-                        <h2 class="name fw-bold">{{ $product->name }}</h2>
+                        <h1 class="name fw-bold fs-3 mb-2">{{ $product->name }}</h1>
 
                         <div class="price-rating my-3 d-flex align-items-center flex-wrap gap-3">
                             <h3 class="theme-color price fs-2 fw-bold mb-0" id="displayProductPrice">
@@ -184,6 +189,47 @@
                             <div class="alert alert-success mt-3">{{ session('status') }}</div>
                         @endif
 
+                        @if ($product->activeOffers && $product->activeOffers->isNotEmpty())
+                            <div class="multi-offer-box p-3 my-3 rounded-3 border" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #fde68a !important;">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="fw-bold text-dark d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-tags text-warning"></i> Multi-Buy Bundle Savings
+                                    </span>
+                                    <span class="badge bg-warning text-dark fw-bold">Instant Discount</span>
+                                </div>
+                                <div class="row g-2">
+                                    @foreach ($product->activeOffers as $offer)
+                                        @php
+                                            $discountedUnit = $offer->discountedPriceFor((float) $product->price);
+                                        @endphp
+                                        <div class="col-sm-6">
+                                            <div class="p-2 bg-white rounded-2 border border-warning-subtle shadow-sm h-100 d-flex flex-column justify-content-between offer-bundle-card"
+                                                 onclick="selectOfferBundle({{ $offer->min_quantity }}, this)"
+                                                 style="cursor: pointer; transition: all 0.2s ease;">
+                                                <div>
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <strong class="text-dark">{{ $offer->title ?: ('Buy ' . $offer->min_quantity . ' Items') }}</strong>
+                                                        @if ($offer->badge_label)
+                                                            <span class="badge bg-danger text-white px-2 py-1" style="font-size: 10px;">{{ $offer->badge_label }}</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="small text-muted mt-1">
+                                                        Save <span class="badge bg-success-subtle text-success fw-bold">{{ (int) $offer->discount_percentage }}% OFF</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2 pt-1 border-top d-flex justify-content-between align-items-center">
+                                                    <span class="fw-bold text-success fs-6">${{ number_format($discountedUnit, 2) }} <small class="text-muted fw-normal">/ea</small></span>
+                                                    <button type="button" class="btn btn-sm btn-outline-warning text-dark py-0 px-2 fw-semibold" style="font-size: 11px;">
+                                                        Select {{ $offer->min_quantity }}x
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
                         @if ($product->stock > 0)
                             <form class="note-box product-packege mt-4" method="POST" action="{{ route('cart.store', $product->slug) }}">
                                 @csrf
@@ -231,11 +277,15 @@
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
                                     data-bs-target="#description" type="button" role="tab" aria-controls="description"
-                                    aria-selected="true">Description</button>
+                                    aria-selected="true"><i class="fa-solid fa-align-left me-2"></i>Description</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info"
-                                    type="button" role="tab" aria-controls="info" aria-selected="false">Additional Info</button>
+                                <button class="nav-link" id="specifications-tab" data-bs-toggle="tab" data-bs-target="#specifications"
+                                    type="button" role="tab" aria-controls="specifications" aria-selected="false"><i class="fa-solid fa-list-check me-2"></i>Specifications</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="return-tab" data-bs-toggle="tab" data-bs-target="#return-policy"
+                                    type="button" role="tab" aria-controls="return-policy" aria-selected="false"><i class="fa-solid fa-shield-halved me-2"></i>Return Policy</button>
                             </li>
                         </ul>
 
@@ -246,20 +296,25 @@
                                     <p class="text-muted mt-3">Packaged with care to ensure the highest freshness, hygiene, and taste. Store in a cool, dry place.</p>
                                 </div>
                             </div>
-                            <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
-                                <table class="table table-striped mb-0">
+                            <div class="tab-pane fade" id="specifications" role="tabpanel" aria-labelledby="specifications-tab">
+                                <table class="table table-striped align-middle mb-0">
                                     <tbody>
                                         <tr>
-                                            <th>Product Name</th>
+                                            <th style="width: 200px;">Product Name</th>
                                             <td>{{ $product->name }}</td>
                                         </tr>
                                         <tr>
                                             <th>Category</th>
-                                            <td>{{ $product->category->name }}</td>
+                                            <td>
+                                                @if ($product->category?->parent)
+                                                    {{ $product->category->parent->name }} &gt;
+                                                @endif
+                                                {{ $product->category->name }}
+                                            </td>
                                         </tr>
                                         <tr>
                                             <th>SKU</th>
-                                            <td>{{ $product->sku }}</td>
+                                            <td><code>{{ $product->sku }}</code></td>
                                         </tr>
                                         <tr>
                                             <th>Unit Size</th>
@@ -267,10 +322,57 @@
                                         </tr>
                                         <tr>
                                             <th>Availability</th>
-                                            <td>{{ $product->stock > 0 ? 'In Stock (' . $product->stock . ' units)' : 'Out of Stock' }}</td>
+                                            <td>
+                                                <span class="badge {{ $product->stock > 0 ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ $product->stock > 0 ? 'In Stock (' . $product->stock . ' units)' : 'Out of Stock' }}
+                                                </span>
+                                            </td>
                                         </tr>
+                                        @if ($product->activeVariations && $product->activeVariations->isNotEmpty())
+                                            <tr>
+                                                <th>Variations Available</th>
+                                                <td>
+                                                    {{ $product->activeVariations->pluck('name')->filter()->implode(', ') ?: ($product->activeVariations->count() . ' options available') }}
+                                                </td>
+                                            </tr>
+                                        @endif
                                     </tbody>
                                 </table>
+                            </div>
+                            <div class="tab-pane fade" id="return-policy" role="tabpanel" aria-labelledby="return-tab">
+                                <div class="return-policy-box">
+                                    <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-3 border">
+                                        <div class="rounded-circle bg-success-subtle text-success p-3 d-inline-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fa-solid fa-rotate-left fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold mb-1 text-dark">14-Day Hassle-Free Returns & Exchanges</h5>
+                                            <p class="text-muted mb-0 small">Shop with 100% confidence. If you are not satisfied with your purchase, we make returns straightforward.</p>
+                                        </div>
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded h-100">
+                                                <h6 class="fw-bold text-dark"><i class="fa-solid fa-check text-success me-2"></i>Eligible for Return</h6>
+                                                <ul class="text-muted small ps-3 mb-0">
+                                                    <li>Items received within the last 14 calendar days.</li>
+                                                    <li>Items in brand new, unwashed, and undamaged condition with original packaging.</li>
+                                                    <li>Defective, damaged in transit, or incorrect items received.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="p-3 border rounded h-100">
+                                                <h6 class="fw-bold text-dark"><i class="fa-solid fa-truck-fast text-primary me-2"></i>Fast Refund Process</h6>
+                                                <ul class="text-muted small ps-3 mb-0">
+                                                    <li>Refunds are processed within 2–4 business days of receiving the item.</li>
+                                                    <li>Refund is credited back to your original payment method.</li>
+                                                    <li>Our support team is available 24/7 for return assistance.</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -393,5 +495,19 @@
                 });
             });
         });
+        function selectOfferBundle(qty, element) {
+            const qtyInput = document.querySelector('input.qty-input[name="quantity"]');
+            if (qtyInput) {
+                qtyInput.value = qty;
+            }
+            document.querySelectorAll('.offer-bundle-card').forEach(card => {
+                card.style.borderColor = '#fde68a';
+                card.style.boxShadow = 'none';
+            });
+            if (element) {
+                element.style.borderColor = '#eab308';
+                element.style.boxShadow = '0 0 0 2px rgba(234, 179, 8, 0.4)';
+            }
+        }
     </script>
 @endsection

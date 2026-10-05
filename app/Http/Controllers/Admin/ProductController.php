@@ -73,13 +73,14 @@ class ProductController extends Controller
         $product = Product::query()->create($data);
 
         $this->syncVariations($product, $request->input('variations', []));
+        $this->syncOffers($product, $request->input('offers', []));
 
         return redirect()->route('admin.products.index')->with('status', 'Product created successfully.');
     }
 
     public function edit(Product $product): View
     {
-        $product->load('variations');
+        $product->load(['variations', 'offers']);
 
         return view('admin.products.form', [
             'product' => $product,
@@ -93,6 +94,7 @@ class ProductController extends Controller
         $product->update($data);
 
         $this->syncVariations($product, $request->input('variations', []));
+        $this->syncOffers($product, $request->input('offers', []));
 
         return redirect()->route('admin.products.index')->with('status', 'Product updated successfully.');
     }
@@ -115,6 +117,12 @@ class ProductController extends Controller
                 $cloneVariation->sku = $variation->sku.'-COPY-'.rand(10, 99);
             }
             $cloneVariation->save();
+        }
+
+        foreach ($product->offers as $offer) {
+            $cloneOffer = $offer->replicate();
+            $cloneOffer->product_id = $clone->id;
+            $cloneOffer->save();
         }
 
         return redirect()->route('admin.products.edit', $clone)->with('status', 'Product duplicated successfully. You are now editing the duplicate.');
@@ -180,6 +188,45 @@ class ProductController extends Controller
 
         // Delete any variations that were removed in the form
         $product->variations()->whereNotIn('id', $validVariationIds)->delete();
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $offersData
+     */
+    private function syncOffers(Product $product, array $offersData): void
+    {
+        $validOfferIds = [];
+
+        foreach ($offersData as $row) {
+            if (empty($row['min_quantity']) || empty($row['discount_percentage'])) {
+                continue;
+            }
+
+            $offerAttributes = [
+                'title' => $row['title'] ?? null,
+                'min_quantity' => max(2, (int) $row['min_quantity']),
+                'discount_percentage' => (float) $row['discount_percentage'],
+                'badge_label' => $row['badge_label'] ?? null,
+                'is_active' => isset($row['is_active']) ? (bool) $row['is_active'] : true,
+                'starts_at' => ! empty($row['starts_at']) ? $row['starts_at'] : null,
+                'ends_at' => ! empty($row['ends_at']) ? $row['ends_at'] : null,
+            ];
+
+            if (! empty($row['id'])) {
+                $existing = $product->offers()->find($row['id']);
+                if ($existing) {
+                    $existing->update($offerAttributes);
+                    $validOfferIds[] = $existing->id;
+
+                    continue;
+                }
+            }
+
+            $created = $product->offers()->create($offerAttributes);
+            $validOfferIds[] = $created->id;
+        }
+
+        $product->offers()->whereNotIn('id', $validOfferIds)->delete();
     }
 
     /**

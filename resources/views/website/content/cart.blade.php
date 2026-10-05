@@ -239,7 +239,13 @@
 
                                                 <td class="price-cell">
                                                     <div class="fw-semibold text-dark fs-6">${{ number_format($product->price, 2) }}</div>
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">In Stock</span>
+                                                    @if (!empty($item['appliedOffer']))
+                                                        <span class="badge bg-warning text-dark border border-warning-subtle mt-1" style="font-size: 11px;">
+                                                            <i class="fa-solid fa-tags me-1"></i> {{ $item['appliedOffer']->title ?: ('Multi-Buy ' . (int)$item['appliedOffer']->discount_percentage . '% OFF') }}
+                                                        </span>
+                                                    @else
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">In Stock</span>
+                                                    @endif
                                                 </td>
 
                                                 <td class="qty-cell">
@@ -304,6 +310,12 @@
                                     <span class="text-muted">Subtotal</span>
                                     <span class="fw-semibold text-dark">${{ number_format($cartSubtotalCents / 100, 2) }}</span>
                                 </div>
+                                @if (!empty($cartSavingsCents) && $cartSavingsCents > 0)
+                                    <div class="d-flex justify-content-between align-items-center mb-2 text-success">
+                                        <span><i class="fa-solid fa-tag me-1"></i> Multi-Buy Savings</span>
+                                        <span class="fw-bold">-${{ number_format($cartSavingsCents / 100, 2) }}</span>
+                                    </div>
+                                @endif
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="text-muted">Delivery</span>
                                     <span class="fw-semibold {{ $shippingFeeCents === 0 ? 'text-success' : 'text-dark' }}">

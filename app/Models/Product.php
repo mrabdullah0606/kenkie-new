@@ -51,6 +51,16 @@ class Product extends Model
         return $this->hasMany(ProductVariation::class)->where('is_active', true);
     }
 
+    public function offers(): HasMany
+    {
+        return $this->hasMany(ProductOffer::class)->orderBy('min_quantity');
+    }
+
+    public function activeOffers(): HasMany
+    {
+        return $this->offers()->active();
+    }
+
     public function getHasVariationsAttribute(): bool
     {
         return $this->variations()->count() > 0;

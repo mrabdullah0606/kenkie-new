@@ -476,6 +476,105 @@
                 </div>
             </div>
 
+            <!-- FULL WIDTH ROW: Multiple Buyer Offers (Volume & Tiered Discounts) -->
+            <div class="col-12">
+                <div class="card mb-4 shadow-sm border">
+                    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2 card-header-toggle" data-bs-toggle="collapse" data-bs-target="#offersCollapse" aria-expanded="true" aria-controls="offersCollapse">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="rounded-3 bg-warning-subtle text-warning p-2 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="fa-solid fa-tags fs-5"></i>
+                            </span>
+                            <div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <h5 class="fw-bold mb-0 text-dark">Multiple Buyer Offers & Tiered Discounts</h5>
+                                    <span class="badge bg-warning-subtle text-dark border border-warning" id="offersCountBadge">
+                                        {{ $product->offers->count() }} {{ Str::plural('Offer', $product->offers->count()) }}
+                                    </span>
+                                </div>
+                                <small class="text-muted">Configure bundle savings such as Buy 2 Get 10% Off or Buy 3+ Get 15% Off with optional start & end dates.</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2" onclick="event.stopPropagation();">
+                            <button type="button" class="btn btn-sm btn-outline-warning text-dark fw-semibold d-inline-flex align-items-center gap-1" id="addOfferBtn">
+                                <i class="fa-solid fa-plus"></i> Add Multi-Buy Offer
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" data-bs-toggle="collapse" data-bs-target="#offersCollapse" aria-expanded="true" aria-controls="offersCollapse" title="Click to collapse / expand Offers section">
+                                <i class="fa-solid fa-chevron-down chevron-rotate"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="collapse show" id="offersCollapse">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0" id="offersTable">
+                                    <thead class="table-light">
+                                        <tr class="small text-uppercase text-muted">
+                                            <th style="min-width: 200px;">Offer Title / Headline</th>
+                                            <th style="min-width: 110px;">Min Qty</th>
+                                            <th style="min-width: 130px;">Discount (%)</th>
+                                            <th style="min-width: 140px;">Badge Tag</th>
+                                            <th style="min-width: 160px;">Starts At</th>
+                                            <th style="min-width: 160px;">Ends At</th>
+                                            <th style="min-width: 70px;" class="text-center">Active</th>
+                                            <th style="min-width: 50px;" class="text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="offersBody">
+                                        @forelse (old('offers', $product->offers) as $index => $offer)
+                                            @php
+                                                $off = is_array($offer) ? (object) $offer : $offer;
+                                            @endphp
+                                            <tr class="offer-row">
+                                                @if (!empty($off->id))
+                                                    <input type="hidden" name="offers[{{ $index }}][id]" value="{{ $off->id }}">
+                                                @endif
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="offers[{{ $index }}][title]" value="{{ $off->title ?? '' }}" placeholder="e.g. Buy 2 Save 10%">
+                                                </td>
+                                                <td>
+                                                    <input type="number" min="2" class="form-control form-control-sm text-center" name="offers[{{ $index }}][min_quantity]" value="{{ $off->min_quantity ?? 2 }}">
+                                                </td>
+                                                <td>
+                                                    <div class="input-group input-group-sm">
+                                                        <input type="number" step="0.01" min="1" max="100" class="form-control" name="offers[{{ $index }}][discount_percentage]" value="{{ $off->discount_percentage ?? 10 }}">
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control form-control-sm" name="offers[{{ $index }}][badge_label]" value="{{ $off->badge_label ?? '' }}" placeholder="POPULAR">
+                                                </td>
+                                                <td>
+                                                    <input type="datetime-local" class="form-control form-control-sm" name="offers[{{ $index }}][starts_at]" value="{{ !empty($off->starts_at) ? \Carbon\Carbon::parse($off->starts_at)->format('Y-m-d\TH:i') : '' }}">
+                                                </td>
+                                                <td>
+                                                    <input type="datetime-local" class="form-control form-control-sm" name="offers[{{ $index }}][ends_at]" value="{{ !empty($off->ends_at) ? \Carbon\Carbon::parse($off->ends_at)->format('Y-m-d\TH:i') : '' }}">
+                                                </td>
+                                                <td class="text-center">
+                                                    <input type="hidden" name="offers[{{ $index }}][is_active]" value="0">
+                                                    <input type="checkbox" class="form-check-input" name="offers[{{ $index }}][is_active]" value="1" @checked($off->is_active ?? true)>
+                                                </td>
+                                                <td class="text-center">
+                                                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-offer-btn" title="Remove Offer">
+                                                        <i class="fa-solid fa-trash-can"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr id="noOffersRow">
+                                                <td colspan="8" class="text-center text-muted py-4 small">
+                                                    <i class="fa-solid fa-tags fs-3 text-muted d-block mb-2"></i>
+                                                    No buyer offers configured yet. Click <strong>"Add Multi-Buy Offer"</strong> above to incentivize bulk orders (e.g. Buy 2 Get 10% Off).
+                                                </td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- FULL WIDTH ROW: SEO & Search Engine Optimization Card (Expandable) -->
             <div class="col-12">
                 <div class="card mb-4 shadow-sm border">
@@ -779,6 +878,65 @@ document.addEventListener('DOMContentLoaded', function() {
             const btn = e.target.closest('.remove-variation-btn');
             if (btn) {
                 const row = btn.closest('.variation-row');
+                if (row) {
+                    row.remove();
+                }
+            }
+        });
+    }
+
+    // 8. Dynamic Multi-Buy Offers Management
+    const addOfferBtn = document.getElementById('addOfferBtn');
+    const offersBody = document.getElementById('offersBody');
+    const noOffersRow = document.getElementById('noOffersRow');
+    let offerIndex = document.querySelectorAll('.offer-row').length + 100;
+
+    if (addOfferBtn && offersBody) {
+        addOfferBtn.addEventListener('click', function() {
+            if (noOffersRow) noOffersRow.remove();
+
+            const tr = document.createElement('tr');
+            tr.className = 'offer-row';
+            tr.innerHTML = `
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="offers[${offerIndex}][title]" placeholder="e.g. Buy 2 Save 10%">
+                </td>
+                <td>
+                    <input type="number" min="2" class="form-control form-control-sm text-center" name="offers[${offerIndex}][min_quantity]" value="2">
+                </td>
+                <td>
+                    <div class="input-group input-group-sm">
+                        <input type="number" step="0.01" min="1" max="100" class="form-control" name="offers[${offerIndex}][discount_percentage]" value="10">
+                        <span class="input-group-text">%</span>
+                    </div>
+                </td>
+                <td>
+                    <input type="text" class="form-control form-control-sm" name="offers[${offerIndex}][badge_label]" placeholder="POPULAR">
+                </td>
+                <td>
+                    <input type="datetime-local" class="form-control form-control-sm" name="offers[${offerIndex}][starts_at]">
+                </td>
+                <td>
+                    <input type="datetime-local" class="form-control form-control-sm" name="offers[${offerIndex}][ends_at]">
+                </td>
+                <td class="text-center">
+                    <input type="hidden" name="offers[${offerIndex}][is_active]" value="0">
+                    <input type="checkbox" class="form-check-input" name="offers[${offerIndex}][is_active]" value="1" checked>
+                </td>
+                <td class="text-center">
+                    <button type="button" class="btn btn-sm btn-link text-danger p-0 remove-offer-btn" title="Remove Offer">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
+            `;
+            offersBody.appendChild(tr);
+            offerIndex++;
+        });
+
+        offersBody.addEventListener('click', function(e) {
+            const btn = e.target.closest('.remove-offer-btn');
+            if (btn) {
+                const row = btn.closest('.offer-row');
                 if (row) {
                     row.remove();
                 }
