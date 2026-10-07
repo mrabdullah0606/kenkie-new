@@ -4,9 +4,11 @@ use App\Http\Controllers\Admin\BankOfferController as AdminBankOfferController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
+use App\Http\Controllers\Admin\MarketingSettingController as AdminMarketingSettingController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
+use App\Http\Controllers\Admin\PromotionalPopupController as AdminPromotionalPopupController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
@@ -56,11 +58,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::put('/home-content/slides/{slide}', [AdminHomeController::class, 'updateSlide'])->name('home.slides.update');
     Route::delete('/home-content/slides/{slide}', [AdminHomeController::class, 'destroySlide'])->name('home.slides.destroy');
     Route::resource('offers', AdminBankOfferController::class)->except('show');
+    Route::patch('popups/{popup}/toggle-status', [AdminPromotionalPopupController::class, 'toggleStatus'])->name('popups.toggle-status');
+    Route::resource('popups', AdminPromotionalPopupController::class)->except('show');
+    Route::get('marketing', [AdminMarketingSettingController::class, 'index'])->name('marketing.index');
+    Route::put('marketing/whatsapp', [AdminMarketingSettingController::class, 'updateWhatsApp'])->name('marketing.whatsapp');
+    Route::put('marketing/pixels', [AdminMarketingSettingController::class, 'updatePixels'])->name('marketing.pixels');
+    Route::put('marketing/seo', [AdminMarketingSettingController::class, 'updateSeo'])->name('marketing.seo');
     Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
+use App\Http\Controllers\TrackOrderController;
 use App\Http\Controllers\UserDashboardController;
 
 Route::middleware('auth')->group(function () {
@@ -80,5 +89,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Public order tracking (no login required)
+Route::get('/track-order', [TrackOrderController::class, 'show'])->name('track-order.show');
+Route::post('/track-order', [TrackOrderController::class, 'lookup'])->name('track-order.lookup');
 
 require __DIR__.'/auth.php';

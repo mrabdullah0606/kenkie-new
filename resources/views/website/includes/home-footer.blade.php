@@ -48,7 +48,7 @@
                             <a href="{{ route('about') }}" class="light-text">Payments</a>
                         </li>
                         <li>
-                            <a href="{{ auth()->check() ? route('account.index') : route('login') }}" class="light-text">Track My Order</a>
+                            <a href="{{ route('track-order.show') }}" class="light-text">Track My Order</a>
                         </li>
                         <li>
                             <a href="{{ route('return.policy') }}" class="light-text">Returns &amp; Refund Policy</a>

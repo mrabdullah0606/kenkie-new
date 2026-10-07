@@ -83,6 +83,8 @@ class CategoryController extends Controller
             'slug' => ['required', 'alpha_dash', 'max:255', Rule::unique('categories', 'slug')->ignore($category)],
             'image' => ['nullable', 'string', 'max:255'],
             'image_file' => ['nullable', 'image', 'max:10240'],
+            'size_chart_file' => ['nullable', 'image', 'max:10240'],
+            'remove_size_chart' => ['sometimes', 'boolean'],
             'position' => ['required', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
@@ -92,7 +94,14 @@ class CategoryController extends Controller
             $validated['image'] = 'storage/'.$path;
         }
 
-        unset($validated['image_file']);
+        if ($request->hasFile('size_chart_file')) {
+            $path = $request->file('size_chart_file')->store('categories/size_charts', 'public');
+            $validated['size_chart'] = 'storage/'.$path;
+        } elseif ($request->boolean('remove_size_chart')) {
+            $validated['size_chart'] = null;
+        }
+
+        unset($validated['image_file'], $validated['size_chart_file'], $validated['remove_size_chart']);
 
         $validated['is_active'] = $request->boolean('is_active', $category?->is_active ?? true);
 

@@ -209,6 +209,7 @@ class ProductController extends Controller
                 'discount_percentage' => (float) $row['discount_percentage'],
                 'badge_label' => $row['badge_label'] ?? null,
                 'is_active' => isset($row['is_active']) ? (bool) $row['is_active'] : true,
+                'allow_on_discounted' => isset($row['allow_on_discounted']) ? (bool) $row['allow_on_discounted'] : false,
                 'starts_at' => ! empty($row['starts_at']) ? $row['starts_at'] : null,
                 'ends_at' => ! empty($row['ends_at']) ? $row['ends_at'] : null,
             ];

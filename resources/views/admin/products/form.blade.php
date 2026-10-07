@@ -524,6 +524,7 @@
                                             <th style="min-width: 140px;">Badge Tag</th>
                                             <th style="min-width: 160px;">Starts At</th>
                                             <th style="min-width: 160px;">Ends At</th>
+                                            <th style="min-width: 100px;" class="text-center" title="Allow this offer to apply on products that are already discounted / on sale">On Sale Items</th>
                                             <th style="min-width: 70px;" class="text-center">Active</th>
                                             <th style="min-width: 50px;" class="text-center">Action</th>
                                         </tr>
@@ -559,6 +560,10 @@
                                                     <input type="datetime-local" class="form-control form-control-sm" name="offers[{{ $index }}][ends_at]" value="{{ !empty($off->ends_at) ? \Carbon\Carbon::parse($off->ends_at)->format('Y-m-d\TH:i') : '' }}">
                                                 </td>
                                                 <td class="text-center">
+                                                    <input type="hidden" name="offers[{{ $index }}][allow_on_discounted]" value="0">
+                                                    <input type="checkbox" class="form-check-input" name="offers[{{ $index }}][allow_on_discounted]" value="1" @checked($off->allow_on_discounted ?? true) title="Enable to apply even on already discounted products">
+                                                </td>
+                                                <td class="text-center">
                                                     <input type="hidden" name="offers[{{ $index }}][is_active]" value="0">
                                                     <input type="checkbox" class="form-check-input" name="offers[{{ $index }}][is_active]" value="1" @checked($off->is_active ?? true)>
                                                 </td>
@@ -570,7 +575,7 @@
                                             </tr>
                                         @empty
                                             <tr id="noOffersRow">
-                                                <td colspan="8" class="text-center text-muted py-4 small">
+                                                <td colspan="9" class="text-center text-muted py-4 small">
                                                     <i class="fa-solid fa-tags fs-3 text-muted d-block mb-2"></i>
                                                     No buyer offers configured yet. Click <strong>"Add Multi-Buy Offer"</strong> above to incentivize bulk orders (e.g. Buy 2 Get 10% Off).
                                                 </td>
@@ -939,6 +944,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
                 <td>
                     <input type="datetime-local" class="form-control form-control-sm" name="offers[${offerIndex}][ends_at]">
+                </td>
+                <td class="text-center">
+                    <input type="hidden" name="offers[${offerIndex}][allow_on_discounted]" value="0">
+                    <input type="checkbox" class="form-check-input" name="offers[${offerIndex}][allow_on_discounted]" value="1" checked title="Enable to apply even on already discounted products">
                 </td>
                 <td class="text-center">
                     <input type="hidden" name="offers[${offerIndex}][is_active]" value="0">

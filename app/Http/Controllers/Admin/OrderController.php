@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Services\CourierShippingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -69,6 +70,8 @@ class OrderController extends Controller
         return view('admin.orders.show', [
             'order' => $order->load(['items', 'user']),
             'allowedStatuses' => self::ALLOWED_STATUSES,
+            'supportedCouriers' => CourierShippingService::supportedCouriers(),
+            'trackingStatuses' => CourierShippingService::trackingStatuses(),
         ]);
     }
 
@@ -100,12 +103,66 @@ class OrderController extends Controller
     public function updateTracking(Request $request, Order $order): RedirectResponse
     {
         $validated = $request->validate([
+            'courier_code' => ['nullable', 'string', 'max:50'],
             'courier_name' => ['nullable', 'string', 'max:255'],
             'tracking_number' => ['nullable', 'string', 'max:255'],
             'tracking_url' => ['nullable', 'string', 'max:500'],
+            'tracking_status' => ['nullable', 'string', 'max:50'],
+            'auto_mark_shipped' => ['nullable', 'boolean'],
         ]);
 
-        $order->update($validated);
+        $courierCode = $validated['courier_code'] ?? null;
+        $courierName = $validated['courier_name'] ?? null;
+        $trackingNumber = trim((string) ($validated['tracking_number'] ?? ''));
+        $trackingUrl = trim((string) ($validated['tracking_url'] ?? ''));
+        $trackingStatus = $validated['tracking_status'] ?? ($order->tracking_status ?: 'pending');
+
+        $supported = CourierShippingService::supportedCouriers();
+
+        if ($courierCode && isset($supported[$courierCode])) {
+            if (empty($courierName) || $courierCode !== 'other') {
+                $courierName = $supported[$courierCode]['name'];
+            }
+        } elseif ($courierName) {
+            $courierCode = CourierShippingService::detectCourierCode($courierName);
+            if ($courierCode !== 'other' && empty($courierName)) {
+                $courierName = $supported[$courierCode]['name'];
+            }
+        }
+
+        // Auto-generate tracking URL if empty and courier + number are available
+        if (empty($trackingUrl) && ! empty($trackingNumber)) {
+            $generated = CourierShippingService::generateTrackingUrl($courierCode ?: $courierName, $trackingNumber);
+            if ($generated) {
+                $trackingUrl = $generated;
+            }
+        }
+
+        $updates = [
+            'courier_code' => $courierCode,
+            'courier_name' => $courierName,
+            'tracking_number' => $trackingNumber ?: null,
+            'tracking_url' => $trackingUrl ?: null,
+            'tracking_status' => $trackingStatus,
+        ];
+
+        // If auto mark shipped or tracking status indicates in transit/dispatched and order is still pending/processing
+        $shouldMarkShipped = $request->boolean('auto_mark_shipped') || in_array($trackingStatus, ['in_transit', 'out_for_delivery', 'delivered'], true);
+        if ($shouldMarkShipped && in_array($order->status, ['pending', 'processing'], true)) {
+            $updates['status'] = 'shipped';
+            if (empty($order->shipped_at)) {
+                $updates['shipped_at'] = now();
+            }
+        }
+
+        if ($trackingStatus === 'delivered' && empty($order->delivered_at)) {
+            $updates['delivered_at'] = now();
+            if ($order->status !== 'delivered' && $order->status !== 'completed') {
+                $updates['status'] = 'delivered';
+            }
+        }
+
+        $order->update($updates);
 
         return redirect()->route('admin.orders.show', $order)->with('status', 'Courier tracking information updated successfully.');
     }

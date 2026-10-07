@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CourierShippingService;
 use Database\Factories\OrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -30,8 +31,10 @@ class Order extends Model
         'payment_status',
         'admin_notes',
         'courier_name',
+        'courier_code',
         'tracking_number',
         'tracking_url',
+        'tracking_status',
         'shipped_at',
         'delivered_at',
         'stripe_session_id',
@@ -54,6 +57,48 @@ class Order extends Model
     public function getFormattedOrderIdAttribute(): string
     {
         return $this->order_number ?? ('KNK-'.(1000 + $this->id));
+    }
+
+    public function getLiveTrackingUrlAttribute(): ?string
+    {
+        if (! empty($this->tracking_url)) {
+            return $this->tracking_url;
+        }
+
+        return CourierShippingService::generateTrackingUrl(
+            $this->courier_code ?: $this->courier_name,
+            $this->tracking_number
+        );
+    }
+
+    /**
+     * @return array{code: string, name: string, badge_class: string, icon: string}
+     */
+    public function getCourierInfoAttribute(): array
+    {
+        $code = $this->courier_code ?: CourierShippingService::detectCourierCode($this->courier_name);
+        $couriers = CourierShippingService::supportedCouriers();
+
+        return $couriers[$code] ?? [
+            'code' => 'other',
+            'name' => $this->courier_name ?: 'Courier',
+            'badge_class' => 'bg-secondary text-white',
+            'icon' => 'fa-solid fa-truck',
+        ];
+    }
+
+    /**
+     * @return array{label: string, badge_class: string}
+     */
+    public function getTrackingStatusInfoAttribute(): array
+    {
+        $statuses = CourierShippingService::trackingStatuses();
+        $key = $this->tracking_status ?: 'pending';
+
+        return $statuses[$key] ?? [
+            'label' => ucfirst(str_replace('_', ' ', $key)),
+            'badge_class' => 'bg-secondary text-white',
+        ];
     }
 
     public function user(): BelongsTo

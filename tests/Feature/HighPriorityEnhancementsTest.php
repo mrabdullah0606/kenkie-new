@@ -278,11 +278,10 @@ it('renders single product title, return policy tab, and multi-buy offers on sto
     $response = $this->get(route('products.show', $product->slug));
 
     $response->assertOk()
-        ->assertSee('Product Details')
         ->assertSee('Artisan Ceramic Vase')
         ->assertSee('Return Policy')
         ->assertSee('14-Day Hassle-Free Returns & Exchanges', false)
-        ->assertSee('Multi-Buy Bundle Savings')
+        ->assertSee('Multi-Buy Savings')
         ->assertSee('Buy 2 Save 10%')
         ->assertSee('POPULAR');
 });

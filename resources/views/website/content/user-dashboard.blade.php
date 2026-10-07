@@ -477,9 +477,22 @@
                                                     @else
                                                         <span class="badge bg-warning-subtle text-warning border border-warning-subtle" style="font-size: 11px;">
                                                             <i class="fa-regular fa-clock me-1"></i> Pending
-                                                        </span>
+                                                         </span>
                                                     @endif
                                                 </div>
+                                                {{-- Courier tracking badge --}}
+                                                @if ($order->tracking_number)
+                                                    @php $ci = $order->courier_info; $si = $order->tracking_status_info; $lu = $order->live_tracking_url; @endphp
+                                                    <span class="badge {{ $ci['badge_class'] }}" style="font-size: 11px;">
+                                                        <i class="{{ $ci['icon'] }} me-1"></i>{{ $ci['name'] }}
+                                                    </span>
+                                                    <span class="badge {{ $si['badge_class'] }}" style="font-size: 11px;">{{ $si['label'] }}</span>
+                                                    @if ($lu)
+                                                        <a href="{{ $lu }}" target="_blank" class="badge bg-success text-white text-decoration-none" style="font-size: 11px;">
+                                                            <i class="fa-solid fa-satellite-dish me-1"></i> Track
+                                                        </a>
+                                                    @endif
+                                                @endif
                                             </div>
                                             <div class="d-flex align-items-center gap-3">
                                                 <span class="text-muted small">Subtotal: ${{ number_format((float) $order->subtotal, 2) }}</span>

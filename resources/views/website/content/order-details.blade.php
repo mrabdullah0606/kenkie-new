@@ -97,6 +97,40 @@
                                 </div>
                             </div>
 
+                            {{-- Courier Tracking Info --}}
+                            @if ($order->tracking_number)
+                                @php
+                                    $courierInfo = $order->courier_info;
+                                    $statusInfo  = $order->tracking_status_info;
+                                    $liveUrl     = $order->live_tracking_url;
+                                @endphp
+                                <div class="alert border rounded-3 d-flex align-items-center gap-3 py-3 px-4 mb-4" style="background:#f0fdf4; border-color:#86efac!important;">
+                                    <div class="fs-3">
+                                        <i class="{{ $courierInfo['icon'] }} text-success"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                            <span class="badge {{ $courierInfo['badge_class'] }} px-2 py-1">
+                                                {{ $courierInfo['name'] }}
+                                            </span>
+                                            <span class="badge {{ $statusInfo['badge_class'] }} px-2 py-1">
+                                                {{ $statusInfo['label'] }}
+                                            </span>
+                                        </div>
+                                        <p class="mb-0 small">
+                                            <strong>Tracking #:</strong>
+                                            <span class="font-monospace">{{ $order->tracking_number }}</span>
+                                        </p>
+                                    </div>
+                                    @if ($liveUrl)
+                                        <a href="{{ $liveUrl }}" target="_blank"
+                                            class="btn btn-success btn-sm text-nowrap fw-semibold">
+                                            <i class="fa-solid fa-satellite-dish me-1"></i> Track Parcel
+                                        </a>
+                                    @endif
+                                </div>
+                            @endif
+
                             <!-- Purchased Items List -->
                             <h5 class="fw-bold mb-3">Order Items ({{ $order->items->count() }})</h5>
                             <div class="table-responsive mb-4">
