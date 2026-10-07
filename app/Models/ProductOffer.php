@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'discount_percentage',
     'badge_label',
     'is_active',
+    'allow_on_discounted',
     'starts_at',
     'ends_at',
 ])]
@@ -52,6 +53,7 @@ class ProductOffer extends Model
             'min_quantity' => 'integer',
             'discount_percentage' => 'decimal:2',
             'is_active' => 'boolean',
+            'allow_on_discounted' => 'boolean',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
         ];

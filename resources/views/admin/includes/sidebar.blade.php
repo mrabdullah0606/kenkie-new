@@ -90,6 +90,20 @@
                     </li>
 
                     <li class="sidebar-list">
+                        <a class="sidebar-link {{ request()->routeIs('admin.popups.*') ? 'active' : '' }}" href="{{ route('admin.popups.index') }}">
+                            <i class="fa-solid fa-bullhorn"></i>
+                            <span>Promotional Pop-ups</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-list">
+                        <a class="sidebar-link {{ request()->routeIs('admin.marketing.*') ? 'active' : '' }}" href="{{ route('admin.marketing.index') }}">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>Marketing & WhatsApp</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-list">
                         <a class="sidebar-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}" href="{{ route('admin.profile.edit') }}">
                             <i class="fa-solid fa-sliders"></i>
                             <span>Settings & Profile</span>

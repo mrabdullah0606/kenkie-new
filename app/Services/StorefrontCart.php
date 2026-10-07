@@ -87,10 +87,17 @@ class StorefrontCart
 
                 $unitPriceCents = (int) round((float) $product->price * 100);
                 $effectiveUnitPriceCents = $unitPriceCents;
+                $isProductDiscounted = $product->regular_price && (float) $product->regular_price > (float) $product->price;
 
                 $appliedOffer = $product->relationLoaded('activeOffers')
                     ? $product->activeOffers
-                        ->filter(fn ($offer) => $quantity >= $offer->min_quantity)
+                        ->filter(function ($offer) use ($quantity, $isProductDiscounted) {
+                            if ($isProductDiscounted && ! $offer->allow_on_discounted) {
+                                return false;
+                            }
+
+                            return $quantity >= $offer->min_quantity;
+                        })
                         ->sortByDesc('discount_percentage')
                         ->first()
                     : null;

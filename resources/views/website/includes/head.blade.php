@@ -1,13 +1,100 @@
+@php
+    $mktSettings = \App\Models\MarketingSetting::getSettings();
+    $siteTitle = $mktSettings->meta_title ?? 'KENKIE – Online Shopping Store | Home of the Future Gadgets.';
+    $siteDescription = $mktSettings->meta_description ?? 'KENKIE - Delivers all over UK | Deals in electronic devices, mobile accessories, top-notch handy gadgets and many more.';
+    $siteKeywords = $mktSettings->meta_keywords ?? 'KENKIE, online shopping store, electronics, gadgets, UK delivery, mobile accessories';
+    $googleVerification = $mktSettings->google_site_verification ?? '-dGzkf4mqQ32aE6zvmSo35tzlFXXwWPjpE9YBF6jpxg';
+
+    $resolvedPageTitle = View::hasSection('title_meta') 
+        ? View::yieldContent('title_meta') 
+        : (View::hasSection('title') ? View::yieldContent('title') : $siteTitle);
+
+    $resolvedDescription = View::hasSection('meta_description') ? View::yieldContent('meta_description') : $siteDescription;
+    $resolvedKeywords = View::hasSection('meta_keywords') ? View::yieldContent('meta_keywords') : $siteKeywords;
+    $resolvedOgTitle = View::hasSection('og_title') ? View::yieldContent('og_title') : ($resolvedPageTitle && $resolvedPageTitle !== 'Home' ? $resolvedPageTitle : $siteTitle);
+    $resolvedOgDescription = View::hasSection('og_description') ? View::yieldContent('og_description') : $resolvedDescription;
+    $resolvedOgType = View::hasSection('og_type') ? View::yieldContent('og_type') : 'website';
+    $resolvedOgUrl = View::hasSection('og_url') ? View::yieldContent('og_url') : url()->current();
+    $resolvedCanonical = View::hasSection('canonical_url') ? View::yieldContent('canonical_url') : url()->current();
+    $resolvedOgImage = View::hasSection('og_image') ? View::yieldContent('og_image') : asset('assets/images/banner/kenkie-hero-banner.jpg');
+@endphp
+<meta charset="UTF-8">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="profile" href="https://gmpg.org/xfn/11">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="description" content="Fastkart">
-<meta name="keywords" content="Fastkart">
-<meta name="author" content="Fastkart">
+
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Optimized SEO Meta Tags -->
+<title>{{ $resolvedPageTitle }}</title>
+<meta name="description" content="{{ $resolvedDescription }}">
+<meta name="keywords" content="{{ $resolvedKeywords }}">
+<meta name="author" content="KENKIE">
+<link rel="canonical" href="{{ $resolvedCanonical }}">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="{{ $resolvedOgType }}" />
+<meta property="og:title" content="{{ $resolvedOgTitle }}" />
+<meta property="og:description" content="{{ $resolvedOgDescription }}" />
+<meta property="og:url" content="{{ $resolvedOgUrl }}" />
+<meta property="og:site_name" content="KENKIE" />
+<meta property="article:modified_time" content="2022-12-19T17:47:07+00:00" />
+<meta property="og:image" content="{{ $resolvedOgImage }}" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="{{ $resolvedOgTitle }}" />
+<meta name="twitter:description" content="{{ $resolvedOgDescription }}" />
+<meta name="twitter:image" content="{{ $resolvedOgImage }}" />
+
+@if(!empty($googleVerification))
+<meta name="google-site-verification" content="{{ $googleVerification }}" />
+@endif
+
+<!-- Schema.org JSON-LD -->
+<script type="application/ld+json" class="yoast-schema-graph">
+{
+    "@@context": "https://schema.org",
+    "@@graph": [
+        {
+            "@@type": "WebSite",
+            "@@id": "{{ url('/') }}/#website",
+            "url": "{{ url('/') }}",
+            "name": "KENKIE",
+            "description": "KENKIE – Online Shopping Store | Home of the Future Gadgets",
+            "potentialAction": [{
+                "@@type": "SearchAction",
+                "target": {
+                    "@@type": "EntryPoint",
+                    "urlTemplate": "{{ url('/search/live?search={search_term_string}') }}"
+                },
+                "query-input": "required name=search_term_string"
+            }],
+            "inLanguage": "en-US"
+        },
+        {
+            "@@type": "WebPage",
+            "@@id": "{{ url()->current() }}/",
+            "url": "{{ url()->current() }}",
+            "name": "{{ $resolvedPageTitle }}",
+            "isPartOf": {
+                "@@id": "{{ url('/') }}/#website"
+            },
+            "description": "{{ $resolvedDescription }}",
+            "inLanguage": "en-US"
+        }
+    ]
+}
+</script>
+
+<link rel="dns-prefetch" href="//unpkg.com" />
+<link rel="dns-prefetch" href="//fonts.googleapis.com" />
+<link rel="alternate" type="application/rss+xml" title="KENKIE &raquo; Feed" href="{{ url('/feed') }}" />
 <link rel="icon" href="@yield('favicon', asset('assets/images/logo/kenkie-favicon-32.png'))" type="image/png">
 <link rel="apple-touch-icon" href="{{ asset('assets/images/logo/kenkie-favicon-180.png') }}">
-<title>@yield('title', config('app.name'))</title>
 
 <link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">

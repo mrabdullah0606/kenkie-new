@@ -157,31 +157,113 @@
 
             <!-- Courier & Shipment Tracking Card -->
             <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-truck-fast text-primary me-2"></i>Courier & Tracking Info</h5>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="fw-bold mb-0"><i class="fa-solid fa-truck-fast text-primary me-2"></i>Courier & Tracking</h5>
+                    @if ($order->tracking_number)
+                        @php $courierInfo = $order->courier_info; $statusInfo = $order->tracking_status_info; @endphp
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge {{ $courierInfo['badge_class'] }} px-2 py-1 small">
+                                <i class="{{ $courierInfo['icon'] }} me-1"></i>{{ $courierInfo['name'] }}
+                            </span>
+                            <span class="badge {{ $statusInfo['badge_class'] }} px-2 py-1 small">{{ $statusInfo['label'] }}</span>
+                        </div>
+                    @endif
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('admin.orders.update-tracking', $order) }}">
+                    {{-- Current tracking number display --}}
+                    @if ($order->tracking_number)
+                        @php $liveUrl = $order->live_tracking_url; @endphp
+                        <div class="alert alert-light border d-flex align-items-center gap-3 py-2 px-3 mb-3">
+                            <i class="fa-solid fa-barcode text-muted fs-5"></i>
+                            <div class="flex-grow-1">
+                                <span class="text-muted small d-block">Current Tracking #</span>
+                                <strong class="font-monospace text-dark">{{ $order->tracking_number }}</strong>
+                            </div>
+                            @if ($liveUrl)
+                                <a href="{{ $liveUrl }}" target="_blank" class="btn btn-sm btn-success text-nowrap">
+                                    <i class="fa-solid fa-satellite-dish me-1"></i> Track Live
+                                </a>
+                            @endif
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('admin.orders.update-tracking', $order) }}" id="trackingForm">
                         @csrf
                         @method('PATCH')
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold" for="courier_name">Courier / Carrier Name</label>
-                            <input type="text" name="courier_name" id="courier_name" class="form-control form-control-sm" value="{{ old('courier_name', $order->courier_name) }}" placeholder="e.g. FedEx, DHL, Royal Mail, TCS">
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label small fw-semibold" for="tracking_number">Tracking Number / AWB</label>
-                            <input type="text" name="tracking_number" id="tracking_number" class="form-control form-control-sm font-monospace" value="{{ old('tracking_number', $order->tracking_number) }}" placeholder="e.g. TRK-987654321">
-                        </div>
+
+                        {{-- Courier Selector Buttons --}}
                         <div class="mb-3">
-                            <label class="form-label small fw-semibold" for="tracking_url">Tracking URL (Optional)</label>
-                            <input type="url" name="tracking_url" id="tracking_url" class="form-control form-control-sm" value="{{ old('tracking_url', $order->tracking_url) }}" placeholder="https://courier.com/track?no=...">
+                            <label class="form-label small fw-semibold d-block mb-2">Select Courier</label>
+                            <input type="hidden" name="courier_code" id="courier_code_input" value="{{ old('courier_code', $order->courier_code) }}">
+                            <div class="d-flex flex-wrap gap-2" id="courierBtns">
+                                @foreach ($supportedCouriers as $code => $courier)
+                                    <button type="button"
+                                        class="btn btn-sm courier-btn {{ old('courier_code', $order->courier_code) === $code ? 'btn-dark active' : 'btn-outline-secondary' }}"
+                                        data-code="{{ $code }}"
+                                        data-name="{{ $courier['name'] }}"
+                                        data-template="{{ $courier['tracking_url_template'] ?? '' }}"
+                                        data-placeholder="{{ $courier['placeholder'] }}">
+                                        <i class="{{ $courier['icon'] }} me-1"></i>{{ $courier['name'] }}
+                                    </button>
+                                @endforeach
+                            </div>
                         </div>
+
+                        {{-- Tracking Number --}}
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold" for="tracking_number">Tracking Number</label>
+                            <input type="text" name="tracking_number" id="tracking_number"
+                                class="form-control form-control-sm font-monospace"
+                                value="{{ old('tracking_number', $order->tracking_number) }}"
+                                placeholder="{{ $supportedCouriers[$order->courier_code ?? 'other']['placeholder'] ?? 'e.g. tracking number' }}">
+                        </div>
+
+                        {{-- Live URL Preview --}}
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold" for="tracking_url">
+                                Tracking URL
+                                <span class="text-muted fw-normal">(auto-generated · override if needed)</span>
+                            </label>
+                            <input type="url" name="tracking_url" id="tracking_url"
+                                class="form-control form-control-sm"
+                                value="{{ old('tracking_url', $order->tracking_url) }}"
+                                placeholder="Auto-generated from courier + number">
+                            <div id="urlPreview" class="mt-1 d-none">
+                                <small class="text-success"><i class="fa-solid fa-link me-1"></i>
+                                    Preview: <a href="#" id="urlPreviewLink" target="_blank" class="text-success small"></a>
+                                </small>
+                            </div>
+                        </div>
+
+                        {{-- Tracking Status --}}
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold" for="tracking_status">Tracking Status</label>
+                            <select name="tracking_status" id="tracking_status" class="form-select form-select-sm">
+                                @foreach ($trackingStatuses as $key => $ts)
+                                    <option value="{{ $key }}" @selected(($order->tracking_status ?: 'pending') === $key)>
+                                        {{ $ts['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Auto mark shipped --}}
+                        @if (in_array($order->status, ['pending', 'processing']))
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="auto_mark_shipped" id="auto_mark_shipped" value="1">
+                                <label class="form-check-label small" for="auto_mark_shipped">
+                                    Auto-update order status to <strong>Shipped</strong> when saving
+                                </label>
+                            </div>
+                        @endif
+
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-outline-primary btn-sm flex-grow-1">
-                                <i class="fa-solid fa-floppy-disk me-1"></i> Save Tracking
+                            <button type="submit" class="btn btn-primary btn-sm flex-grow-1">
+                                <i class="fa-solid fa-floppy-disk me-1"></i> Save Tracking Info
                             </button>
-                            @if ($order->tracking_url)
-                                <a href="{{ $order->tracking_url }}" target="_blank" class="btn btn-primary btn-sm" title="Track Live Shipment">
+                            @if ($order->live_tracking_url)
+                                <a href="{{ $order->live_tracking_url }}" target="_blank"
+                                    class="btn btn-outline-success btn-sm" title="Open Live Tracking">
                                     <i class="fa-solid fa-up-right-from-square"></i>
                                 </a>
                             @endif
@@ -312,3 +394,66 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    const codeInput  = document.getElementById('courier_code_input');
+    const numInput   = document.getElementById('tracking_number');
+    const urlInput   = document.getElementById('tracking_url');
+    const previewBox = document.getElementById('urlPreview');
+    const previewLnk = document.getElementById('urlPreviewLink');
+    const btns       = document.querySelectorAll('.courier-btn');
+
+    let currentTemplate = '';
+
+    // Restore template from active button on load
+    const activeBtn = document.querySelector('.courier-btn.active');
+    if (activeBtn) currentTemplate = activeBtn.dataset.template || '';
+
+    function updatePreview() {
+        const num = numInput.value.trim();
+        // Only auto-fill url if field is empty or was auto-filled before
+        if (!urlInput.value.trim() && currentTemplate && num) {
+            const generated = currentTemplate.replace('{tracking}', encodeURIComponent(num));
+            previewLnk.textContent = generated;
+            previewLnk.href = generated;
+            previewBox.classList.remove('d-none');
+        } else if (urlInput.value.trim()) {
+            previewBox.classList.add('d-none');
+        } else {
+            previewBox.classList.add('d-none');
+        }
+    }
+
+    btns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            btns.forEach(b => {
+                b.classList.remove('btn-dark', 'active');
+                b.classList.add('btn-outline-secondary');
+            });
+            this.classList.remove('btn-outline-secondary');
+            this.classList.add('btn-dark', 'active');
+            codeInput.value = this.dataset.code;
+            currentTemplate = this.dataset.template || '';
+            numInput.placeholder = this.dataset.placeholder || '';
+            // Clear manual URL so auto-preview takes over
+            urlInput.value = '';
+            updatePreview();
+        });
+    });
+
+    numInput.addEventListener('input', updatePreview);
+    urlInput.addEventListener('input', function () {
+        if (this.value.trim()) {
+            previewBox.classList.add('d-none');
+        } else {
+            updatePreview();
+        }
+    });
+
+    // Initial preview if number already set
+    if (numInput.value.trim()) updatePreview();
+})();
+</script>
+@endpush
