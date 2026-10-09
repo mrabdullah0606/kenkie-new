@@ -24,30 +24,162 @@ class CatalogSeeder extends Seeder
 
         $fallbackSource = public_path('assets/images/product/category/1.jpg');
 
-        $categoriesData = [
-            ['name' => 'Home, Furniture & DIY', 'slug' => 'home-furniture-diy', 'image' => 'assets/images/furniture/1.png'],
-            ['name' => 'Garden & Patio', 'slug' => 'garden-patio', 'image' => 'assets/images/furniture/8.png'],
-            ['name' => 'Vehicle Parts & Accessories', 'slug' => 'vehicle-parts-accessories', 'image' => 'assets/images/furniture/14.png'],
-            ['name' => 'Sporting Goods', 'slug' => 'sporting-goods', 'image' => 'assets/images/grocery/product/kichen/4.png'],
-            ['name' => 'Pet Supplies', 'slug' => 'pet-supplies', 'image' => 'assets/images/furniture/2.png'],
-            ['name' => 'Mobile Phones & Communication', 'slug' => 'mobile-phones-communication', 'image' => 'assets/images/grocery/product/personal-care/2.png'],
-            ['name' => 'Health & Beauty', 'slug' => 'health-beauty', 'image' => 'assets/images/grocery/product/personal-care/6.png'],
-            ['name' => 'Computers/Tablets & Networking', 'slug' => 'computers-tablets-networking', 'image' => 'assets/images/furniture/10.png'],
-            ['name' => 'Collectables', 'slug' => 'collectables', 'image' => 'assets/images/furniture/9.png'],
-            ['name' => 'Crafts', 'slug' => 'crafts', 'image' => 'assets/images/furniture/6.png'],
-            ['name' => 'Sound & Vision', 'slug' => 'sound-vision', 'image' => 'assets/images/furniture/11.png'],
+        $mainCategoriesData = [
+            [
+                'name' => 'Home, Furniture & DIY',
+                'slug' => 'home-furniture-diy',
+                'image' => 'assets/images/furniture/1.png',
+                'subcategories' => [
+                    ['name' => 'Luxury Bedding & Linens', 'slug' => 'luxury-bedding-linens', 'image' => 'assets/images/furniture/1.png'],
+                    ['name' => 'Bathroom Accessories', 'slug' => 'bathroom-accessories', 'image' => 'assets/images/furniture/2.png'],
+                    ['name' => 'Kitchenware & Cookware', 'slug' => 'kitchenware-cookware', 'image' => 'assets/images/grocery/product/kichen/1.png'],
+                    ['name' => 'Accent & Living Furniture', 'slug' => 'accent-living-furniture', 'image' => 'assets/images/furniture/6.png'],
+                ],
+            ],
+            [
+                'name' => 'Fashion & Apparel',
+                'slug' => 'fashion-apparel',
+                'image' => 'assets/images/furniture/11.png',
+                'subcategories' => [
+                    ['name' => "Men's Designer Wear", 'slug' => 'mens-designer-wear', 'image' => 'assets/images/furniture/11.png'],
+                    ['name' => "Women's Collection", 'slug' => 'womens-collection', 'image' => 'assets/images/furniture/5.png'],
+                    ['name' => 'Footwear & Accessories', 'slug' => 'footwear-accessories', 'image' => 'assets/images/furniture/3.png'],
+                ],
+            ],
+            [
+                'name' => 'Garden & Patio',
+                'slug' => 'garden-patio',
+                'image' => 'assets/images/furniture/8.png',
+                'subcategories' => [
+                    ['name' => 'Watering & Garden Hoses', 'slug' => 'watering-garden-hoses', 'image' => 'assets/images/furniture/8.png'],
+                    ['name' => 'Outdoor Planters & Pots', 'slug' => 'outdoor-planters-pots', 'image' => 'assets/images/furniture/9.png'],
+                    ['name' => 'Solar & Garden Lighting', 'slug' => 'solar-garden-lighting', 'image' => 'assets/images/furniture/10.png'],
+                ],
+            ],
+            [
+                'name' => 'Vehicle Parts & Accessories',
+                'slug' => 'vehicle-parts-accessories',
+                'image' => 'assets/images/furniture/14.png',
+                'subcategories' => [
+                    ['name' => 'Car Cleaning & Care', 'slug' => 'car-cleaning-care', 'image' => 'assets/images/grocery/product/kichen/3.png'],
+                    ['name' => 'Phone Mounts & Holders', 'slug' => 'car-phone-mounts-holders', 'image' => 'assets/images/furniture/13.png'],
+                    ['name' => 'Tyre & Maintenance Tools', 'slug' => 'tyre-maintenance-tools', 'image' => 'assets/images/furniture/14.png'],
+                ],
+            ],
+            [
+                'name' => 'Sporting Goods',
+                'slug' => 'sporting-goods',
+                'image' => 'assets/images/grocery/product/kichen/4.png',
+                'subcategories' => [
+                    ['name' => 'Yoga & Fitness Mats', 'slug' => 'yoga-fitness-mats', 'image' => 'assets/images/grocery/product/kichen/4.png'],
+                    ['name' => 'Resistance & Home Gym', 'slug' => 'resistance-home-gym', 'image' => 'assets/images/grocery/product/kichen/5.png'],
+                    ['name' => 'Camping & Outdoors', 'slug' => 'camping-outdoors', 'image' => 'assets/images/furniture/6.png'],
+                ],
+            ],
+            [
+                'name' => 'Pet Supplies',
+                'slug' => 'pet-supplies',
+                'image' => 'assets/images/furniture/2.png',
+                'subcategories' => [
+                    ['name' => 'Pet Beds & Furniture', 'slug' => 'pet-beds-furniture', 'image' => 'assets/images/furniture/2.png'],
+                    ['name' => 'Interactive Pet Toys', 'slug' => 'interactive-pet-toys', 'image' => 'assets/images/grocery/product/personal-care/1.png'],
+                    ['name' => 'Bowls & Feeders', 'slug' => 'bowls-feeders', 'image' => 'assets/images/grocery/product/kichen/6.png'],
+                ],
+            ],
+            [
+                'name' => 'Mobile Phones & Communication',
+                'slug' => 'mobile-phones-communication',
+                'image' => 'assets/images/grocery/product/personal-care/2.png',
+                'subcategories' => [
+                    ['name' => 'Wireless Chargers & Docks', 'slug' => 'wireless-chargers-docks', 'image' => 'assets/images/grocery/product/personal-care/2.png'],
+                    ['name' => 'Power Banks & Batteries', 'slug' => 'power-banks-batteries', 'image' => 'assets/images/grocery/product/kichen/7.png'],
+                    ['name' => 'Cables & Wall Chargers', 'slug' => 'cables-wall-chargers', 'image' => 'assets/images/grocery/product/personal-care/4.png'],
+                ],
+            ],
+            [
+                'name' => 'Health & Beauty',
+                'slug' => 'health-beauty',
+                'image' => 'assets/images/grocery/product/personal-care/6.png',
+                'subcategories' => [
+                    ['name' => 'Grooming & Trimmers', 'slug' => 'grooming-trimmers', 'image' => 'assets/images/grocery/product/personal-care/5.png'],
+                    ['name' => 'Electric Toothbrushes', 'slug' => 'electric-toothbrushes', 'image' => 'assets/images/grocery/product/personal-care/6.png'],
+                    ['name' => 'Aromatherapy & Diffusers', 'slug' => 'aromatherapy-diffusers', 'image' => 'assets/images/grocery/product/personal-care/8.png'],
+                ],
+            ],
+            [
+                'name' => 'Computers/Tablets & Networking',
+                'slug' => 'computers-tablets-networking',
+                'image' => 'assets/images/furniture/10.png',
+                'subcategories' => [
+                    ['name' => 'Laptop Stands & Desks', 'slug' => 'laptop-stands-desks', 'image' => 'assets/images/furniture/1.png'],
+                    ['name' => 'Multiport Hubs & Adapters', 'slug' => 'multiport-hubs-adapters', 'image' => 'assets/images/furniture/13.png'],
+                    ['name' => 'Keyboards & Mice', 'slug' => 'keyboards-mice', 'image' => 'assets/images/furniture/14.png'],
+                ],
+            ],
+            [
+                'name' => 'Collectables',
+                'slug' => 'collectables',
+                'image' => 'assets/images/furniture/9.png',
+                'subcategories' => [
+                    ['name' => 'Wall Clocks & Timepieces', 'slug' => 'wall-clocks-timepieces', 'image' => 'assets/images/furniture/8.png'],
+                    ['name' => 'Artisan Trays & Accents', 'slug' => 'artisan-trays-accents', 'image' => 'assets/images/furniture/7.png'],
+                ],
+            ],
+            [
+                'name' => 'Crafts',
+                'slug' => 'crafts',
+                'image' => 'assets/images/furniture/6.png',
+                'subcategories' => [
+                    ['name' => 'Acrylic & Fine Art Paints', 'slug' => 'acrylic-fine-art-paints', 'image' => 'assets/images/grocery/product/chemist/2.png'],
+                    ['name' => 'Macrame Cords & Ropes', 'slug' => 'macrame-cords-ropes', 'image' => 'assets/images/grocery/product/chemist/3.png'],
+                ],
+            ],
+            [
+                'name' => 'Sound & Vision',
+                'slug' => 'sound-vision',
+                'image' => 'assets/images/furniture/11.png',
+                'subcategories' => [
+                    ['name' => 'Noise Cancelling Headphones', 'slug' => 'noise-cancelling-headphones', 'image' => 'assets/images/furniture/11.png'],
+                    ['name' => 'Bluetooth Speakers', 'slug' => 'bluetooth-speakers', 'image' => 'assets/images/grocery/product/personal-care/2.png'],
+                    ['name' => 'Microphones & Streaming', 'slug' => 'microphones-streaming', 'image' => 'assets/images/grocery/product/personal-care/4.png'],
+                    ['name' => 'Home Cinema Projectors', 'slug' => 'home-cinema-projectors', 'image' => 'assets/images/furniture/10.png'],
+                ],
+            ],
         ];
 
-        // Wipe old categories that are not in the new list
-        $newSlugs = array_column($categoriesData, 'slug');
-        Category::query()->whereNotIn('slug', $newSlugs)->delete();
-
-        foreach ($categoriesData as $position => $attributes) {
-            Category::updateOrCreate(
-                ['slug' => $attributes['slug']],
-                [...$attributes, 'position' => $position, 'is_active' => true],
+        $allValidSlugs = [];
+        foreach ($mainCategoriesData as $pos => $mainData) {
+            $allValidSlugs[] = $mainData['slug'];
+            $mainCat = Category::updateOrCreate(
+                ['slug' => $mainData['slug']],
+                [
+                    'parent_id' => null,
+                    'name' => $mainData['name'],
+                    'image' => $mainData['image'],
+                    'position' => $pos,
+                    'is_active' => true,
+                ]
             );
+
+            if (! empty($mainData['subcategories'])) {
+                foreach ($mainData['subcategories'] as $subPos => $subData) {
+                    $allValidSlugs[] = $subData['slug'];
+                    Category::updateOrCreate(
+                        ['slug' => $subData['slug']],
+                        [
+                            'parent_id' => $mainCat->id,
+                            'name' => $subData['name'],
+                            'image' => $subData['image'],
+                            'position' => $subPos + 1,
+                            'is_active' => true,
+                        ]
+                    );
+                }
+            }
         }
+
+        // Clean up categories not in the defined taxonomy
+        Category::query()->whereNotIn('slug', $allValidSlugs)->delete();
 
         $categoryIds = Category::query()->pluck('id', 'slug');
 
@@ -580,7 +712,11 @@ class CatalogSeeder extends Seeder
             // Copy fallback image if referenced file doesn't exist on disk yet
             $fullPath = public_path($item['image']);
             if (! file_exists($fullPath) && file_exists($fallbackSource)) {
-                copy($fallbackSource, $fullPath);
+                $dir = dirname($fullPath);
+                if (! is_dir($dir)) {
+                    @mkdir($dir, 0755, true);
+                }
+                @copy($fallbackSource, $fullPath);
             }
 
             $sku = strtoupper(substr(str_replace('-', '', $catSlug), 0, 3)).'-'.str_pad((string) ($index + 1), 3, '0', STR_PAD_LEFT);

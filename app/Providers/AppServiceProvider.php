@@ -35,13 +35,11 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 $cart = session('cart', []);
-                $validProductIds = ! empty($cart) && is_array($cart)
-                    ? Product::whereIn('id', array_keys($cart))->where('is_active', true)->pluck('id')->all()
-                    : [];
-
                 $cartCount = 0;
-                foreach ($validProductIds as $validId) {
-                    $cartCount += (int) ($cart[$validId] ?? 0);
+                if (is_array($cart)) {
+                    foreach ($cart as $key => $qty) {
+                        $cartCount += max(0, (int) $qty);
+                    }
                 }
 
                 $wishlist = session('wishlist', []);

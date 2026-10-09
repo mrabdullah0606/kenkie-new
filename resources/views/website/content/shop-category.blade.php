@@ -396,22 +396,49 @@
                                                             placeholder="Search">
                                                         <i class="fa-solid fa-magnifying-glass"></i>
                                                     </div>
-                                                    <ul class="category-list custom-padding custom-height list-unstyled m-0" id="categoryListWrap">
+                                                    <ul class="category-list custom-padding list-unstyled m-0" id="categoryListWrap" style="max-height: 380px; overflow-y: auto;">
                                                         @foreach ($categories as $cat)
                                                             <li class="category-item-row mb-2">
-                                                                <div class="form-check ps-0 m-0 category-list-box">
-                                                                    <input class="checkbox_animated category-checkbox"
-                                                                        type="checkbox"
-                                                                        name="categories[]"
-                                                                        value="{{ $cat->slug }}"
-                                                                        id="cat_{{ $cat->id }}"
-                                                                        {{ in_array($cat->slug, $selectedCategories) ? 'checked' : '' }}
-                                                                        onchange="document.getElementById('filterForm').submit();">
-                                                                    <label class="form-check-label ms-2" for="cat_{{ $cat->id }}">
-                                                                        <span class="name">{{ $cat->name }}</span>
-                                                                        <span class="number">({{ $cat->products_count }})</span>
-                                                                    </label>
+                                                                <div class="form-check ps-0 m-0 category-list-box d-flex align-items-center justify-content-between">
+                                                                    <div class="d-flex align-items-center flex-grow-1">
+                                                                        <input class="checkbox_animated category-checkbox"
+                                                                            type="checkbox"
+                                                                            name="categories[]"
+                                                                            value="{{ $cat->slug }}"
+                                                                            id="cat_{{ $cat->id }}"
+                                                                            {{ in_array($cat->slug, $selectedCategories) ? 'checked' : '' }}
+                                                                            onchange="document.getElementById('filterForm').submit();">
+                                                                        <label class="form-check-label ms-2 fw-semibold text-dark" for="cat_{{ $cat->id }}" style="font-size: 13.5px;">
+                                                                            <span class="name">{{ $cat->name }}</span>
+                                                                        </label>
+                                                                    </div>
+                                                                    <span class="number badge bg-light text-muted border">({{ $cat->products_count }})</span>
                                                                 </div>
+
+                                                                {{-- Subcategories --}}
+                                                                @if (isset($cat->children) && $cat->children->isNotEmpty())
+                                                                    <ul class="list-unstyled ps-4 mt-1 mb-2 pt-1 border-start ms-2" style="border-color: #e5e7eb !important;">
+                                                                        @foreach ($cat->children as $sub)
+                                                                            <li class="category-item-row mb-1">
+                                                                                <div class="form-check ps-0 m-0 category-list-box d-flex align-items-center justify-content-between">
+                                                                                    <div class="d-flex align-items-center flex-grow-1">
+                                                                                        <input class="checkbox_animated category-checkbox"
+                                                                                            type="checkbox"
+                                                                                            name="categories[]"
+                                                                                            value="{{ $sub->slug }}"
+                                                                                            id="cat_{{ $sub->id }}"
+                                                                                            {{ in_array($sub->slug, $selectedCategories) ? 'checked' : '' }}
+                                                                                            onchange="document.getElementById('filterForm').submit();">
+                                                                                        <label class="form-check-label ms-2 text-muted" for="cat_{{ $sub->id }}" style="font-size: 12.5px;">
+                                                                                            <span class="name">{{ $sub->name }}</span>
+                                                                                        </label>
+                                                                                    </div>
+                                                                                    <span class="number text-muted small" style="font-size: 11px;">({{ $sub->products_count }})</span>
+                                                                                </div>
+                                                                            </li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
                                                             </li>
                                                         @endforeach
                                                     </ul>

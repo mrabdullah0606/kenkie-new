@@ -56,27 +56,60 @@ class CheckoutController extends Controller
         $shippingFeeCents = 0;
 
         $order = DB::transaction(function () use ($request, $validated, $cart, &$lineItems, &$subtotalCents, &$shippingFeeCents): Order {
+            $productIds = [];
+            foreach (array_keys($cart) as $cartKey) {
+                $pId = str_contains((string) $cartKey, ':')
+                    ? (int) explode(':', (string) $cartKey)[0]
+                    : (int) $cartKey;
+                $productIds[] = $pId;
+            }
+
             $products = Product::query()
-                ->whereKey(array_keys($cart))
-                ->with('activeOffers')
+                ->whereIn('id', array_unique($productIds))
+                ->with(['activeOffers', 'activeVariations'])
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('id');
 
-            if ($products->count() !== count($cart)) {
-                StorefrontCart::sanitizeSessionCart($request);
-                throw ValidationException::withMessages(['cart' => 'A product in your cart is no longer available.']);
-            }
+            foreach ($cart as $cartKey => $quantity) {
+                $cartKeyStr = (string) $cartKey;
+                $variationId = null;
 
-            foreach ($cart as $productId => $quantity) {
-                $product = $products->get((int) $productId);
+                if (str_contains($cartKeyStr, ':')) {
+                    [$pId, $vId] = explode(':', $cartKeyStr, 2);
+                    $productId = (int) $pId;
+                    $variationId = (int) $vId;
+                } else {
+                    $productId = (int) $cartKeyStr;
+                }
+
+                $product = $products->get($productId);
                 $quantity = filter_var($quantity, FILTER_VALIDATE_INT);
 
-                if (! $product || ! $product->is_active || ! $quantity || $quantity > $product->stock) {
+                if (! $product || ! $product->is_active || ! $quantity) {
                     throw ValidationException::withMessages(['cart' => 'Please review product availability and quantities.']);
                 }
 
-                $unitPriceCents = (int) round((float) $product->price * 100);
+                $variation = null;
+                $maxStock = (int) $product->stock;
+
+                if ($variationId && $product->relationLoaded('activeVariations')) {
+                    $variation = $product->activeVariations->firstWhere('id', $variationId);
+                    if (! $variation || ! $variation->is_active) {
+                        throw ValidationException::withMessages(['cart' => 'Selected variation is no longer available.']);
+                    }
+                    $maxStock = (int) $variation->stock;
+                }
+
+                if ($quantity > $maxStock) {
+                    throw ValidationException::withMessages(['cart' => "Only {$maxStock} units available for {$product->name}."]);
+                }
+
+                $unitPrice = $variation
+                    ? (float) ($variation->sale_price ?? $variation->regular_price ?? $product->price)
+                    : (float) $product->price;
+
+                $unitPriceCents = (int) round($unitPrice * 100);
                 $effectiveUnitPriceCents = $unitPriceCents;
                 $isProductDiscounted = $product->regular_price && (float) $product->regular_price > (float) $product->price;
 
@@ -100,8 +133,27 @@ class CheckoutController extends Controller
 
                 $lineTotalCents = $effectiveUnitPriceCents * $quantity;
                 $subtotalCents += $lineTotalCents;
+
+                $variationLabel = '';
+                if ($variation) {
+                    $parts = array_filter([
+                        $variation->name,
+                        $variation->color ? 'Color: '.$variation->color : null,
+                        $variation->size ? 'Size: '.$variation->size : null,
+                        $variation->material ? 'Material: '.$variation->material : null,
+                    ]);
+                    $variationLabel = implode(' · ', $parts);
+                }
+
+                $displayName = $variation && $variationLabel
+                    ? $product->name.' ('.$variationLabel.')'
+                    : $product->name;
+
                 $lineItems[] = [
                     'product' => $product,
+                    'variation' => $variation,
+                    'displayName' => $displayName,
+                    'sku' => $variation?->sku ?: $product->sku,
                     'quantity' => $quantity,
                     'unitPriceCents' => $effectiveUnitPriceCents,
                     'lineTotalCents' => $lineTotalCents,
@@ -135,14 +187,20 @@ class CheckoutController extends Controller
 
             foreach ($lineItems as $lineItem) {
                 $product = $lineItem['product'];
+                $variation = $lineItem['variation'] ?? null;
+
                 $order->items()->create([
                     'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'sku' => $product->sku,
+                    'product_name' => $lineItem['displayName'],
+                    'sku' => $lineItem['sku'],
                     'unit_price' => $this->money($lineItem['unitPriceCents']),
                     'quantity' => $lineItem['quantity'],
                     'line_total' => $this->money($lineItem['lineTotalCents']),
                 ]);
+
+                if ($variation) {
+                    $variation->decrement('stock', $lineItem['quantity']);
+                }
                 $product->decrement('stock', $lineItem['quantity']);
             }
 

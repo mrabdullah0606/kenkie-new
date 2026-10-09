@@ -86,6 +86,14 @@ class StorefrontController extends Controller
             ->orderBy('position')
             ->get();
 
+        $mainCategories = $categories->whereNull('parent_id')->values()->map(function ($cat) use ($categories) {
+            $childIds = $categories->where('parent_id', $cat->id)->pluck('id');
+            $subProductsCount = $childIds->isNotEmpty() ? (int) $categories->whereIn('id', $childIds)->sum('products_count') : 0;
+            $cat->total_products_count = (int) $cat->products_count + $subProductsCount;
+
+            return $cat;
+        });
+
         $categoriesBySlug = $categories->keyBy('slug');
 
         $homeSettings = HomeSetting::getSettings();
@@ -156,6 +164,7 @@ class StorefrontController extends Controller
 
         return view('website.pages.home', [
             'categories' => $categories,
+            'mainCategories' => $mainCategories,
             'categoriesBySlug' => $categoriesBySlug,
             'homeSettings' => $homeSettings,
             'heroSlides' => $heroSlides,
@@ -189,12 +198,14 @@ class StorefrontController extends Controller
 
         $categories = Category::query()
             ->where('is_active', true)
+            ->whereNull('parent_id')
+            ->with(['children' => fn ($q) => $q->where('is_active', true)->withCount('products')->orderBy('position')])
             ->withCount('products')
             ->orderBy('position')
             ->get();
 
         $selectedCategory = $categorySlug
-            ? $categories->firstWhere('slug', $categorySlug)
+            ? Category::where('slug', $categorySlug)->first()
             : null;
 
         $productsQuery = Product::query()

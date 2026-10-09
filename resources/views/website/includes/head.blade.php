@@ -844,11 +844,48 @@ header.header-3 .sticky-header {
 .pagination .page-link:hover {
     color: #22c55e !important;
 }
-.back-to-top a {
-    background-color: #22c55e !important;
+.theme-option {
+    position: fixed !important;
+    bottom: 92px !important;
+    right: 28px !important;
+    z-index: 99980 !important;
 }
-.back-to-top a:hover {
+.theme-option .back-to-top {
+    margin: 0 !important;
+    padding: 0 !important;
+    background-color: transparent !important;
+}
+.back-to-top a,
+#back-to-top {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background-color: #22c55e !important;
+    color: #ffffff !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+    border: none !important;
+    transition: all 0.25s ease !important;
+}
+.back-to-top a:hover,
+#back-to-top:hover {
     background-color: #16a34a !important;
+    color: #ffffff !important;
+    transform: translateY(-3px) !important;
+    box-shadow: 0 6px 18px rgba(34, 197, 94, 0.4) !important;
+}
+@media (max-width: 768px) {
+    .theme-option {
+        bottom: 78px !important;
+        right: 22px !important;
+    }
+    .back-to-top a,
+    #back-to-top {
+        width: 40px !important;
+        height: 40px !important;
+    }
 }
 .fullpage-loader--invisible {
     display: none !important;

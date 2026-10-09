@@ -219,30 +219,32 @@
                                                 <td class="product-info-cell">
                                                     <div class="d-flex align-items-center gap-3">
                                                         <a href="{{ route('products.show', $product->slug) }}" class="flex-shrink-0">
-                                                            <img src="{{ asset($product->image ?: 'assets/images/vegetable/product/1.png') }}"
-                                                                class="cart-thumb" alt="{{ $product->name }}">
+                                                            <img src="{{ asset($item['displayImage'] ?? $product->image ?: 'assets/images/vegetable/product/1.png') }}"
+                                                                class="cart-thumb" alt="{{ $item['displayName'] ?? $product->name }}">
                                                         </a>
                                                         <div class="product-info-meta">
                                                             <h6 class="mb-1 fw-bold">
                                                                 <a href="{{ route('products.show', $product->slug) }}" class="text-dark text-decoration-none text-truncate-2">
-                                                                    {{ $product->name }}
+                                                                    {{ $item['displayName'] ?? $product->name }}
                                                                 </a>
                                                             </h6>
                                                             <div class="d-flex flex-wrap align-items-center gap-2 text-muted small">
                                                                 <span>Sold By: <strong class="text-secondary">{{ $product->category?->name ?? 'Kenkie' }}</strong></span>
-                                                                <span>â€¢</span>
-                                                                <span>Unit: {{ $product->unit }}</span>
+                                                                <span>•</span>
+                                                                <span>SKU: {{ $item['displaySku'] ?? $product->sku }}</span>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </td>
 
                                                 <td class="price-cell">
-                                                    <div class="fw-semibold text-dark fs-6">${{ number_format($product->price, 2) }}</div>
+                                                    <div class="fw-semibold text-dark fs-6">${{ number_format($item['effectiveUnitPriceCents'] / 100, 2) }}</div>
                                                     @if (!empty($item['appliedOffer']))
                                                         <span class="badge bg-warning text-dark border border-warning-subtle mt-1" style="font-size: 11px;">
                                                             <i class="fa-solid fa-tags me-1"></i> {{ $item['appliedOffer']->title ?: ('Multi-Buy ' . (int)$item['appliedOffer']->discount_percentage . '% OFF') }}
                                                         </span>
+                                                    @elseif(!empty($item['variation']))
+                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1">Variation Option</span>
                                                     @else
                                                         <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">In Stock</span>
                                                     @endif
@@ -250,12 +252,12 @@
 
                                                 <td class="qty-cell">
                                                     <div class="cart-quantity-box">
-                                                        <button type="button" class="btn qty-control-btn qty-left-minus" data-slug="{{ $product->slug }}" aria-label="Decrease">
+                                                        <button type="button" class="btn qty-control-btn qty-left-minus" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" aria-label="Decrease">
                                                             <i class="fa-solid fa-minus"></i>
                                                         </button>
                                                         <input type="text" class="form-control qty-input text-center"
-                                                            value="{{ $item['quantity'] }}" data-slug="{{ $product->slug }}" max="{{ $product->stock }}" readonly>
-                                                        <button type="button" class="btn qty-control-btn qty-right-plus" data-slug="{{ $product->slug }}" aria-label="Increase">
+                                                            value="{{ $item['quantity'] }}" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" max="{{ $item['maxStock'] ?? $product->stock }}" readonly>
+                                                        <button type="button" class="btn qty-control-btn qty-right-plus" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" aria-label="Increase">
                                                             <i class="fa-solid fa-plus"></i>
                                                         </button>
                                                     </div>
@@ -278,6 +280,7 @@
                                                         <form method="POST" action="{{ route('cart.destroy', $product->slug) }}" class="m-0">
                                                             @csrf
                                                             @method('DELETE')
+                                                            <input type="hidden" name="cart_key" value="{{ $item['key'] }}">
                                                             <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none small">
                                                                 <i class="fa-regular fa-trash-can me-1"></i>Remove
                                                             </button>

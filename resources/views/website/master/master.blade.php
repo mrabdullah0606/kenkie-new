@@ -854,12 +854,12 @@
             <div class="row">
                 <div class="col-12">
                     <div class="category-slider-1 arrow-slider wow fadeInUp">
-                        @forelse ($categories as $category)
+                        @forelse (($mainCategories ?? $categories->whereNull('parent_id')) as $category)
                             <div>
                                 <div class="category-box-list">
                                     <a href="{{ route('shop.category', ['category' => $category->slug]) }}" class="category-name">
                                         <h4>{{ $category->name }}</h4>
-                                        <h6>{{ $category->products_count }} items</h6>
+                                        <h6>{{ $category->total_products_count ?? $category->products_count }} items</h6>
                                     </a>
                                     <div class="category-box-view">
                                         <a href="{{ route('shop.category', ['category' => $category->slug]) }}">

@@ -191,28 +191,33 @@
 
                         {{-- Stock + Category badges --}}
                         <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                            @if ($product->stock > 0)
-                                <span class="badge-stock-in">
-                                    <i class="fa-solid fa-circle-check me-1"></i> In Stock &mdash; {{ $product->stock }} available
-                                </span>
-                            @else
-                                <span class="badge-stock-out">
+                            <span id="stockStatusBadge" class="{{ ($product->activeVariations->first()?->stock ?? $product->stock) > 0 ? 'badge-stock-in' : 'badge-stock-out' }}">
+                                @if (($product->activeVariations->first()?->stock ?? $product->stock) > 0)
+                                    <i class="fa-solid fa-circle-check me-1"></i> In Stock &mdash; <span id="displayStock">{{ $product->activeVariations->first()?->stock ?? $product->stock }}</span> available
+                                @else
                                     <i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock
-                                </span>
+                                @endif
+                            </span>
+                            @if ($product->category)
+                                <a href="{{ route('shop.category', ['category' => $product->category->slug]) }}" class="badge bg-light text-dark border text-decoration-none" style="font-size:11px;">{{ $product->category->name }}</a>
                             @endif
-                            <span class="badge bg-light text-dark border" style="font-size:11px;">{{ $product->category?->name }}</span>
                         </div>
 
                         {{-- Product name --}}
                         <h1 class="fw-bold mb-3" style="font-size:1.85rem; line-height:1.2; color:#111;">{{ $product->name }}</h1>
 
+                        @php
+                            $initialVar = $product->activeVariations->first();
+                            $initialPrice = $initialVar ? ($initialVar->sale_price ?? $initialVar->regular_price ?? $product->price) : $product->price;
+                            $initialRegular = $initialVar ? ($initialVar->regular_price && (float)$initialVar->regular_price > (float)$initialPrice ? $initialVar->regular_price : null) : ($product->regular_price && (float)$product->regular_price > (float)$product->price ? $product->regular_price : null);
+                            $initialDiscount = $initialVar ? $initialVar->discount_percentage : $product->discount_percentage;
+                        @endphp
+
                         {{-- Price row --}}
                         <div class="d-flex align-items-baseline gap-3 mb-1 flex-wrap">
-                            <span class="price-main" id="displayProductPrice">${{ number_format((float) $product->price, 2) }}</span>
-                            @if ($product->regular_price && (float) $product->regular_price > (float) $product->price)
-                                <span class="price-regular" id="displayRegularPrice">${{ number_format((float) $product->regular_price, 2) }}</span>
-                                <span class="discount-pill" id="displayDiscountBadge">{{ $product->discount_percentage }}% OFF</span>
-                            @endif
+                            <span class="price-main" id="displayProductPrice">${{ number_format((float) $initialPrice, 2) }}</span>
+                            <span class="price-regular {{ $initialRegular ? '' : 'd-none' }}" id="displayRegularPrice">${{ $initialRegular ? number_format((float) $initialRegular, 2) : '' }}</span>
+                            <span class="discount-pill {{ $initialDiscount > 0 ? '' : 'd-none' }}" id="displayDiscountBadge">{{ $initialDiscount }}% OFF</span>
                             @php $effectiveSizeChart = $product->size_chart ?: $product->category?->size_chart; @endphp
                             @if ($effectiveSizeChart)
                                 <button type="button" class="btn btn-sm btn-outline-secondary ms-auto d-inline-flex align-items-center gap-1 fw-semibold" data-bs-toggle="modal" data-bs-target="#sizeChartModal">
@@ -237,15 +242,19 @@
                                     @foreach ($product->activeVariations as $var)
                                         @php
                                             $varPrice = $var->sale_price ?? $var->regular_price ?? $product->price;
+                                            $varRegular = $var->regular_price && (float) $var->regular_price > (float) $varPrice ? $var->regular_price : null;
                                             $varLabel = $var->name ?: trim(($var->color ? $var->color . ' ' : '') . ($var->size ?: '') . ($var->material ? ' (' . $var->material . ')' : ''));
                                         @endphp
                                         <button type="button"
                                             class="variation-pill-btn {{ $loop->first ? 'active' : '' }}"
+                                            data-id="{{ $var->id }}"
                                             data-price="{{ number_format((float) $varPrice, 2) }}"
-                                            data-regular="{{ $var->regular_price ? number_format((float) $var->regular_price, 2) : '' }}"
+                                            data-raw-price="{{ (float) $varPrice }}"
+                                            data-regular="{{ $varRegular ? number_format((float) $varRegular, 2) : '' }}"
                                             data-discount="{{ $var->discount_percentage }}"
                                             data-sku="{{ $var->sku ?: $product->sku }}"
                                             data-stock="{{ $var->stock }}"
+                                            data-image="{{ $var->image ? asset($var->image) : '' }}"
                                             data-name="{{ $varLabel }}">
                                             {{ $varLabel }}
                                             @if ($varPrice)
@@ -271,16 +280,19 @@
                                     </span>
                                     <span class="badge bg-warning text-dark fw-bold px-2" style="font-size:11px;">Instant Discount</span>
                                 </div>
-                                <div class="row g-2">
+                                <div class="row g-2" id="offersGrid">
                                     @foreach ($applicableOffers as $offer)
                                         @php
-                                            $discountedUnit = $offer->discountedPriceFor((float) $product->price);
-                                            $totalSaving = round(((float) $product->price - $discountedUnit) * $offer->min_quantity, 2);
+                                            $discountedUnit = $offer->discountedPriceFor((float) $initialPrice);
+                                            $totalSaving = round(((float) $initialPrice - $discountedUnit) * $offer->min_quantity, 2);
                                         @endphp
                                         <div class="col-sm-6">
                                             <div class="offer-card"
                                                  id="offer-card-{{ $offer->id }}"
-                                                 onclick="selectOfferBundle({{ $offer->min_quantity }}, {{ $offer->id }}, {{ $discountedUnit }}, {{ $totalSaving }}, this)">
+                                                 data-offer-id="{{ $offer->id }}"
+                                                 data-min-qty="{{ $offer->min_quantity }}"
+                                                 data-discount-percent="{{ (float) $offer->discount_percentage }}"
+                                                 onclick="selectOfferBundle({{ $offer->min_quantity }}, {{ $offer->id }}, this)">
                                                 <div class="check-mark"><i class="fa-solid fa-check" style="font-size:10px;"></i></div>
                                                 <div class="d-flex align-items-start justify-content-between mb-1">
                                                     <span class="fw-bold text-dark" style="font-size:14px;">
@@ -296,10 +308,10 @@
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center pt-2" style="border-top:1px solid #fde68a;">
                                                     <div>
-                                                        <span class="fw-bold text-success" style="font-size:16px;">${{ number_format($discountedUnit, 2) }}</span>
+                                                        <span class="fw-bold text-success offer-unit-price" style="font-size:16px;">${{ number_format($discountedUnit, 2) }}</span>
                                                         <span class="text-muted small">/ea</span>
                                                     </div>
-                                                    <span class="text-success small fw-semibold">Save ${{ number_format($totalSaving, 2) }} total</span>
+                                                    <span class="text-success small fw-semibold offer-total-saving">Save ${{ number_format($totalSaving, 2) }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -322,16 +334,18 @@
                         @endif
 
                         {{-- Add to Cart --}}
-                        @if ($product->stock > 0)
-                            <form class="mt-2" method="POST" action="{{ route('cart.store', $product->slug) }}" id="addToCartForm">
-                                @csrf
-                                <input type="hidden" name="quantity" id="qtyHiddenInput" value="1">
+                        <form class="mt-2" method="POST" action="{{ route('cart.store', $product->slug) }}" id="addToCartForm">
+                            @csrf
+                            <input type="hidden" name="quantity" id="qtyHiddenInput" value="1">
+                            <input type="hidden" name="variation_id" id="selectedVariationInput" value="{{ $product->activeVariations->first()?->id }}">
+
+                            <div id="inStockControls" class="{{ ($product->activeVariations->first()?->stock ?? $product->stock) > 0 ? '' : 'd-none' }}">
                                 <div class="d-flex align-items-center gap-3 flex-wrap">
                                     <div class="qty-control">
                                         <button type="button" id="qtyMinus" aria-label="Decrease quantity">
                                             <i class="fa-solid fa-minus" style="font-size:12px;"></i>
                                         </button>
-                                        <input type="number" id="qtyDisplay" value="1" min="1" max="{{ $product->stock }}" readonly style="background:none;">
+                                        <input type="number" id="qtyDisplay" value="1" min="1" max="{{ $product->activeVariations->first()?->stock ?? $product->stock }}" readonly style="background:none;">
                                         <button type="button" id="qtyPlus" aria-label="Increase quantity">
                                             <i class="fa-solid fa-plus" style="font-size:12px;"></i>
                                         </button>
@@ -340,26 +354,30 @@
                                         <i data-feather="shopping-cart" class="me-2" style="width:18px;height:18px;"></i> Add To Cart
                                     </button>
                                 </div>
-                                @error('quantity')
-                                    <div class="text-danger small mt-2">{{ $message }}</div>
-                                @enderror
-                            </form>
-                        @else
-                            <div class="alert alert-warning rounded-3 mt-2 d-flex align-items-center gap-2">
-                                <i class="fa-solid fa-triangle-exclamation"></i>
-                                This product is currently out of stock.
                             </div>
-                        @endif
+
+                            <div id="outOfStockAlert" class="alert alert-warning rounded-3 mt-2 d-flex align-items-center gap-2 {{ ($product->activeVariations->first()?->stock ?? $product->stock) > 0 ? 'd-none' : '' }}">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                This option is currently out of stock.
+                            </div>
+
+                            @error('quantity')
+                                <div class="text-danger small mt-2">{{ $message }}</div>
+                            @enderror
+                            @error('variation_id')
+                                <div class="text-danger small mt-2">{{ $message }}</div>
+                            @enderror
+                        </form>
 
                         {{-- Wishlist + Continue --}}
-                        <div class="d-flex flex-wrap gap-2 mt-3">
-                            <form method="POST" action="{{ route('wishlist.store', $product->slug) }}">
+                        <div class="d-flex align-items-center gap-2 mt-3 flex-wrap">
+                            <form method="POST" action="{{ route('wishlist.store', $product->slug) }}" class="m-0 d-inline-flex">
                                 @csrf
-                                <button class="btn btn-outline-secondary fw-semibold" type="submit" style="border-radius:12px;">
+                                <button class="btn btn-outline-secondary fw-semibold d-inline-flex align-items-center justify-content-center px-3 py-2" type="submit" style="border-radius:12px; white-space:nowrap;">
                                     <i class="fa-solid fa-heart me-1 text-danger"></i> Wishlist
                                 </button>
                             </form>
-                            <a href="{{ route('shop.category') }}" class="btn btn-outline-dark fw-semibold" style="border-radius:12px;">
+                            <a href="{{ route('shop.category') }}" class="btn btn-outline-dark fw-semibold d-inline-flex align-items-center justify-content-center px-3 py-2" style="border-radius:12px; white-space:nowrap;">
                                 Continue Shopping
                             </a>
                         </div>
@@ -621,57 +639,46 @@
 /* ── Image switcher ── */
 function switchProductImage(src, el) {
     const img = document.getElementById('mainProductImage');
-    if (img) { img.style.opacity = '0.2'; setTimeout(() => { img.src = src; img.style.opacity = '1'; }, 160); }
+    if (img && src) {
+        img.style.opacity = '0.2';
+        setTimeout(() => {
+            img.src = src;
+            img.style.opacity = '1';
+        }, 160);
+    }
     document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
     if (el) el.classList.add('active');
 }
 
-/* ── Quantity control ── */
-document.addEventListener('DOMContentLoaded', function () {
-    const maxStock = {{ $product->stock ?? 0 }};
-    const display  = document.getElementById('qtyDisplay');
-    const hidden   = document.getElementById('qtyHiddenInput');
-    let qty = 1;
+/* ── Reactive Product, Variation & Offer State ── */
+let currentUnitPrice = {{ (float) $initialPrice }};
+let currentStock = {{ (int) ($initialVar?->stock ?? $product->stock) }};
+let currentQty = 1;
 
-    function setQty(n) {
-        qty = Math.max(1, Math.min(n, maxStock));
-        if (display) display.value = qty;
-        if (hidden)  hidden.value  = qty;
-    }
+function updateOfferCards() {
+    const offerCards = document.querySelectorAll('.offer-card');
+    offerCards.forEach(card => {
+        const minQty = parseInt(card.dataset.minQty, 10) || 1;
+        const discountPercent = parseFloat(card.dataset.discountPercent) || 0;
+        const discountedUnit = currentUnitPrice * (1 - (discountPercent / 100));
+        const totalSaving = (currentUnitPrice - discountedUnit) * minQty;
 
-    document.getElementById('qtyMinus')?.addEventListener('click', () => setQty(qty - 1));
-    document.getElementById('qtyPlus')?.addEventListener('click', () => setQty(qty + 1));
+        const unitEl = card.querySelector('.offer-unit-price');
+        const savingEl = card.querySelector('.offer-total-saving');
 
-    /* ── Variation pills ── */
-    const varBtns      = document.querySelectorAll('.variation-pill-btn');
-    const priceEl      = document.getElementById('displayProductPrice');
-    const regularEl    = document.getElementById('displayRegularPrice');
-    const discountEl   = document.getElementById('displayDiscountBadge');
-    const skuEl        = document.getElementById('displaySku');
-    const stockEl      = document.getElementById('displayStock');
+        if (unitEl) unitEl.textContent = '$' + discountedUnit.toFixed(2);
+        if (savingEl) savingEl.textContent = 'Save $' + totalSaving.toFixed(2);
 
-    varBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            varBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            if (this.dataset.price && priceEl)  priceEl.textContent = '$' + this.dataset.price;
-            if (regularEl) {
-                if (this.dataset.regular) { regularEl.textContent = '$' + this.dataset.regular; regularEl.classList.remove('d-none'); }
-                else regularEl.classList.add('d-none');
+        if (card.classList.contains('selected')) {
+            const summaryText = document.getElementById('savingsSummaryText');
+            if (summaryText) {
+                summaryText.textContent = 'You save $' + totalSaving.toFixed(2) + ' with this ' + minQty + '-item bundle! 🎉';
             }
-            if (discountEl) {
-                if (this.dataset.discount > 0) { discountEl.textContent = this.dataset.discount + '% OFF'; discountEl.classList.remove('d-none'); }
-                else discountEl.classList.add('d-none');
-            }
-            if (this.dataset.sku   && skuEl)   skuEl.textContent   = this.dataset.sku;
-            if (this.dataset.stock && stockEl) stockEl.textContent = this.dataset.stock;
-        });
+        }
     });
-});
+}
 
-/* ── Offer bundle selector ── */
-function selectOfferBundle(qty, offerId, unitPrice, totalSaving, el) {
-    // Toggle: click again to deselect
+function selectOfferBundle(qty, offerId, el) {
     if (el.classList.contains('selected')) {
         clearOfferSelection();
         return;
@@ -680,26 +687,127 @@ function selectOfferBundle(qty, offerId, unitPrice, totalSaving, el) {
     el.classList.add('selected');
 
     // Set qty
-    const display = document.getElementById('qtyDisplay');
-    const hidden  = document.getElementById('qtyHiddenInput');
-    if (display) display.value = qty;
-    if (hidden)  hidden.value  = qty;
+    setQuantity(qty);
 
-    // Show savings bar
-    const bar  = document.getElementById('savingsBar');
+    const minQty = parseInt(el.dataset.minQty, 10) || qty;
+    const discountPercent = parseFloat(el.dataset.discountPercent) || 0;
+    const discountedUnit = currentUnitPrice * (1 - (discountPercent / 100));
+    const totalSaving = (currentUnitPrice - discountedUnit) * minQty;
+
+    const bar = document.getElementById('savingsBar');
     const text = document.getElementById('savingsSummaryText');
-    if (bar)  bar.style.display = 'block';
-    if (text) text.textContent  = 'You save $' + totalSaving.toFixed(2) + ' with this ' + qty + '-item bundle! 🎉';
+    if (bar) bar.style.display = 'block';
+    if (text) text.textContent = 'You save $' + totalSaving.toFixed(2) + ' with this ' + minQty + '-item bundle! 🎉';
 }
 
 function clearOfferSelection() {
     document.querySelectorAll('.offer-card').forEach(c => c.classList.remove('selected'));
-    const display = document.getElementById('qtyDisplay');
-    const hidden  = document.getElementById('qtyHiddenInput');
-    if (display) display.value = 1;
-    if (hidden)  hidden.value  = 1;
+    setQuantity(1);
     const bar = document.getElementById('savingsBar');
     if (bar) bar.style.display = 'none';
 }
+
+function setQuantity(n) {
+    const max = Math.max(1, currentStock);
+    currentQty = Math.max(1, Math.min(n, max));
+    const display = document.getElementById('qtyDisplay');
+    const hidden = document.getElementById('qtyHiddenInput');
+    if (display) {
+        display.value = currentQty;
+        display.setAttribute('max', max);
+    }
+    if (hidden) hidden.value = currentQty;
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const display = document.getElementById('qtyDisplay');
+    const hidden = document.getElementById('qtyHiddenInput');
+    const varInput = document.getElementById('selectedVariationInput');
+
+    document.getElementById('qtyMinus')?.addEventListener('click', () => setQuantity(currentQty - 1));
+    document.getElementById('qtyPlus')?.addEventListener('click', () => setQuantity(currentQty + 1));
+
+    /* ── Variation pills ── */
+    const varBtns = document.querySelectorAll('.variation-pill-btn');
+    const priceEl = document.getElementById('displayProductPrice');
+    const regularEl = document.getElementById('displayRegularPrice');
+    const discountEl = document.getElementById('displayDiscountBadge');
+    const skuEl = document.getElementById('displaySku');
+    const stockEl = document.getElementById('displayStock');
+    const stockBadge = document.getElementById('stockStatusBadge');
+    const inStockControls = document.getElementById('inStockControls');
+    const outOfStockAlert = document.getElementById('outOfStockAlert');
+
+    varBtns.forEach(btn => {
+        btn.addEventListener('click', function () {
+            varBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            if (this.dataset.id && varInput) {
+                varInput.value = this.dataset.id;
+            }
+
+            if (this.dataset.rawPrice) {
+                currentUnitPrice = parseFloat(this.dataset.rawPrice) || 0;
+            } else if (this.dataset.price) {
+                currentUnitPrice = parseFloat(this.dataset.price) || 0;
+            }
+
+            if (this.dataset.price && priceEl) {
+                priceEl.textContent = '$' + this.dataset.price;
+            }
+
+            if (regularEl) {
+                if (this.dataset.regular && parseFloat(this.dataset.regular) > currentUnitPrice) {
+                    regularEl.textContent = '$' + this.dataset.regular;
+                    regularEl.classList.remove('d-none');
+                } else {
+                    regularEl.classList.add('d-none');
+                }
+            }
+
+            if (discountEl) {
+                const disc = parseInt(this.dataset.discount, 10);
+                if (disc > 0) {
+                    discountEl.textContent = disc + '% OFF';
+                    discountEl.classList.remove('d-none');
+                } else {
+                    discountEl.classList.add('d-none');
+                }
+            }
+
+            if (this.dataset.sku && skuEl) skuEl.textContent = this.dataset.sku;
+
+            if (this.dataset.stock !== undefined) {
+                currentStock = parseInt(this.dataset.stock, 10) || 0;
+                if (stockEl) stockEl.textContent = currentStock;
+
+                if (currentStock > 0) {
+                    if (stockBadge) {
+                        stockBadge.className = 'badge-stock-in';
+                        stockBadge.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> In Stock &mdash; <span id="displayStock">' + currentStock + '</span> available';
+                    }
+                    if (inStockControls) inStockControls.classList.remove('d-none');
+                    if (outOfStockAlert) outOfStockAlert.classList.add('d-none');
+                } else {
+                    if (stockBadge) {
+                        stockBadge.className = 'badge-stock-out';
+                        stockBadge.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock';
+                    }
+                    if (inStockControls) inStockControls.classList.add('d-none');
+                    if (outOfStockAlert) outOfStockAlert.classList.remove('d-none');
+                }
+
+                setQuantity(currentQty);
+            }
+
+            if (this.dataset.image) {
+                switchProductImage(this.dataset.image, null);
+            }
+
+            updateOfferCards();
+        });
+    });
+});
 </script>
 @endsection
