@@ -156,22 +156,22 @@
                                                     </div>
                                                 </td>
                                                 <td><code>{{ $item->sku }}</code></td>
-                                                <td>${{ number_format((float) $item->unit_price, 2) }}</td>
+                                                <td>£{{ number_format((float) $item->unit_price, 2) }}</td>
                                                 <td>{{ $item->quantity }}</td>
-                                                <td class="text-end fw-bold text-dark">${{ number_format((float) $item->line_total, 2) }}</td>
+                                                <td class="text-end fw-bold text-dark">£{{ number_format((float) $item->line_total, 2) }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
                                     <tfoot>
                                         <tr>
                                             <th colspan="4" class="text-end">Subtotal:</th>
-                                            <td class="text-end fw-bold">${{ number_format((float) $order->subtotal, 2) }}</td>
+                                            <td class="text-end fw-bold">£{{ number_format((float) $order->subtotal, 2) }}</td>
                                         </tr>
                                         <tr>
                                             <th colspan="4" class="text-end">Shipping Fee:</th>
                                             <td class="text-end fw-bold">
                                                 @if ($order->shipping_fee > 0)
-                                                    ${{ number_format((float) $order->shipping_fee, 2) }}
+                                                    £{{ number_format((float) $order->shipping_fee, 2) }}
                                                 @else
                                                     <span class="text-success">Free Delivery</span>
                                                 @endif
@@ -179,7 +179,7 @@
                                         </tr>
                                         <tr class="table-light">
                                             <th colspan="4" class="text-end fs-5">Order Total:</th>
-                                            <td class="text-end fs-5 fw-bold text-success">${{ number_format((float) $order->total, 2) }}</td>
+                                            <td class="text-end fs-5 fw-bold text-success">£{{ number_format((float) $order->total, 2) }}</td>
                                         </tr>
                                     </tfoot>
                                 </table>

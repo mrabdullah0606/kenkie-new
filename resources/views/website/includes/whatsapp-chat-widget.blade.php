@@ -105,30 +105,121 @@
 
 <style>
     .kenkie-support-wrapper {
-        position: fixed;
-        bottom: 24px;
-        right: 24px;
-        z-index: 99990;
+        position: fixed !important;
+        bottom: 24px !important;
+        right: 24px !important;
+        z-index: 99990 !important;
         font-family: inherit;
     }
+
     .kenkie-float-btn {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: #25d366;
-        color: #ffffff;
-        border: none;
-        box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        position: relative;
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 50% !important;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        outline: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45) !important;
+        position: relative !important;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        padding: 0 !important;
     }
+
     .kenkie-float-btn:hover {
-        transform: scale(1.08);
-        box-shadow: 0 14px 30px -4px rgba(37, 211, 102, 0.6);
+        transform: scale(1.08) !important;
+        box-shadow: 0 12px 28px rgba(37, 211, 102, 0.55) !important;
+        color: #ffffff !important;
+    }
+
+    .kenkie-float-btn .float-btn-icon {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #ffffff !important;
+    }
+
+    .kenkie-float-btn i {
+        font-size: 28px !important;
+        color: #ffffff !important;
+        line-height: 1 !important;
+    }
+
+    /* Stack Back-to-Top gracefully above WhatsApp button */
+    .theme-option {
+        position: fixed !important;
+        bottom: 92px !important;
+        right: 28px !important;
+        z-index: 99980 !important;
+        transition: all 0.3s ease-in-out !important;
+    }
+
+    .theme-option .back-to-top {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: transparent !important;
+    }
+
+    .theme-option .back-to-top a,
+    #back-to-top {
+        width: 44px !important;
+        height: 44px !important;
+        border-radius: 50% !important;
+        background-color: #22c55e !important;
+        color: #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15) !important;
+        border: none !important;
+        transition: all 0.25s ease !important;
+        text-decoration: none !important;
+    }
+
+    .theme-option .back-to-top a:hover,
+    #back-to-top:hover {
+        background-color: #16a34a !important;
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 18px rgba(34, 197, 94, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .theme-option .back-to-top a i,
+    #back-to-top i {
+        font-size: 16px !important;
+        color: #ffffff !important;
+        line-height: 1 !important;
+    }
+
+    @media (max-width: 768px) {
+        .kenkie-support-wrapper {
+            bottom: 18px !important;
+            right: 18px !important;
+        }
+        .kenkie-float-btn {
+            width: 50px !important;
+            height: 50px !important;
+        }
+        .kenkie-float-btn i {
+            font-size: 24px !important;
+        }
+        .theme-option {
+            bottom: 78px !important;
+            right: 22px !important;
+        }
+        .theme-option .back-to-top a,
+        #back-to-top {
+            width: 40px !important;
+            height: 40px !important;
+        }
+        .theme-option .back-to-top a i,
+        #back-to-top i {
+            font-size: 14px !important;
+        }
     }
     .online-indicator {
         position: absolute;

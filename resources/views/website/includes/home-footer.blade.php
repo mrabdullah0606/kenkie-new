@@ -27,10 +27,10 @@
                             <a href="https://www.ebay.co.uk/usr/kenkie-official" target="_blank" rel="noopener noreferrer" class="light-text">Kenkie Ebay</a>
                         </li>
                         <li>
-                            <a href="{{ route('privacy.policy') }}" class="light-text">Privacy Policy</a>
+                            <a href="https://www.amazon.co.uk/stores/KENKIE/page/487BF6DD-5825-481E-8D57-0FB35B9DC83E?dplnkId=d38d60d6-187f-43dc-9a7c-86caaee88080&ref=d6k_universal&dplnk=Y&ref_=cm_sw_r_apin_ast_store_HHNYC9C58WEBDF1MSEDG" target="_blank" rel="noopener noreferrer" class="light-text">Kenkie Amazon</a>
                         </li>
                         <li>
-                            <a href="https://step4humanity.com/" target="_blank" rel="noopener noreferrer" class="light-text">Charity</a>
+                            <a href="{{ route('privacy.policy') }}" class="light-text">Privacy Policy</a>
                         </li>
                     </ul>
                 </div>
@@ -99,7 +99,7 @@
                     </div>
                     <ul class="footer-list footer-contact footer-list-light">
                         <li>
-                            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
+                            <a href="https://www.facebook.com/share/1JC6RQXui7/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
                                 <i class="fa-brands fa-facebook-f text-white" style="width: 16px;"></i> Facebook
                             </a>
                         </li>
@@ -109,12 +109,12 @@
                             </a>
                         </li>
                         <li>
-                            <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
+                            <a href="https://www.tiktok.com/@kenkieofficial?_r=1&_t=ZN-9AQLmd3iXCw" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
                                 <i class="fa-brands fa-tiktok text-white" style="width: 16px;"></i> Tiktok
                             </a>
                         </li>
                         <li>
-                            <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
+                            <a href="https://youtube.com/@kenkieofficial?si=oNQG40unIDlNw2rH" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
                                 <i class="fa-brands fa-youtube text-danger" style="width: 16px;"></i> Youtube
                             </a>
                         </li>

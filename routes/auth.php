@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\OtpVerificationController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -17,10 +18,24 @@ Route::middleware('guest')->group(function () {
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
+    Route::get('register/verify-otp', [OtpVerificationController::class, 'showRegisterOtp'])
+        ->name('register.otp');
+    Route::post('register/verify-otp', [OtpVerificationController::class, 'verifyRegisterOtp'])
+        ->name('register.verify-otp');
+    Route::post('register/resend-otp', [OtpVerificationController::class, 'resendRegisterOtp'])
+        ->name('register.resend-otp');
+
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
+
+    Route::get('login/verify-otp', [OtpVerificationController::class, 'showLoginOtp'])
+        ->name('login.otp');
+    Route::post('login/verify-otp', [OtpVerificationController::class, 'verifyLoginOtp'])
+        ->name('login.verify-otp');
+    Route::post('login/resend-otp', [OtpVerificationController::class, 'resendLoginOtp'])
+        ->name('login.resend-otp');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');

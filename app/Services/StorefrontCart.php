@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Product;
+use App\Models\ProductVariation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
@@ -13,7 +14,7 @@ class StorefrontCart
     public const int FREE_SHIPPING_THRESHOLD_CENTS = 5000;
 
     /**
-     * @return array<int, int>
+     * @return array<string|int, int>
      */
     public static function sanitizeSessionCart(Request $request): array
     {
@@ -24,34 +25,77 @@ class StorefrontCart
             return [];
         }
 
-        $quantities = [];
-        foreach ($cart as $productId => $quantity) {
-            $productId = filter_var($productId, FILTER_VALIDATE_INT);
-            $quantity = filter_var($quantity, FILTER_VALIDATE_INT);
+        $parsed = [];
+        $productIds = [];
+        $variationIds = [];
 
-            if ($productId && $quantity && $quantity > 0) {
-                $quantities[$productId] = $quantity;
+        foreach ($cart as $cartKey => $quantity) {
+            $cartKey = trim((string) $cartKey);
+            $qty = filter_var($quantity, FILTER_VALIDATE_INT);
+
+            if ($cartKey === '' || ! $qty || $qty <= 0) {
+                continue;
+            }
+
+            if (str_contains($cartKey, ':')) {
+                [$pId, $vId] = explode(':', $cartKey, 2);
+                $pId = filter_var($pId, FILTER_VALIDATE_INT);
+                $vId = filter_var($vId, FILTER_VALIDATE_INT);
+
+                if ($pId && $vId) {
+                    $parsed[$cartKey] = [
+                        'product_id' => (int) $pId,
+                        'variation_id' => (int) $vId,
+                        'quantity' => (int) $qty,
+                    ];
+                    $productIds[] = (int) $pId;
+                    $variationIds[] = (int) $vId;
+                }
+            } else {
+                $pId = filter_var($cartKey, FILTER_VALIDATE_INT);
+                if ($pId) {
+                    $parsed[$cartKey] = [
+                        'product_id' => (int) $pId,
+                        'variation_id' => null,
+                        'quantity' => (int) $qty,
+                    ];
+                    $productIds[] = (int) $pId;
+                }
             }
         }
 
-        if (empty($quantities)) {
+        if (empty($parsed)) {
             $request->session()->put('cart', []);
 
             return [];
         }
 
-        $validProducts = Product::query()
-            ->whereKey(array_keys($quantities))
+        $products = Product::query()
+            ->whereIn('id', array_unique($productIds))
             ->where('is_active', true)
-            ->pluck('stock', 'id');
+            ->with(['activeVariations'])
+            ->get()
+            ->keyBy('id');
 
         $sanitized = [];
-        foreach ($quantities as $productId => $quantity) {
-            if ($validProducts->has($productId)) {
-                $stock = (int) $validProducts->get($productId);
-                if ($stock > 0) {
-                    $sanitized[$productId] = min($quantity, $stock);
+        foreach ($parsed as $cartKey => $item) {
+            $product = $products->get($item['product_id']);
+            if (! $product) {
+                continue;
+            }
+
+            $maxStock = (int) $product->stock;
+
+            if (! empty($item['variation_id'])) {
+                $variation = $product->activeVariations->firstWhere('id', $item['variation_id']);
+                if (! $variation || ! $variation->is_active) {
+                    continue;
                 }
+                $maxStock = (int) $variation->stock;
+            }
+
+            if ($maxStock > 0) {
+                $sanitized[$cartKey] = min($item['quantity'], $maxStock);
             }
         }
 
@@ -62,30 +106,73 @@ class StorefrontCart
 
     /**
      * @return array{
-     *     cartItems: Collection<int, array{product: Product, quantity: int, lineTotalCents: int}>,
+     *     cartItems: Collection<int, array{
+     *         key: string,
+     *         product: Product,
+     *         variation: ?ProductVariation,
+     *         variationId: ?int,
+     *         displayName: string,
+     *         displaySku: ?string,
+     *         displayImage: ?string,
+     *         maxStock: int,
+     *         quantity: int,
+     *         unitPriceCents: int,
+     *         effectiveUnitPriceCents: int,
+     *         appliedOffer: mixed,
+     *         savedCents: int,
+     *         lineTotalCents: int
+     *     }>,
      *     cartItemCount: int,
-     *     cartSubtotalCents: int
+     *     cartSubtotalCents: int,
+     *     cartSavingsCents: int
      * }
      */
     public function contents(Request $request): array
     {
         $quantities = self::sanitizeSessionCart($request);
 
+        $productIds = [];
+        foreach (array_keys($quantities) as $cartKey) {
+            $pId = str_contains((string) $cartKey, ':')
+                ? (int) explode(':', (string) $cartKey)[0]
+                : (int) $cartKey;
+            $productIds[] = $pId;
+        }
+
         $products = Product::query()
-            ->whereKey(array_keys($quantities))
-            ->with('activeOffers')
+            ->whereIn('id', array_unique($productIds))
+            ->with(['activeOffers', 'activeVariations', 'category'])
             ->get()
             ->keyBy('id');
 
         $cartItems = collect($quantities)
-            ->map(function (int $quantity, int $productId) use ($products): ?array {
-                $product = $products->get($productId);
+            ->map(function (int $quantity, string|int $cartKey) use ($products): ?array {
+                $cartKeyStr = (string) $cartKey;
+                $variationId = null;
 
+                if (str_contains($cartKeyStr, ':')) {
+                    [$pId, $vId] = explode(':', $cartKeyStr, 2);
+                    $productId = (int) $pId;
+                    $variationId = (int) $vId;
+                } else {
+                    $productId = (int) $cartKeyStr;
+                }
+
+                $product = $products->get($productId);
                 if (! $product) {
                     return null;
                 }
 
-                $unitPriceCents = (int) round((float) $product->price * 100);
+                $variation = null;
+                if ($variationId && $product->relationLoaded('activeVariations')) {
+                    $variation = $product->activeVariations->firstWhere('id', $variationId);
+                }
+
+                $unitPrice = $variation
+                    ? (float) ($variation->sale_price ?? $variation->regular_price ?? $product->price)
+                    : (float) $product->price;
+
+                $unitPriceCents = (int) round($unitPrice * 100);
                 $effectiveUnitPriceCents = $unitPriceCents;
                 $isProductDiscounted = $product->regular_price && (float) $product->regular_price > (float) $product->price;
 
@@ -110,8 +197,30 @@ class StorefrontCart
                 $lineTotalCents = $effectiveUnitPriceCents * $quantity;
                 $savedCents = ($unitPriceCents * $quantity) - $lineTotalCents;
 
+                $variationLabel = '';
+                if ($variation) {
+                    $parts = array_filter([
+                        $variation->name,
+                        $variation->color ? 'Color: '.$variation->color : null,
+                        $variation->size ? 'Size: '.$variation->size : null,
+                        $variation->material ? 'Material: '.$variation->material : null,
+                    ]);
+                    $variationLabel = implode(' · ', $parts);
+                }
+
+                $displayName = $variation && $variationLabel
+                    ? $product->name.' ('.$variationLabel.')'
+                    : $product->name;
+
                 return [
+                    'key' => $cartKeyStr,
                     'product' => $product,
+                    'variation' => $variation,
+                    'variationId' => $variationId,
+                    'displayName' => $displayName,
+                    'displaySku' => $variation?->sku ?: $product->sku,
+                    'displayImage' => $variation?->image ?: $product->image,
+                    'maxStock' => $variation ? (int) $variation->stock : (int) $product->stock,
                     'quantity' => $quantity,
                     'unitPriceCents' => $unitPriceCents,
                     'effectiveUnitPriceCents' => $effectiveUnitPriceCents,
