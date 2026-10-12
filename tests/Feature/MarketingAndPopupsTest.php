@@ -133,6 +133,30 @@ class MarketingAndPopupsTest extends TestCase
         $response->assertSee('HELLO10');
         $response->assertSee('kenkieSupportWidget');
         $response->assertSee('Start WhatsApp Chat');
+
+        $popup = PromotionalPopup::query()->latest()->first();
+        $version = $popup->id.'_'.($popup->updated_at ? $popup->updated_at->timestamp : '0');
+        // When cookie is present as dismissed/claimed for this version, server does not render the popup
+        $dismissedResponse = $this->withCookies([
+            'kenkie_popup_dismissed_'.$version => 'claimed',
+        ])->get(route('home'));
+        $dismissedResponse->assertOk();
+        $dismissedResponse->assertDontSee('Storefront Welcome Popup');
+
+        // But when a brand new popup is added by admin, it is immediately shown
+        $newPopup = PromotionalPopup::query()->create([
+            'title' => 'New Flash Sale Popup',
+            'button_text' => 'Grab Deal',
+            'button_url' => '/shop-category',
+            'target_page' => 'all',
+            'delay_seconds' => 1,
+            'is_active' => true,
+        ]);
+        $newPopupResponse = $this->withCookies([
+            'kenkie_popup_dismissed_'.$version => 'claimed',
+        ])->get(route('home'));
+        $newPopupResponse->assertOk();
+        $newPopupResponse->assertSee('New Flash Sale Popup');
     }
 
     public function test_product_page_renders_size_guide_modal_and_tab(): void
@@ -187,10 +211,10 @@ class MarketingAndPopupsTest extends TestCase
         $response2->assertOk();
         $response2->assertSee('Multi-Buy Savings');
 
-        // Adding 2 to cart should calculate bundle discount off the $80 price (10% off $80 = $72 each -> $144 total)
+        // Adding 2 to cart should calculate bundle discount off the £80 price (10% off £80 = £72 each -> £144 total)
         $this->withSession(['cart' => [$product->id => 2]])
             ->get(route('cart.index'))
             ->assertOk()
-            ->assertSee('$144.00');
+            ->assertSee('£144.00');
     }
 }

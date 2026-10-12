@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->encryptCookies(except: [
+            'kenkie_popup_dismissed_*',
+        ]);
+
         $middleware->alias([
             'admin' => EnsureUserIsAdmin::class,
         ]);

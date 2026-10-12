@@ -11,8 +11,17 @@
     $activePopup = \App\Models\PromotionalPopup::query()
         ->active()
         ->forPage($currentPage)
-        ->latest()
+        ->latest('id')
         ->first();
+
+    if ($activePopup) {
+        $popupVersion = $activePopup->id . '_' . ($activePopup->updated_at ? $activePopup->updated_at->timestamp : '0');
+        $cookieKey = 'kenkie_popup_dismissed_' . $popupVersion;
+        $cookieVal = request()->cookie($cookieKey) ?? ($_COOKIE[$cookieKey] ?? null);
+        if ($cookieVal !== null && ($cookieVal === 'claimed' || $cookieVal === '1' || (is_numeric($cookieVal) && (int) $cookieVal > time() * 1000))) {
+            $activePopup = null;
+        }
+    }
 @endphp
 
 @if ($activePopup)
@@ -59,7 +68,7 @@
                         @endif
 
                         <div class="d-grid gap-2">
-                            <a href="{{ url($activePopup->button_url) }}" class="btn btn-theme py-2 fw-bold text-white shadow-sm" style="background:#15803d; border-color:#15803d; border-radius:10px;">
+                            <a href="{{ url($activePopup->button_url) }}" id="promoClaimBtn" class="btn btn-theme py-2 fw-bold text-white shadow-sm" style="background:#15803d; border-color:#15803d; border-radius:10px;">
                                 {{ $activePopup->button_text }} <i class="fa-solid fa-arrow-right ms-2"></i>
                             </a>
                         </div>
@@ -191,45 +200,90 @@
 <script>
 (function() {
     const popupId = {{ $activePopup->id }};
+    const popupVersion = '{{ $activePopup->updated_at ? $activePopup->updated_at->timestamp : '0' }}';
     const delaySec = {{ $activePopup->delay_seconds }};
-    const storageKey = 'kenkie_popup_dismissed_' + popupId;
-    const dismissedUntil = localStorage.getItem(storageKey);
+    const storageKey = 'kenkie_popup_dismissed_' + popupId + '_' + popupVersion;
 
-    // Check if dismissed within the last 24 hours
-    if (dismissedUntil && parseInt(dismissedUntil, 10) > Date.now()) {
+    function isDismissed() {
+        try {
+            const val = localStorage.getItem(storageKey);
+            if (val && (parseInt(val, 10) > Date.now() || val === 'claimed' || val === '1')) {
+                return true;
+            }
+        } catch(e) {}
+
+        try {
+            const sVal = sessionStorage.getItem(storageKey);
+            if (sVal) return true;
+        } catch(e) {}
+
+        try {
+            const match = document.cookie.match(new RegExp('(^|;\\s*)' + storageKey + '=([^;]+)'));
+            if (match) {
+                const cVal = match[2];
+                if (cVal === 'claimed' || cVal === '1' || parseInt(cVal, 10) > Date.now()) {
+                    return true;
+                }
+            }
+        } catch(e) {}
+
+        return false;
+    }
+
+    function recordDismissal(days = 1, status = '') {
+        const expireMs = Date.now() + (days * 24 * 60 * 60 * 1000);
+        const valToStore = status ? status : expireMs.toString();
+
+        try {
+            localStorage.setItem(storageKey, valToStore);
+        } catch(e) {}
+
+        try {
+            sessionStorage.setItem(storageKey, 'true');
+        } catch(e) {}
+
+        try {
+            const maxAge = days * 24 * 60 * 60;
+            document.cookie = storageKey + '=' + valToStore + '; path=/; max-age=' + maxAge + '; SameSite=Lax';
+        } catch(e) {}
+    }
+
+    // Do not show if already dismissed
+    if (isDismissed()) {
         return;
     }
 
     const modal = document.getElementById('promotionalPopupModal');
     const closeBtn = document.getElementById('promoCloseBtn');
     const dismissTodayBtn = document.getElementById('promoDismissToday');
+    const claimBtn = document.getElementById('promoClaimBtn');
 
     function showPopup() {
-        if (!modal) return;
+        if (!modal || isDismissed()) return;
         modal.style.display = 'flex';
         setTimeout(() => {
             modal.classList.add('show');
         }, 30);
     }
 
-    function hidePopup(rememberDays = 0) {
+    function hidePopup(rememberDays = 1) {
         if (!modal) return;
         modal.classList.remove('show');
         setTimeout(() => {
             modal.style.display = 'none';
         }, 350);
 
-        if (rememberDays > 0) {
-            const expireTime = Date.now() + (rememberDays * 24 * 60 * 60 * 1000);
-            localStorage.setItem(storageKey, expireTime.toString());
-        } else {
-            // Dismiss for current browser session (1 hour)
-            const expireTime = Date.now() + (1 * 60 * 60 * 1000);
-            localStorage.setItem(storageKey, expireTime.toString());
-        }
+        recordDismissal(rememberDays);
     }
 
     setTimeout(showPopup, delaySec * 1000);
+
+    if (claimBtn) {
+        claimBtn.addEventListener('click', function() {
+            // Mark as claimed for 30 days so user is never prompted again on refresh or next visits
+            recordDismissal(30, 'claimed');
+        });
+    }
 
     if (closeBtn) {
         closeBtn.addEventListener('click', () => hidePopup(1));
@@ -247,18 +301,21 @@
 
     // Copy Promo Code function
     window.copyPromoCode = function(code) {
-        navigator.clipboard.writeText(code).then(() => {
-            const textSpan = document.getElementById('copyBtnText');
-            const icon = document.getElementById('copyIcon');
-            if (textSpan) textSpan.innerText = 'Copied!';
-            if (icon) {
-                icon.className = 'fa-solid fa-check me-1';
-            }
-            setTimeout(() => {
-                if (textSpan) textSpan.innerText = 'Copy';
-                if (icon) icon.className = 'fa-regular fa-copy me-1';
-            }, 2500);
-        });
+        recordDismissal(7);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(code).then(() => {
+                const textSpan = document.getElementById('copyBtnText');
+                const icon = document.getElementById('copyIcon');
+                if (textSpan) textSpan.innerText = 'Copied!';
+                if (icon) {
+                    icon.className = 'fa-solid fa-check me-1';
+                }
+                setTimeout(() => {
+                    if (textSpan) textSpan.innerText = 'Copy';
+                    if (icon) icon.className = 'fa-regular fa-copy me-1';
+                }, 2500);
+            });
+        }
     };
 })();
 </script>
