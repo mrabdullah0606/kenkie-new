@@ -73,18 +73,15 @@
                                 <div class="dropdown theme-form-select">
                                     <button class="btn dropdown-toggle" type="button" id="select-dollar"
                                         data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span>USD</span>
+                                        <span>GBP</span>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end sm-dropdown-menu"
                                         aria-labelledby="select-dollar">
                                         <li>
-                                            <a class="dropdown-item" id="aud" href="javascript:void(0)">AUD</a>
+                                            <a class="dropdown-item" id="usd" href="javascript:void(0)">USD</a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item" id="eur" href="javascript:void(0)">EUR</a>
-                                        </li>
-                                        <li>
-                                            <a class="dropdown-item" id="cny" href="javascript:void(0)">CNY</a>
                                         </li>
                                     </ul>
                                 </div>

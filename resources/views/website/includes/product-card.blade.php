@@ -58,9 +58,9 @@
             </a>
             <p class="text-content mt-1 mb-2 product-content">{{ $product->unit }} · {{ $product->stock }} in stock</p>
             <h5 class="price d-flex align-items-center flex-wrap">
-                <span class="theme-color fw-bold">${{ number_format((float) $product->price, 2) }}</span>
+                <span class="theme-color fw-bold">£{{ number_format((float) $product->price, 2) }}</span>
                 @if ($product->regular_price && (float) $product->regular_price > (float) $product->price)
-                    <del class="text-muted ms-2 small">${{ number_format((float) $product->regular_price, 2) }}</del>
+                    <del class="text-muted ms-2 small">£{{ number_format((float) $product->regular_price, 2) }}</del>
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-2 small" style="font-size: 10px;">-{{ $product->discount_percentage }}%</span>
                 @endif
             </h5>

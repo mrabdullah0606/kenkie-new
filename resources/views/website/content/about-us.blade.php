@@ -141,7 +141,7 @@
                             </div>
                             <div class="col-md-6">
                                 <p class="mb-1 text-muted small"><strong>Company Registered Address:</strong></p>
-                                <p class="mb-2 fw-semibold text-dark">Flat A, 51 Bescot Road Walsall WS2 9AD United Kingdom</p>
+                                <p class="mb-2 fw-semibold text-dark">Walsall WS2 9AD United Kingdom</p>
                                 <p class="mb-1 text-muted small"><strong>Official Contact Email:</strong></p>
                                 <p class="mb-0 fw-semibold"><a href="mailto:info@kenkie.com" class="theme-color text-decoration-none">info@kenkie.com</a></p>
                             </div>

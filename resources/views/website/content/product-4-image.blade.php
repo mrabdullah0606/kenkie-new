@@ -55,13 +55,71 @@
         .discount-pill { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; border-radius:20px; font-size:12px; font-weight:700; padding:3px 10px; }
 
         /* ── Variations ── */
-        .variation-pill-btn {
-            border: 2px solid #e2e8f0; background:#fff; border-radius:10px;
-            padding: 7px 14px; font-size:13px; font-weight:600; color:#374151;
-            transition: all 0.18s ease; cursor:pointer;
+        .product-variations-wrapper {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 16px 18px;
         }
-        .variation-pill-btn:hover { border-color:#86efac; color:#15803d; }
-        .variation-pill-btn.active { border-color:#22c55e; background:#f0fdf4; color:#15803d; box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+        .step-num-badge {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #15803d;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .variation-attr-btn {
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            position: relative;
+        }
+        .variation-attr-btn:hover:not(:disabled) {
+            border-color: #86efac;
+            color: #15803d;
+            background: #f0fdf4;
+            transform: translateY(-1px);
+        }
+        .variation-attr-btn.active {
+            border-color: #22c55e !important;
+            background: #f0fdf4 !important;
+            color: #15803d !important;
+            font-weight: 700 !important;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2) !important;
+        }
+        .variation-attr-btn:disabled,
+        .variation-attr-btn.is-disabled {
+            opacity: 0.45;
+            background: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #94a3b8 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            text-decoration: line-through;
+        }
+        .color-swatch-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.18);
+            display: inline-block;
+            flex-shrink: 0;
+        }
 
         /* ── Offers ── */
         .offers-section {
@@ -215,8 +273,8 @@
 
                         {{-- Price row --}}
                         <div class="d-flex align-items-baseline gap-3 mb-1 flex-wrap">
-                            <span class="price-main" id="displayProductPrice">${{ number_format((float) $initialPrice, 2) }}</span>
-                            <span class="price-regular {{ $initialRegular ? '' : 'd-none' }}" id="displayRegularPrice">${{ $initialRegular ? number_format((float) $initialRegular, 2) : '' }}</span>
+                            <span class="price-main" id="displayProductPrice">£{{ number_format((float) $initialPrice, 2) }}</span>
+                            <span class="price-regular {{ $initialRegular ? '' : 'd-none' }}" id="displayRegularPrice">£{{ $initialRegular ? number_format((float) $initialRegular, 2) : '' }}</span>
                             <span class="discount-pill {{ $initialDiscount > 0 ? '' : 'd-none' }}" id="displayDiscountBadge">{{ $initialDiscount }}% OFF</span>
                             @php $effectiveSizeChart = $product->size_chart ?: $product->category?->size_chart; @endphp
                             @if ($effectiveSizeChart)
@@ -233,35 +291,202 @@
                         </div>
 
                         {{-- Variations --}}
-                        @if ($product->activeVariations && $product->activeVariations->isNotEmpty())
-                            <div class="mb-4">
-                                <p class="fw-bold text-dark small mb-2">
-                                    <i class="fa-solid fa-swatchbook me-1 text-primary"></i> Choose Option:
-                                </p>
-                                <div class="d-flex flex-wrap gap-2" id="variationsContainer">
-                                    @foreach ($product->activeVariations as $var)
-                                        @php
-                                            $varPrice = $var->sale_price ?? $var->regular_price ?? $product->price;
-                                            $varRegular = $var->regular_price && (float) $var->regular_price > (float) $varPrice ? $var->regular_price : null;
-                                            $varLabel = $var->name ?: trim(($var->color ? $var->color . ' ' : '') . ($var->size ?: '') . ($var->material ? ' (' . $var->material . ')' : ''));
-                                        @endphp
-                                        <button type="button"
-                                            class="variation-pill-btn {{ $loop->first ? 'active' : '' }}"
-                                            data-id="{{ $var->id }}"
-                                            data-price="{{ number_format((float) $varPrice, 2) }}"
-                                            data-raw-price="{{ (float) $varPrice }}"
-                                            data-regular="{{ $varRegular ? number_format((float) $varRegular, 2) : '' }}"
-                                            data-discount="{{ $var->discount_percentage }}"
-                                            data-sku="{{ $var->sku ?: $product->sku }}"
-                                            data-stock="{{ $var->stock }}"
-                                            data-image="{{ $var->image ? asset($var->image) : '' }}"
-                                            data-name="{{ $varLabel }}">
-                                            {{ $varLabel }}
-                                            @if ($varPrice)
-                                                <span class="ms-1 small opacity-75">${{ number_format((float) $varPrice, 2) }}</span>
-                                            @endif
-                                        </button>
-                                    @endforeach
+                        @php
+                            $activeVars = $product->activeVariations ?? collect();
+                            $distinctColors = $activeVars->pluck('color')->filter(fn($c) => filled($c))->unique()->values();
+                            $distinctSizes = $activeVars->pluck('size')->filter(fn($s) => filled($s))->unique()->values();
+                            $hasColorAndSize = $distinctColors->isNotEmpty() && $distinctSizes->isNotEmpty();
+                            $hasOnlyColor = $distinctColors->isNotEmpty() && $distinctSizes->isEmpty();
+                            $hasOnlySize = $distinctColors->isEmpty() && $distinctSizes->isNotEmpty();
+
+                            $variationsJsonData = $activeVars->map(function($v) use ($product) {
+                                $vPrice = $v->sale_price ?? $v->regular_price ?? $product->price;
+                                $vRegular = $v->regular_price && (float) $v->regular_price > (float) $vPrice ? $v->regular_price : null;
+                                return [
+                                    'id' => $v->id,
+                                    'name' => $v->name,
+                                    'color' => $v->color,
+                                    'size' => $v->size,
+                                    'material' => $v->material,
+                                    'dimensions' => $v->dimensions,
+                                    'price' => number_format((float) $vPrice, 2, '.', ''),
+                                    'raw_price' => (float) $vPrice,
+                                    'regular_price' => $vRegular ? number_format((float) $vRegular, 2, '.', '') : null,
+                                    'discount_percentage' => (int) $v->discount_percentage,
+                                    'sku' => $v->sku ?: $product->sku,
+                                    'stock' => (int) $v->stock,
+                                    'image' => $v->image ? asset($v->image) : null,
+                                    'label' => $v->name ?: trim(($v->color ? $v->color . ' ' : '') . ($v->size ?: '') . ($v->material ? ' (' . $v->material . ')' : ''))
+                                ];
+                            })->values();
+
+                            $colorHexMap = [
+                                'emerald green' => '#10b981',
+                                'green' => '#22c55e',
+                                'forest green' => '#15803d',
+                                'mint' => '#a7f3d0',
+                                'charcoal gray' => '#374151',
+                                'gray' => '#6b7280',
+                                'grey' => '#6b7280',
+                                'black' => '#111827',
+                                'white' => '#f9fafb',
+                                'camel tan' => '#c29b38',
+                                'tan' => '#d2b48c',
+                                'brown' => '#78350f',
+                                'beige' => '#f5f5dc',
+                                'midnight navy' => '#1e3a8a',
+                                'navy' => '#1e40af',
+                                'blue' => '#3b82f6',
+                                'royal blue' => '#2563eb',
+                                'sky blue' => '#38bdf8',
+                                'red' => '#ef4444',
+                                'crimson' => '#dc2626',
+                                'burgundy' => '#800020',
+                                'pink' => '#ec4899',
+                                'rose' => '#f43f5e',
+                                'orange' => '#f97316',
+                                'yellow' => '#eab308',
+                                'gold' => '#d97706',
+                                'purple' => '#a855f7',
+                                'violet' => '#7c3aed',
+                                'silver' => '#94a3b8',
+                            ];
+                        @endphp
+
+                        @if ($activeVars->isNotEmpty())
+                            <div class="product-variations-wrapper mb-4">
+                                @if ($hasColorAndSize)
+                                    {{-- 1. Choose Color First --}}
+                                    <div class="variation-group mb-3 pb-3 border-bottom">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="d-flex align-items-center gap-2 fw-bold text-dark" style="font-size:13.5px;">
+                                                <span class="step-num-badge">1</span>
+                                                <span>Choose Color:</span>
+                                                <strong id="selectedColorLabel" class="text-success">{{ $distinctColors->first() }}</strong>
+                                            </span>
+                                            <span class="text-muted small">Select color first</span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2" id="colorOptionsContainer">
+                                            @foreach ($distinctColors as $cIndex => $col)
+                                                @php
+                                                    $normCol = strtolower(trim((string)$col));
+                                                    $hex = $colorHexMap[$normCol] ?? '#94a3b8';
+                                                @endphp
+                                                <button type="button"
+                                                    class="variation-attr-btn variation-color-btn {{ $cIndex === 0 ? 'active' : '' }}"
+                                                    data-color="{{ $col }}"
+                                                    onclick="handleColorSelect('{{ addslashes($col) }}', this)">
+                                                    <span class="color-swatch-dot" style="background-color: {{ $hex }};"></span>
+                                                    <span>{{ $col }}</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    {{-- 2. Choose Size Next --}}
+                                    <div class="variation-group">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="d-flex align-items-center gap-2 fw-bold text-dark" style="font-size:13.5px;">
+                                                <span class="step-num-badge">2</span>
+                                                <span>Choose Size:</span>
+                                                <strong id="selectedSizeLabel" class="text-primary">{{ $distinctSizes->first() }}</strong>
+                                            </span>
+                                            <span class="text-muted small">Available sizes for selected color</span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2" id="sizeOptionsContainer">
+                                            @foreach ($distinctSizes as $sIndex => $sz)
+                                                <button type="button"
+                                                    class="variation-attr-btn variation-size-btn {{ $sIndex === 0 ? 'active' : '' }}"
+                                                    data-size="{{ $sz }}"
+                                                    onclick="handleSizeSelect('{{ addslashes($sz) }}', this)">
+                                                    <span>{{ $sz }}</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                @elseif ($hasOnlyColor)
+                                    {{-- Color Only --}}
+                                    <div class="variation-group">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="d-flex align-items-center gap-2 fw-bold text-dark" style="font-size:13.5px;">
+                                                <i class="fa-solid fa-palette text-success"></i>
+                                                <span>Choose Color:</span>
+                                                <strong id="selectedColorLabel" class="text-success">{{ $distinctColors->first() }}</strong>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2" id="colorOptionsContainer">
+                                            @foreach ($distinctColors as $cIndex => $col)
+                                                @php
+                                                    $normCol = strtolower(trim((string)$col));
+                                                    $hex = $colorHexMap[$normCol] ?? '#94a3b8';
+                                                @endphp
+                                                <button type="button"
+                                                    class="variation-attr-btn variation-color-btn {{ $cIndex === 0 ? 'active' : '' }}"
+                                                    data-color="{{ $col }}"
+                                                    onclick="handleColorSelect('{{ addslashes($col) }}', this)">
+                                                    <span class="color-swatch-dot" style="background-color: {{ $hex }};"></span>
+                                                    <span>{{ $col }}</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                @elseif ($hasOnlySize)
+                                    {{-- Size Only --}}
+                                    <div class="variation-group">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="d-flex align-items-center gap-2 fw-bold text-dark" style="font-size:13.5px;">
+                                                <i class="fa-solid fa-ruler-combined text-primary"></i>
+                                                <span>Choose Size:</span>
+                                                <strong id="selectedSizeLabel" class="text-primary">{{ $distinctSizes->first() }}</strong>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2" id="sizeOptionsContainer">
+                                            @foreach ($distinctSizes as $sIndex => $sz)
+                                                <button type="button"
+                                                    class="variation-attr-btn variation-size-btn {{ $sIndex === 0 ? 'active' : '' }}"
+                                                    data-size="{{ $sz }}"
+                                                    onclick="handleSizeSelect('{{ addslashes($sz) }}', this)">
+                                                    <span>{{ $sz }}</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                @else
+                                    {{-- General Options --}}
+                                    <div class="variation-group">
+                                        <div class="d-flex align-items-center justify-content-between mb-2">
+                                            <span class="d-flex align-items-center gap-2 fw-bold text-dark" style="font-size:13.5px;">
+                                                <i class="fa-solid fa-swatchbook text-primary"></i>
+                                                <span>Choose Option:</span>
+                                                <strong id="selectedGenericLabel" class="text-primary">{{ $activeVars->first()?->name ?: 'Option 1' }}</strong>
+                                            </span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-2" id="genericOptionsContainer">
+                                            @foreach ($activeVars as $gIndex => $var)
+                                                @php
+                                                    $vLabel = $var->name ?: trim(($var->color ? $var->color . ' ' : '') . ($var->size ?: '') . ($var->material ? ' (' . $var->material . ')' : ''));
+                                                @endphp
+                                                <button type="button"
+                                                    class="variation-attr-btn variation-generic-btn {{ $gIndex === 0 ? 'active' : '' }}"
+                                                    data-id="{{ $var->id }}"
+                                                    onclick="handleGenericSelect({{ $var->id }}, this)">
+                                                    <span>{{ $vLabel }}</span>
+                                                </button>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- Active selection summary badge --}}
+                                <div class="mt-3 pt-2 border-top d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                    <small class="text-muted d-flex align-items-center gap-1">
+                                        <i class="fa-solid fa-circle-check text-success"></i> Selected:
+                                        <span id="activeVariationSummary" class="fw-semibold text-dark"></span>
+                                    </small>
+                                    <span id="variationStockNote" class="small fw-semibold text-success"></span>
                                 </div>
                             </div>
                         @endif
@@ -308,10 +533,10 @@
                                                 </div>
                                                 <div class="d-flex justify-content-between align-items-center pt-2" style="border-top:1px solid #fde68a;">
                                                     <div>
-                                                        <span class="fw-bold text-success offer-unit-price" style="font-size:16px;">${{ number_format($discountedUnit, 2) }}</span>
+                                                        <span class="fw-bold text-success offer-unit-price" style="font-size:16px;">£{{ number_format($discountedUnit, 2) }}</span>
                                                         <span class="text-muted small">/ea</span>
                                                     </div>
-                                                    <span class="text-success small fw-semibold offer-total-saving">Save ${{ number_format($totalSaving, 2) }}</span>
+                                                    <span class="text-success small fw-semibold offer-total-saving">Save £{{ number_format($totalSaving, 2) }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -503,15 +728,15 @@
                                                     <div class="flex-grow-1">
                                                         <div class="d-flex justify-content-between small text-muted mb-1">
                                                             <span>Normal price ({{ $offer->min_quantity }}x)</span>
-                                                            <span>${{ number_format($normalTotal, 2) }}</span>
+                                                            <span>£{{ number_format($normalTotal, 2) }}</span>
                                                         </div>
                                                         <div class="d-flex justify-content-between small text-success fw-bold mb-1">
                                                             <span>Discount</span>
-                                                            <span>−${{ number_format($savingTotal, 2) }}</span>
+                                                            <span>−£{{ number_format($savingTotal, 2) }}</span>
                                                         </div>
                                                         <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-1">
                                                             <span>Bundle total</span>
-                                                            <span class="text-success fs-5">${{ number_format($totalPrice, 2) }}</span>
+                                                            <span class="text-success fs-5">£{{ number_format($totalPrice, 2) }}</span>
                                                         </div>
                                                     </div>
                                                     @if ($offer->ends_at)
@@ -666,13 +891,13 @@ function updateOfferCards() {
         const unitEl = card.querySelector('.offer-unit-price');
         const savingEl = card.querySelector('.offer-total-saving');
 
-        if (unitEl) unitEl.textContent = '$' + discountedUnit.toFixed(2);
-        if (savingEl) savingEl.textContent = 'Save $' + totalSaving.toFixed(2);
+        if (unitEl) unitEl.textContent = '£' + discountedUnit.toFixed(2);
+        if (savingEl) savingEl.textContent = 'Save £' + totalSaving.toFixed(2);
 
         if (card.classList.contains('selected')) {
             const summaryText = document.getElementById('savingsSummaryText');
             if (summaryText) {
-                summaryText.textContent = 'You save $' + totalSaving.toFixed(2) + ' with this ' + minQty + '-item bundle! 🎉';
+                summaryText.textContent = 'You save £' + totalSaving.toFixed(2) + ' with this ' + minQty + '-item bundle! 🎉';
             }
         }
     });
@@ -697,7 +922,7 @@ function selectOfferBundle(qty, offerId, el) {
     const bar = document.getElementById('savingsBar');
     const text = document.getElementById('savingsSummaryText');
     if (bar) bar.style.display = 'block';
-    if (text) text.textContent = 'You save $' + totalSaving.toFixed(2) + ' with this ' + minQty + '-item bundle! 🎉';
+    if (text) text.textContent = 'You save £' + totalSaving.toFixed(2) + ' with this ' + minQty + '-item bundle! 🎉';
 }
 
 function clearOfferSelection() {
@@ -719,16 +944,114 @@ function setQuantity(n) {
     if (hidden) hidden.value = currentQty;
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    const display = document.getElementById('qtyDisplay');
-    const hidden = document.getElementById('qtyHiddenInput');
+const variationsData = {!! json_encode($variationsJsonData ?? []) !!};
+
+let selectedColor = null;
+let selectedSize = null;
+let currentSelectedVariation = null;
+
+if (variationsData && variationsData.length > 0) {
+    selectedColor = variationsData[0].color || null;
+    selectedSize = variationsData[0].size || null;
+    currentSelectedVariation = variationsData[0];
+}
+
+function handleColorSelect(color, btn) {
+    selectedColor = color;
+
+    document.querySelectorAll('.variation-color-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const colorLabel = document.getElementById('selectedColorLabel');
+    if (colorLabel) colorLabel.textContent = color;
+
+    const sizeBtns = document.querySelectorAll('.variation-size-btn');
+    let firstValidSizeForColor = null;
+    let currentSizeStillValid = false;
+
+    sizeBtns.forEach(sBtn => {
+        const sizeVal = sBtn.dataset.size;
+        const existsForColor = variationsData.some(v => v.color === selectedColor && v.size === sizeVal);
+
+        if (existsForColor) {
+            sBtn.disabled = false;
+            sBtn.classList.remove('is-disabled');
+            if (!firstValidSizeForColor) firstValidSizeForColor = sizeVal;
+            if (sizeVal === selectedSize) currentSizeStillValid = true;
+        } else {
+            sBtn.disabled = true;
+            sBtn.classList.add('is-disabled');
+        }
+    });
+
+    if (!currentSizeStillValid && firstValidSizeForColor) {
+        selectedSize = firstValidSizeForColor;
+        sizeBtns.forEach(sBtn => {
+            if (sBtn.dataset.size === selectedSize) {
+                sBtn.classList.add('active');
+            } else {
+                sBtn.classList.remove('active');
+            }
+        });
+        const sizeLabel = document.getElementById('selectedSizeLabel');
+        if (sizeLabel) sizeLabel.textContent = selectedSize;
+    }
+
+    syncVariationState();
+}
+
+function handleSizeSelect(size, btn) {
+    if (btn && btn.disabled) return;
+
+    selectedSize = size;
+
+    document.querySelectorAll('.variation-size-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const sizeLabel = document.getElementById('selectedSizeLabel');
+    if (sizeLabel) sizeLabel.textContent = size;
+
+    syncVariationState();
+}
+
+function handleGenericSelect(id, btn) {
+    document.querySelectorAll('.variation-generic-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    const v = variationsData.find(x => x.id === parseInt(id, 10));
+    if (v) {
+        currentSelectedVariation = v;
+        const labelEl = document.getElementById('selectedGenericLabel');
+        if (labelEl) labelEl.textContent = v.name || v.label;
+        applyVariationDetails(v);
+    }
+}
+
+function syncVariationState() {
+    if (!variationsData || variationsData.length === 0) return;
+
+    let matched = null;
+    if (selectedColor && selectedSize) {
+        matched = variationsData.find(v => v.color === selectedColor && v.size === selectedSize);
+    }
+    if (!matched && selectedColor) {
+        matched = variationsData.find(v => v.color === selectedColor);
+    }
+    if (!matched && selectedSize) {
+        matched = variationsData.find(v => v.size === selectedSize);
+    }
+    if (!matched) {
+        matched = variationsData[0];
+    }
+
+    if (matched) {
+        currentSelectedVariation = matched;
+        applyVariationDetails(matched);
+    }
+}
+
+function applyVariationDetails(v) {
     const varInput = document.getElementById('selectedVariationInput');
-
-    document.getElementById('qtyMinus')?.addEventListener('click', () => setQuantity(currentQty - 1));
-    document.getElementById('qtyPlus')?.addEventListener('click', () => setQuantity(currentQty + 1));
-
-    /* ── Variation pills ── */
-    const varBtns = document.querySelectorAll('.variation-pill-btn');
     const priceEl = document.getElementById('displayProductPrice');
     const regularEl = document.getElementById('displayRegularPrice');
     const discountEl = document.getElementById('displayDiscountBadge');
@@ -737,77 +1060,94 @@ document.addEventListener('DOMContentLoaded', function () {
     const stockBadge = document.getElementById('stockStatusBadge');
     const inStockControls = document.getElementById('inStockControls');
     const outOfStockAlert = document.getElementById('outOfStockAlert');
+    const summaryEl = document.getElementById('activeVariationSummary');
+    const stockNote = document.getElementById('variationStockNote');
 
-    varBtns.forEach(btn => {
-        btn.addEventListener('click', function () {
-            varBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+    if (varInput) varInput.value = v.id;
 
-            if (this.dataset.id && varInput) {
-                varInput.value = this.dataset.id;
+    currentUnitPrice = parseFloat(v.raw_price) || 0;
+    if (priceEl) priceEl.textContent = '£' + v.price;
+
+    if (regularEl) {
+        if (v.regular_price && parseFloat(v.regular_price) > currentUnitPrice) {
+            regularEl.textContent = '£' + v.regular_price;
+            regularEl.classList.remove('d-none');
+        } else {
+            regularEl.classList.add('d-none');
+        }
+    }
+
+    if (discountEl) {
+        const disc = parseInt(v.discount_percentage, 10) || 0;
+        if (disc > 0) {
+            discountEl.textContent = disc + '% OFF';
+            discountEl.classList.remove('d-none');
+        } else {
+            discountEl.classList.add('d-none');
+        }
+    }
+
+    if (skuEl && v.sku) skuEl.textContent = v.sku;
+
+    currentStock = parseInt(v.stock, 10) || 0;
+    if (stockEl) stockEl.textContent = currentStock;
+
+    if (currentStock > 0) {
+        if (stockBadge) {
+            stockBadge.className = 'badge-stock-in';
+            stockBadge.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> In Stock &mdash; <span id="displayStock">' + currentStock + '</span> available';
+        }
+        if (stockNote) {
+            stockNote.className = 'small fw-semibold text-success';
+            stockNote.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> In Stock (' + currentStock + ' available)';
+        }
+        if (inStockControls) inStockControls.classList.remove('d-none');
+        if (outOfStockAlert) outOfStockAlert.classList.add('d-none');
+    } else {
+        if (stockBadge) {
+            stockBadge.className = 'badge-stock-out';
+            stockBadge.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock';
+        }
+        if (stockNote) {
+            stockNote.className = 'small fw-semibold text-danger';
+            stockNote.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i> Out of Stock';
+        }
+        if (inStockControls) inStockControls.classList.add('d-none');
+        if (outOfStockAlert) outOfStockAlert.classList.remove('d-none');
+    }
+
+    if (summaryEl) {
+        const parts = [];
+        if (v.color) parts.push('Color: ' + v.color);
+        if (v.size) parts.push('Size: ' + v.size);
+        if (v.material) parts.push('Material: ' + v.material);
+        summaryEl.textContent = parts.length > 0 ? parts.join(' | ') : (v.name || v.label);
+    }
+
+    if (v.image) {
+        switchProductImage(v.image, null);
+    }
+
+    setQuantity(currentQty);
+    updateOfferCards();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const display = document.getElementById('qtyDisplay');
+    const hidden = document.getElementById('qtyHiddenInput');
+
+    document.getElementById('qtyMinus')?.addEventListener('click', () => setQuantity(currentQty - 1));
+    document.getElementById('qtyPlus')?.addEventListener('click', () => setQuantity(currentQty + 1));
+
+    if (variationsData && variationsData.length > 0) {
+        syncVariationState();
+        if (selectedColor) {
+            const firstColorBtn = document.querySelector('.variation-color-btn.active') || document.querySelector('.variation-color-btn');
+            if (firstColorBtn) {
+                handleColorSelect(firstColorBtn.dataset.color, firstColorBtn);
             }
-
-            if (this.dataset.rawPrice) {
-                currentUnitPrice = parseFloat(this.dataset.rawPrice) || 0;
-            } else if (this.dataset.price) {
-                currentUnitPrice = parseFloat(this.dataset.price) || 0;
-            }
-
-            if (this.dataset.price && priceEl) {
-                priceEl.textContent = '$' + this.dataset.price;
-            }
-
-            if (regularEl) {
-                if (this.dataset.regular && parseFloat(this.dataset.regular) > currentUnitPrice) {
-                    regularEl.textContent = '$' + this.dataset.regular;
-                    regularEl.classList.remove('d-none');
-                } else {
-                    regularEl.classList.add('d-none');
-                }
-            }
-
-            if (discountEl) {
-                const disc = parseInt(this.dataset.discount, 10);
-                if (disc > 0) {
-                    discountEl.textContent = disc + '% OFF';
-                    discountEl.classList.remove('d-none');
-                } else {
-                    discountEl.classList.add('d-none');
-                }
-            }
-
-            if (this.dataset.sku && skuEl) skuEl.textContent = this.dataset.sku;
-
-            if (this.dataset.stock !== undefined) {
-                currentStock = parseInt(this.dataset.stock, 10) || 0;
-                if (stockEl) stockEl.textContent = currentStock;
-
-                if (currentStock > 0) {
-                    if (stockBadge) {
-                        stockBadge.className = 'badge-stock-in';
-                        stockBadge.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i> In Stock &mdash; <span id="displayStock">' + currentStock + '</span> available';
-                    }
-                    if (inStockControls) inStockControls.classList.remove('d-none');
-                    if (outOfStockAlert) outOfStockAlert.classList.add('d-none');
-                } else {
-                    if (stockBadge) {
-                        stockBadge.className = 'badge-stock-out';
-                        stockBadge.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock';
-                    }
-                    if (inStockControls) inStockControls.classList.add('d-none');
-                    if (outOfStockAlert) outOfStockAlert.classList.remove('d-none');
-                }
-
-                setQuantity(currentQty);
-            }
-
-            if (this.dataset.image) {
-                switchProductImage(this.dataset.image, null);
-            }
-
-            updateOfferCards();
-        });
-    });
+        }
+    }
 });
 </script>
 @endsection

@@ -1083,7 +1083,7 @@
                                         <a href="{{ route('products.show', $featuredDealProduct->slug) }}">
                                             <h4 class="name fw-bold mb-2">{{ $featuredDealProduct->name }}</h4>
                                         </a>
-                                        <h3 class="price theme-color mb-3">${{ number_format((float) $featuredDealProduct->price, 2) }}</h3>
+                                        <h3 class="price theme-color mb-3">£{{ number_format((float) $featuredDealProduct->price, 2) }}</h3>
                                         <form method="POST" action="{{ route('cart.store', $featuredDealProduct->slug) }}">
                                             @csrf
                                             <input type="hidden" name="quantity" value="1">

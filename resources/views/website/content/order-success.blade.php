@@ -142,7 +142,7 @@
 
                                             <td class="price">
                                                 <h4 class="table-title text-content">Unit Price</h4>
-                                                <h6 class="theme-color">${{ number_format($item->unit_price, 2) }}</h6>
+                                                <h6 class="theme-color">£{{ number_format($item->unit_price, 2) }}</h6>
                                             </td>
 
                                             <td class="quantity">
@@ -152,7 +152,7 @@
 
                                             <td class="subtotal">
                                                 <h4 class="table-title text-content">Total</h4>
-                                                <h5>${{ number_format($item->line_total, 2) }}</h5>
+                                                <h5>£{{ number_format($item->line_total, 2) }}</h5>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -174,7 +174,7 @@
                                 <ul class="summery-contain">
                                     <li>
                                         <h4>Subtotal</h4>
-                                        <h4 class="price">${{ number_format($order->subtotal, 2) }}</h4>
+                                        <h4 class="price">£{{ number_format($order->subtotal, 2) }}</h4>
                                     </li>
 
                                     <li>
@@ -183,7 +183,7 @@
                                             @if ((float) $order->shipping_fee === 0.0)
                                                 FREE
                                             @else
-                                                ${{ number_format($order->shipping_fee, 2) }}
+                                                £{{ number_format($order->shipping_fee, 2) }}
                                             @endif
                                         </h4>
                                     </li>
@@ -218,8 +218,8 @@
 
                                 <ul class="summery-total">
                                     <li class="list-total">
-                                        <h4>Total (USD)</h4>
-                                        <h4 class="price theme-color fw-bold">${{ number_format($order->total, 2) }}</h4>
+                                        <h4>Total (GBP)</h4>
+                                        <h4 class="price theme-color fw-bold">£{{ number_format($order->total, 2) }}</h4>
                                     </li>
                                 </ul>
                             </div>

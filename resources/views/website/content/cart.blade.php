@@ -182,7 +182,7 @@
                 </div>
             @enderror
 
-            @if ($cartItems->isEmpty())
+            <div id="cart-empty-wrapper" class="{{ $cartItems->isEmpty() ? '' : 'd-none' }}">
                 <div class="row">
                     <div class="col-12 text-center py-5">
                         <div class="mb-3">
@@ -195,9 +195,11 @@
                         </a>
                     </div>
                 </div>
-            @else
+            </div>
+
+            @if (!$cartItems->isEmpty())
                 @php($shippingFeeCents = $cartSubtotalCents >= \App\Services\StorefrontCart::FREE_SHIPPING_THRESHOLD_CENTS ? 0 : \App\Services\StorefrontCart::SHIPPING_FEE_CENTS)
-                <div class="row g-4">
+                <div class="row g-4" id="cart-active-wrapper">
                     <!-- Cart Table Column -->
                     <div class="col-xxl-9 col-lg-8">
                         <div class="cart-table-wrapper">
@@ -212,10 +214,11 @@
                                             <th scope="col" class="text-end" style="min-width: 120px;">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody id="cart-items-tbody">
                                         @foreach ($cartItems as $item)
                                             @php($product = $item['product'])
-                                            <tr class="cart-item-row">
+                                            @php($safeKey = str_replace(':', '-', $item['key']))
+                                            <tr class="cart-item-row" id="cart-row-{{ $safeKey }}" data-cart-key="{{ $item['key'] }}" data-slug="{{ $product->slug }}" data-has-variation="{{ !empty($item['variation']) ? '1' : '0' }}">
                                                 <td class="product-info-cell">
                                                     <div class="d-flex align-items-center gap-3">
                                                         <a href="{{ route('products.show', $product->slug) }}" class="flex-shrink-0">
@@ -238,34 +241,36 @@
                                                 </td>
 
                                                 <td class="price-cell">
-                                                    <div class="fw-semibold text-dark fs-6">${{ number_format($item['effectiveUnitPriceCents'] / 100, 2) }}</div>
-                                                    @if (!empty($item['appliedOffer']))
-                                                        <span class="badge bg-warning text-dark border border-warning-subtle mt-1" style="font-size: 11px;">
-                                                            <i class="fa-solid fa-tags me-1"></i> {{ $item['appliedOffer']->title ?: ('Multi-Buy ' . (int)$item['appliedOffer']->discount_percentage . '% OFF') }}
-                                                        </span>
-                                                    @elseif(!empty($item['variation']))
-                                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1">Variation Option</span>
-                                                    @else
-                                                        <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">In Stock</span>
-                                                    @endif
+                                                    <div class="fw-semibold text-dark fs-6" id="unit-price-{{ $safeKey }}">£{{ number_format($item['effectiveUnitPriceCents'] / 100, 2) }}</div>
+                                                    <div id="offer-badge-{{ $safeKey }}">
+                                                        @if (!empty($item['appliedOffer']))
+                                                            <span class="badge bg-warning text-dark border border-warning-subtle mt-1" style="font-size: 11px;">
+                                                                <i class="fa-solid fa-tags me-1"></i> {{ $item['appliedOffer']->title ?: ('Multi-Buy ' . (int)$item['appliedOffer']->discount_percentage . '% OFF') }}
+                                                            </span>
+                                                        @elseif(!empty($item['variation']))
+                                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1">Variation Option</span>
+                                                        @else
+                                                            <span class="badge bg-success-subtle text-success border border-success-subtle mt-1">In Stock</span>
+                                                        @endif
+                                                    </div>
                                                 </td>
 
                                                 <td class="qty-cell">
                                                     <div class="cart-quantity-box">
-                                                        <button type="button" class="btn qty-control-btn qty-left-minus" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" aria-label="Decrease">
+                                                        <button type="button" class="btn qty-control-btn cart-qty-decrement" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" aria-label="Decrease">
                                                             <i class="fa-solid fa-minus"></i>
                                                         </button>
-                                                        <input type="text" class="form-control qty-input text-center"
+                                                        <input type="text" class="form-control qty-input text-center" id="qty-val-{{ $safeKey }}"
                                                             value="{{ $item['quantity'] }}" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" max="{{ $item['maxStock'] ?? $product->stock }}" readonly>
-                                                        <button type="button" class="btn qty-control-btn qty-right-plus" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" aria-label="Increase">
+                                                        <button type="button" class="btn qty-control-btn cart-qty-increment" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}" aria-label="Increase">
                                                             <i class="fa-solid fa-plus"></i>
                                                         </button>
                                                     </div>
                                                 </td>
 
                                                 <td class="total-cell">
-                                                    <div class="fw-bold theme-color fs-6">
-                                                        ${{ number_format($item['lineTotalCents'] / 100, 2) }}
+                                                    <div class="fw-bold theme-color fs-6" id="line-total-{{ $safeKey }}">
+                                                        £{{ number_format($item['lineTotalCents'] / 100, 2) }}
                                                     </div>
                                                 </td>
 
@@ -277,14 +282,9 @@
                                                                 <i class="fa-regular fa-heart me-1"></i>Save for later
                                                             </button>
                                                         </form>
-                                                        <form method="POST" action="{{ route('cart.destroy', $product->slug) }}" class="m-0">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <input type="hidden" name="cart_key" value="{{ $item['key'] }}">
-                                                            <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none small">
-                                                                <i class="fa-regular fa-trash-can me-1"></i>Remove
-                                                            </button>
-                                                        </form>
+                                                        <button type="button" class="btn btn-link p-0 text-danger text-decoration-none small cart-item-remove-btn" data-slug="{{ $product->slug }}" data-key="{{ $item['key'] }}">
+                                                            <i class="fa-regular fa-trash-can me-1"></i>Remove
+                                                        </button>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -311,29 +311,27 @@
                             <div class="summary-breakdown mb-3">
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="text-muted">Subtotal</span>
-                                    <span class="fw-semibold text-dark">${{ number_format($cartSubtotalCents / 100, 2) }}</span>
+                                    <span class="fw-semibold text-dark" id="cart-summary-subtotal">£{{ number_format($cartSubtotalCents / 100, 2) }}</span>
                                 </div>
-                                @if (!empty($cartSavingsCents) && $cartSavingsCents > 0)
-                                    <div class="d-flex justify-content-between align-items-center mb-2 text-success">
-                                        <span><i class="fa-solid fa-tag me-1"></i> Multi-Buy Savings</span>
-                                        <span class="fw-bold">-${{ number_format($cartSavingsCents / 100, 2) }}</span>
-                                    </div>
-                                @endif
+                                <div class="justify-content-between align-items-center mb-2 text-success {{ (!empty($cartSavingsCents) && $cartSavingsCents > 0) ? 'd-flex' : 'd-none' }}" id="cart-summary-savings-row">
+                                    <span><i class="fa-solid fa-tag me-1"></i> Multi-Buy Savings</span>
+                                    <span class="fw-bold" id="cart-summary-savings">-£{{ number_format(($cartSavingsCents ?? 0) / 100, 2) }}</span>
+                                </div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="text-muted">Delivery</span>
-                                    <span class="fw-semibold {{ $shippingFeeCents === 0 ? 'text-success' : 'text-dark' }}">
+                                    <span class="fw-semibold {{ $shippingFeeCents === 0 ? 'text-success' : 'text-dark' }}" id="cart-summary-delivery">
                                         @if ($shippingFeeCents === 0)
                                             FREE
                                         @else
-                                            ${{ number_format($shippingFeeCents / 100, 2) }}
+                                            £{{ number_format($shippingFeeCents / 100, 2) }}
                                         @endif
                                     </span>
                                 </div>
                             </div>
 
                             <div class="d-flex justify-content-between align-items-center py-3 border-top border-bottom mb-4">
-                                <span class="fw-bold text-dark fs-5">Total (USD)</span>
-                                <span class="fw-bold theme-color fs-4">${{ number_format(($cartSubtotalCents + $shippingFeeCents) / 100, 2) }}</span>
+                                <span class="fw-bold text-dark fs-5">Total (GBP)</span>
+                                <span class="fw-bold theme-color fs-4" id="cart-summary-total">£{{ number_format(($cartSubtotalCents + $shippingFeeCents) / 100, 2) }}</span>
                             </div>
 
                             <div class="d-grid gap-2">
@@ -370,4 +368,244 @@
         </div>
     </div>
     <!-- Tap to top end -->
+@endsection
+
+@section('page-scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+
+            function updateCartBadges(count) {
+                const countNum = parseInt(count, 10) || 0;
+
+                // 1. Desktop header bag badge
+                document.querySelectorAll('.bag-icon .badge-number, .header-wishlist .badge-number').forEach(function (badge) {
+                    badge.textContent = countNum;
+                    badge.style.display = countNum > 0 ? '' : 'none';
+                });
+
+                // 2. Mobile cart badge
+                document.querySelectorAll('a[href*="/cart"].mobile-header-icon .mobile-badge, a[href*="/cart"] .mobile-badge').forEach(function (badge) {
+                    badge.textContent = countNum;
+                    badge.style.display = countNum > 0 ? '' : 'none';
+                });
+
+                // 3. Fallback header-cart-count badges
+                document.querySelectorAll('.header-cart-count').forEach(function (badge) {
+                    badge.textContent = countNum;
+                    badge.style.display = countNum > 0 ? '' : 'none';
+                });
+            }
+
+            function applyCartResponse(res) {
+                if (!res || !res.success) {
+                    return;
+                }
+
+                // Update Header Cart Count Badges
+                if (res.cartCount !== undefined) {
+                    updateCartBadges(res.cartCount);
+                }
+
+                // If cart is completely empty
+                if (res.isEmpty) {
+                    const activeWrap = document.getElementById('cart-active-wrapper');
+                    const emptyWrap = document.getElementById('cart-empty-wrapper');
+                    if (activeWrap) {
+                        activeWrap.style.display = 'none';
+                    }
+                    if (emptyWrap) {
+                        emptyWrap.classList.remove('d-none');
+                        emptyWrap.style.display = 'block';
+                    }
+                    if (window.feather) {
+                        feather.replace();
+                    }
+                    return;
+                }
+
+                // Update all items from items payload
+                if (res.items) {
+                    Object.keys(res.items).forEach(function (key) {
+                        const itemData = res.items[key];
+                        const safeKey = key.replace(/:/g, '-');
+
+                        // Unit price
+                        const priceEl = document.getElementById('unit-price-' + safeKey);
+                        if (priceEl && itemData.unitPrice !== undefined) {
+                            priceEl.textContent = '£' + itemData.unitPrice;
+                        }
+
+                        // Line total
+                        const totalEl = document.getElementById('line-total-' + safeKey);
+                        if (totalEl && itemData.lineTotal !== undefined) {
+                            totalEl.textContent = '£' + itemData.lineTotal;
+                        }
+
+                        // Quantity input
+                        const qtyEl = document.getElementById('qty-val-' + safeKey);
+                        if (qtyEl && itemData.quantity !== undefined) {
+                            qtyEl.value = itemData.quantity;
+                        }
+
+                        // Offer Badge
+                        const badgeEl = document.getElementById('offer-badge-' + safeKey);
+                        if (badgeEl) {
+                            const row = document.getElementById('cart-row-' + safeKey);
+                            const hasVar = row && row.getAttribute('data-has-variation') === '1';
+
+                            if (itemData.hasOffer && itemData.offerTitle) {
+                                badgeEl.innerHTML = '<span class="badge bg-warning text-dark border border-warning-subtle mt-1" style="font-size: 11px;"><i class="fa-solid fa-tags me-1"></i> ' + itemData.offerTitle + '</span>';
+                            } else if (hasVar) {
+                                badgeEl.innerHTML = '<span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1">Variation Option</span>';
+                            } else {
+                                badgeEl.innerHTML = '<span class="badge bg-success-subtle text-success border border-success-subtle mt-1">In Stock</span>';
+                            }
+                        }
+                    });
+
+                    // Remove rows that no longer exist in response
+                    document.querySelectorAll('.cart-item-row').forEach(function (row) {
+                        const rowKey = row.getAttribute('data-cart-key');
+                        if (rowKey && !res.items[rowKey]) {
+                            row.remove();
+                        }
+                    });
+                }
+
+                // Update Summary Subtotal
+                const subtotalEl = document.getElementById('cart-summary-subtotal');
+                if (subtotalEl && res.subtotal !== undefined) {
+                    subtotalEl.textContent = '£' + res.subtotal;
+                }
+
+                // Update Multi-Buy Savings Row
+                const savingsRowEl = document.getElementById('cart-summary-savings-row');
+                const savingsEl = document.getElementById('cart-summary-savings');
+                if (savingsRowEl && savingsEl) {
+                    if (res.hasSavings && parseFloat(res.savings) > 0) {
+                        savingsEl.textContent = '-£' + res.savings;
+                        savingsRowEl.classList.remove('d-none');
+                        savingsRowEl.classList.add('d-flex');
+                    } else {
+                        savingsRowEl.classList.add('d-none');
+                        savingsRowEl.classList.remove('d-flex');
+                    }
+                }
+
+                // Update Delivery
+                const deliveryEl = document.getElementById('cart-summary-delivery');
+                if (deliveryEl && res.shipping !== undefined) {
+                    deliveryEl.textContent = res.shipping;
+                    if (res.shipping === 'FREE') {
+                        deliveryEl.className = 'fw-semibold text-success';
+                    } else {
+                        deliveryEl.className = 'fw-semibold text-dark';
+                    }
+                }
+
+                // Update Total (GBP)
+                const totalEl = document.getElementById('cart-summary-total');
+                if (totalEl && res.total !== undefined) {
+                    totalEl.textContent = '£' + res.total;
+                }
+            }
+
+            async function sendCartUpdate(slug, key, newQty, btn) {
+                if (btn) {
+                    btn.disabled = true;
+                }
+                const safeKey = key.replace(/:/g, '-');
+                const row = document.getElementById('cart-row-' + safeKey);
+                if (row) {
+                    row.style.opacity = '0.5';
+                    row.style.pointerEvents = 'none';
+                }
+
+                try {
+                    const isDelete = newQty <= 0;
+                    const url = '/cart/' + encodeURIComponent(slug);
+                    const bodyData = isDelete
+                        ? { _token: csrfToken, _method: 'DELETE', cart_key: key }
+                        : { _token: csrfToken, _method: 'PATCH', quantity: newQty, cart_key: key };
+
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify(bodyData)
+                    });
+
+                    const data = await response.json();
+                    if (data && data.success) {
+                        applyCartResponse(data);
+                    } else {
+                        alert((data && data.message) ? data.message : 'Unable to update cart.');
+                    }
+                } catch (err) {
+                    console.error('Cart update error:', err);
+                } finally {
+                    if (btn) {
+                        btn.disabled = false;
+                    }
+                    if (row) {
+                        row.style.opacity = '1';
+                        row.style.pointerEvents = '';
+                    }
+                }
+            }
+
+            // Global delegation for Cart actions
+            document.addEventListener('click', function (e) {
+                // 1. Decrement Button
+                const decBtn = e.target.closest('.cart-qty-decrement');
+                if (decBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const slug = decBtn.getAttribute('data-slug');
+                    const key = decBtn.getAttribute('data-key');
+                    const safeKey = key.replace(/:/g, '-');
+                    const input = document.getElementById('qty-val-' + safeKey);
+                    const currentVal = parseInt(input ? input.value : '1', 10) || 1;
+                    const newVal = currentVal - 1;
+                    sendCartUpdate(slug, key, newVal, decBtn);
+                    return;
+                }
+
+                // 2. Increment Button
+                const incBtn = e.target.closest('.cart-qty-increment');
+                if (incBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const slug = incBtn.getAttribute('data-slug');
+                    const key = incBtn.getAttribute('data-key');
+                    const safeKey = key.replace(/:/g, '-');
+                    const input = document.getElementById('qty-val-' + safeKey);
+                    const currentVal = parseInt(input ? input.value : '1', 10) || 1;
+                    const maxVal = parseInt(input ? input.getAttribute('max') : '9999', 10) || 9999;
+                    if (currentVal >= maxVal) {
+                        return;
+                    }
+                    const newVal = currentVal + 1;
+                    sendCartUpdate(slug, key, newVal, incBtn);
+                    return;
+                }
+
+                // 3. Remove Button
+                const removeBtn = e.target.closest('.cart-item-remove-btn');
+                if (removeBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const slug = removeBtn.getAttribute('data-slug');
+                    const key = removeBtn.getAttribute('data-key');
+                    sendCartUpdate(slug, key, 0, removeBtn);
+                    return;
+                }
+            }, true);
+        });
+    </script>
 @endsection

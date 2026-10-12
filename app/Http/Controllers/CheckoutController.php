@@ -219,7 +219,7 @@ class CheckoutController extends Controller
                     foreach ($lineItems as $item) {
                         $stripeLineItems[] = [
                             'price_data' => [
-                                'currency' => 'usd',
+                                'currency' => 'gbp',
                                 'product_data' => [
                                     'name' => $item['product']->name,
                                     'description' => $item['product']->sku ? 'SKU: '.$item['product']->sku : null,
@@ -233,7 +233,7 @@ class CheckoutController extends Controller
                     if ($shippingFeeCents > 0) {
                         $stripeLineItems[] = [
                             'price_data' => [
-                                'currency' => 'usd',
+                                'currency' => 'gbp',
                                 'product_data' => [
                                     'name' => 'Shipping Fee',
                                 ],

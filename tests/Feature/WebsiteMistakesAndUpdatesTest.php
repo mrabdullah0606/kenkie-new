@@ -21,6 +21,8 @@ test('product page renders variations and multi-buyer offers dynamically', funct
     $variation1 = ProductVariation::create([
         'product_id' => $product->id,
         'name' => 'Medium / Blue',
+        'color' => 'Blue',
+        'size' => 'Medium',
         'sku' => 'SHIRT-M-BLU',
         'sale_price' => 45.00,
         'regular_price' => 55.00,
@@ -31,6 +33,8 @@ test('product page renders variations and multi-buyer offers dynamically', funct
     $variation2 = ProductVariation::create([
         'product_id' => $product->id,
         'name' => 'Large / Blue',
+        'color' => 'Blue',
+        'size' => 'Large',
         'sku' => 'SHIRT-L-BLU',
         'sale_price' => 48.00,
         'regular_price' => 60.00,
@@ -50,8 +54,11 @@ test('product page renders variations and multi-buyer offers dynamically', funct
     $response = $this->get(route('products.show', $product->slug));
 
     $response->assertOk();
-    $response->assertSee('Medium / Blue');
-    $response->assertSee('Large / Blue');
+    $response->assertSee('Choose Color:');
+    $response->assertSee('Choose Size:');
+    $response->assertSee('Blue');
+    $response->assertSee('Medium');
+    $response->assertSee('Large');
     $response->assertSee('Buy 2 Save 10%');
     $response->assertSee('POPULAR');
     $response->assertSee('selectedVariationInput');
@@ -194,4 +201,73 @@ test('category system supports parent and sub-category relationships', function 
     $subResponse = $this->get(route('shop.category', ['category' => $subCat->slug]));
     $subResponse->assertOk();
     $subResponse->assertSee('Ceramic Bowl Set');
+});
+
+test('cart real-time ajax update dynamically recalculates multi-buy savings, line totals, and empty states', function () {
+    $product = Product::factory()->create([
+        'name' => 'Tailored Australian Merino Wool Overcoat',
+        'price' => 210.00,
+        'stock' => 10,
+        'is_active' => true,
+    ]);
+
+    $variation = ProductVariation::create([
+        'product_id' => $product->id,
+        'name' => 'Medium / Camel',
+        'color' => 'Camel',
+        'size' => 'Medium',
+        'sku' => 'COT-CML-M',
+        'sale_price' => 210.00,
+        'regular_price' => 240.00,
+        'stock' => 5,
+        'is_active' => true,
+    ]);
+
+    ProductOffer::create([
+        'product_id' => $product->id,
+        'title' => 'Buy 2 Coats - Save 12% Extra',
+        'min_quantity' => 2,
+        'discount_percentage' => 12.00,
+        'is_active' => true,
+    ]);
+
+    $cartKey = "{$product->id}:{$variation->id}";
+
+    // Set 2 items in cart (which activates 12% discount)
+    $response = $this->withSession(['cart' => [$cartKey => 2]])
+        ->patchJson(route('cart.update', $product->slug), [
+            'quantity' => 1,
+            'cart_key' => $cartKey,
+        ]);
+
+    $response->assertOk()
+        ->assertJson([
+            'success' => true,
+            'cartKey' => $cartKey,
+            'quantity' => 1,
+            'cartCount' => 1,
+            'item' => [
+                'key' => $cartKey,
+                'quantity' => 1,
+                'unitPrice' => '210.00',
+                'lineTotal' => '210.00',
+                'hasOffer' => false,
+            ],
+            'subtotal' => '210.00',
+            'hasSavings' => false,
+            'total' => '210.00',
+            'isEmpty' => false,
+        ]);
+
+    // Remove item completely
+    $destroyResponse = $this->deleteJson(route('cart.destroy', $product->slug), [
+        'cart_key' => $cartKey,
+    ]);
+
+    $destroyResponse->assertOk()
+        ->assertJson([
+            'success' => true,
+            'cartCount' => 0,
+            'isEmpty' => true,
+        ]);
 });

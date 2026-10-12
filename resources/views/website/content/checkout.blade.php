@@ -200,7 +200,7 @@
                                                     class="img-fluid blur-up lazyloaded checkout-image" alt="{{ $product->name }}"
                                                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
                                                 <h4>{{ $product->name }} <span>X {{ $item['quantity'] }}</span></h4>
-                                                <h4 class="price">${{ number_format($item['lineTotalCents'] / 100, 2) }}</h4>
+                                                <h4 class="price">£{{ number_format($item['lineTotalCents'] / 100, 2) }}</h4>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -208,7 +208,7 @@
                                     <ul class="summery-total">
                                         <li>
                                             <h4>Subtotal</h4>
-                                            <h4 class="price">${{ number_format($cartSubtotalCents / 100, 2) }}</h4>
+                                            <h4 class="price">£{{ number_format($cartSubtotalCents / 100, 2) }}</h4>
                                         </li>
 
                                         <li>
@@ -217,20 +217,20 @@
                                                 @if ($shippingFeeCents === 0)
                                                     <span class="text-success">FREE</span>
                                                 @else
-                                                    ${{ number_format($shippingFeeCents / 100, 2) }}
+                                                    £{{ number_format($shippingFeeCents / 100, 2) }}
                                                 @endif
                                             </h4>
                                         </li>
 
                                         <li class="list-total">
-                                            <h4>Total (USD)</h4>
-                                            <h4 class="price">${{ number_format($orderTotalCents / 100, 2) }}</h4>
+                                            <h4>Total (GBP)</h4>
+                                            <h4 class="price">£{{ number_format($orderTotalCents / 100, 2) }}</h4>
                                         </li>
                                     </ul>
                                 </div>
 
                                 <button type="submit" form="checkout-form" id="checkout-submit-btn" class="btn theme-bg-color text-white btn-md w-100 mt-4 fw-bold py-3">
-                                    <i class="fa-solid fa-lock me-2"></i> Pay with Stripe (${{ number_format($orderTotalCents / 100, 2) }})
+                                    <i class="fa-solid fa-lock me-2"></i> Pay with Stripe (£{{ number_format($orderTotalCents / 100, 2) }})
                                 </button>
                                 
                                 <div class="mt-3 text-center">
@@ -271,7 +271,7 @@
             function updatePaymentUI() {
                 if (stripeRadio && stripeRadio.checked) {
                     if (submitBtn) {
-                        submitBtn.innerHTML = '<i class="fa-solid fa-lock me-2"></i> Pay with Stripe ($' + orderTotal + ')';
+                        submitBtn.innerHTML = '<i class="fa-solid fa-lock me-2"></i> Pay with Stripe (£' + orderTotal + ')';
                         submitBtn.classList.remove('btn-secondary');
                         submitBtn.classList.add('theme-bg-color');
                     }

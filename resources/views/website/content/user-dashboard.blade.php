@@ -334,7 +334,7 @@
                                                             <span class="badge bg-light text-dark border">{{ $order->items->count() }} items</span>
                                                         </td>
                                                         <td>
-                                                            <strong class="text-success">${{ number_format((float) $order->total, 2) }}</strong>
+                                                            <strong class="text-success">£{{ number_format((float) $order->total, 2) }}</strong>
                                                         </td>
                                                         <td>
                                                             @php
@@ -444,9 +444,9 @@
                                                             <img src="{{ asset($item->product?->image ?: 'assets/images/product/category/1.jpg') }}" class="rounded border" style="width: 50px; height: 50px; object-fit: contain;" alt="{{ $item->product_name }}">
                                                             <div class="flex-grow-1 overflow-hidden">
                                                                 <h6 class="fw-bold text-dark text-truncate mb-0">{{ $item->product_name }}</h6>
-                                                                <small class="text-muted">Qty: {{ $item->quantity }} &times; ${{ number_format((float) $item->unit_price, 2) }}</small>
+                                                                <small class="text-muted">Qty: {{ $item->quantity }} &times; £{{ number_format((float) $item->unit_price, 2) }}</small>
                                                             </div>
-                                                            <span class="fw-bold text-dark">${{ number_format((float) $item->line_total, 2) }}</span>
+                                                            <span class="fw-bold text-dark">£{{ number_format((float) $item->line_total, 2) }}</span>
                                                         </div>
                                                     </div>
                                                 @endforeach
@@ -495,9 +495,9 @@
                                                 @endif
                                             </div>
                                             <div class="d-flex align-items-center gap-3">
-                                                <span class="text-muted small">Subtotal: ${{ number_format((float) $order->subtotal, 2) }}</span>
-                                                <span class="text-muted small">Shipping: ${{ number_format((float) $order->shipping_fee, 2) }}</span>
-                                                <span class="fs-5 fw-bold text-success">Total: ${{ number_format((float) $order->total, 2) }}</span>
+                                                <span class="text-muted small">Subtotal: £{{ number_format((float) $order->subtotal, 2) }}</span>
+                                                <span class="text-muted small">Shipping: £{{ number_format((float) $order->shipping_fee, 2) }}</span>
+                                                <span class="fs-5 fw-bold text-success">Total: £{{ number_format((float) $order->total, 2) }}</span>
                                             </div>
                                         </div>
                                     </div>

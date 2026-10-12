@@ -4,9 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -24,15 +28,34 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->ensureIsNotRateLimited();
 
-        $request->session()->regenerate();
+        $user = User::where('email', $request->email)->first();
 
-        if ($request->user()->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard', absolute: false));
+        if (! $user || ! Hash::check($request->password, $user->password)) {
+            RateLimiter::hit($request->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.failed'),
+            ]);
         }
 
-        return redirect()->intended(route('home', absolute: false));
+        RateLimiter::clear($request->throttleKey());
+
+        // Generate 6-digit OTP code for login
+        $code = (string) random_int(100000, 999999);
+        $user->login_otp_code = $code;
+        $user->login_otp_expires_at = now()->addMinutes(10);
+        $user->save();
+
+        OtpVerificationController::sendOtpEmail($user, $code, 'login');
+
+        session([
+            'login_2fa_user_id' => $user->id,
+            'login_2fa_remember' => $request->boolean('remember'),
+        ]);
+
+        return redirect()->route('login.otp');
     }
 
     /**

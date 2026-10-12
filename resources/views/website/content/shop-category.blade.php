@@ -363,7 +363,7 @@
                                         @if ($minPrice || $maxPrice)
                                             <li>
                                                 <a href="{{ route('shop.category', request()->except(['min_price', 'max_price'])) }}">
-                                                    ${{ $minPrice ?? 0 }} - ${{ $maxPrice ?? (int)$priceMaxBound }} <i class="fa-solid fa-xmark"></i>
+                                                    £{{ $minPrice ?? 0 }} - £{{ $maxPrice ?? (int)$priceMaxBound }} <i class="fa-solid fa-xmark"></i>
                                                 </a>
                                             </li>
                                         @endif
@@ -459,8 +459,8 @@
                                                 aria-labelledby="headingPrice">
                                                 <div class="accordion-body">
                                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                                        <span class="badge bg-light text-dark p-2 fw-semibold" id="minPriceBadge">${{ $minPrice ?? 0 }}</span>
-                                                        <span class="badge bg-light text-dark p-2 fw-semibold" id="maxPriceBadge">${{ $maxPrice ?? (int)$priceMaxBound }}</span>
+                                                        <span class="badge bg-light text-dark p-2 fw-semibold" id="minPriceBadge">£{{ $minPrice ?? 0 }}</span>
+                                                        <span class="badge bg-light text-dark p-2 fw-semibold" id="maxPriceBadge">£{{ $maxPrice ?? (int)$priceMaxBound }}</span>
                                                     </div>
                                                     <div class="d-flex gap-2 align-items-center mb-3">
                                                         <input type="number" class="form-control form-control-sm" name="min_price"

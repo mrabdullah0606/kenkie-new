@@ -157,7 +157,7 @@
                                 <div>
                                     <span class="text-muted small d-block">Registered Headquarters:</span>
                                     <span class="fw-semibold text-dark fs-6 d-block">
-                                        Flat A, 51 Bescot Road, Walsall, WS2 9AD, United Kingdom
+                                        Walsall, WS2 9AD, United Kingdom
                                     </span>
                                 </div>
                             </div>
@@ -170,8 +170,8 @@
                                 <a href="https://www.ebay.co.uk/usr/kenkie-official" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2">
                                     <i class="fa-brands fa-ebay"></i> Official eBay Store
                                 </a>
-                                <a href="https://step4humanity.com/" target="_blank" rel="noopener noreferrer" class="btn btn-outline-success btn-sm d-inline-flex align-items-center gap-2">
-                                    <i class="fa-solid fa-heart"></i> Step 4 Humanity Charity
+                                <a href="https://www.amazon.co.uk/stores/KENKIE/page/487BF6DD-5825-481E-8D57-0FB35B9DC83E?dplnkId=d38d60d6-187f-43dc-9a7c-86caaee88080&ref=d6k_universal&dplnk=Y&ref_=cm_sw_r_apin_ast_store_HHNYC9C58WEBDF1MSEDG" target="_blank" rel="noopener noreferrer" class="btn btn-outline-warning text-dark btn-sm d-inline-flex align-items-center gap-2">
+                                    <i class="fa-brands fa-amazon"></i> Official Amazon Store
                                 </a>
                             </div>
                         </div>
@@ -180,16 +180,16 @@
                         <div>
                             <span class="text-muted small d-block mb-2">Connect with us on social media:</span>
                             <div class="d-flex align-items-center gap-2">
-                                <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="Facebook">
+                                <a href="https://www.facebook.com/share/1JC6RQXui7/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="Facebook">
                                     <i class="fa-brands fa-facebook-f"></i>
                                 </a>
                                 <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="Instagram">
                                     <i class="fa-brands fa-instagram"></i>
                                 </a>
-                                <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="YouTube">
+                                <a href="https://youtube.com/@kenkieofficial?si=oNQG40unIDlNw2rH" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="YouTube">
                                     <i class="fa-brands fa-youtube"></i>
                                 </a>
-                                <a href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="TikTok">
+                                <a href="https://www.tiktok.com/@kenkieofficial?_r=1&_t=ZN-9AQLmd3iXCw" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="TikTok">
                                     <i class="fa-brands fa-tiktok"></i>
                                 </a>
                             </div>
@@ -201,7 +201,7 @@
                 <div class="col-lg-7">
                     <div class="overflow-hidden rounded-4 border shadow-sm h-100" style="min-height: 480px;">
                         <iframe class="contact-map-iframe"
-                                src="https://maps.google.com/maps?q=51+Bescot+Road+Walsall+WS2+9AD+UK&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                                src="https://maps.google.com/maps?q=Walsall+WS2+9AD+UK&t=&z=13&ie=UTF8&iwloc=&output=embed"
                                 allowfullscreen=""
                                 loading="lazy"
                                 referrerpolicy="no-referrer-when-downgrade">
