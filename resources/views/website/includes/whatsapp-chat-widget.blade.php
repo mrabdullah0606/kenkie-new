@@ -197,7 +197,7 @@
 
     @media (max-width: 768px) {
         .kenkie-support-wrapper {
-            bottom: 18px !important;
+            bottom: calc(88px + env(safe-area-inset-bottom)) !important;
             right: 18px !important;
         }
         .kenkie-float-btn {
@@ -208,7 +208,7 @@
             font-size: 24px !important;
         }
         .theme-option {
-            bottom: 78px !important;
+            bottom: calc(150px + env(safe-area-inset-bottom)) !important;
             right: 22px !important;
         }
         .theme-option .back-to-top a,

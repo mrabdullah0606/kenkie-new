@@ -112,7 +112,45 @@
             background-color: #0da487 !important;
             border-color: #0da487 !important;
         }
+
+        .btn-google {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 11px 16px;
+            border: 1px solid #d9dee3;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #263238 !important;
+            font-weight: 600;
+        }
+
+        .btn-google:hover {
+            background: #f7f9fa;
+            text-decoration: none !important;
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #7a858f;
+            font-size: 12px;
+        }
+
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            height: 1px;
+            flex: 1;
+            background: #e5e9ed;
+        }
     </style>
+    @if (config('services.turnstile.enabled'))
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    @endif
 </head>
 
 <body>
@@ -146,6 +184,14 @@
                                     @endforeach
                                 </ul>
                             </div>
+                        @endif
+
+                        @if (filled(config('services.google.client_id')) && filled(config('services.google.client_secret')))
+                            <a href="{{ route('google.redirect') }}" class="btn-google mb-3">
+                                <i class="fa-brands fa-google" aria-hidden="true"></i>
+                                Continue with Google
+                            </a>
+                            <div class="auth-divider mb-3">or log in with email</div>
                         @endif
 
                         <div class="input-box">
@@ -185,6 +231,15 @@
                                         @endif
                                     </div>
                                 </div>
+
+                                @if (config('services.turnstile.enabled'))
+                                    <div class="col-12">
+                                        <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}" data-theme="light"></div>
+                                        @error('cf-turnstile-response')
+                                            <div class="invalid-feedback d-block mt-1">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                @endif
 
                                 <div class="col-12 mt-4">
                                     <button class="btn btn-theme-submit" type="submit">

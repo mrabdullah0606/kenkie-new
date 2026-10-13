@@ -41,4 +41,17 @@ return [
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
     ],
 
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', rtrim(env('APP_URL', 'http://localhost'), '/').'/auth/google/callback'),
+    ],
+
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+        'enabled' => ! in_array(strtolower((string) env('APP_ENV', 'production')), ['local', 'testing'], true)
+            || (! empty(env('TURNSTILE_SITE_KEY')) && ! empty(env('TURNSTILE_SECRET_KEY'))),
+    ],
+
 ];

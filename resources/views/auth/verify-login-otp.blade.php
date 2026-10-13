@@ -118,11 +118,7 @@
                             </div>
                         @endif
 
-                        @if (!empty($devCode))
-                            <div class="alert alert-info py-2 px-3 mb-3 text-sm text-center" role="alert">
-                                <strong>Local Dev Hint:</strong> Security code is <code>{{ $devCode }}</code>
-                            </div>
-                        @endif
+
 
                         <!-- Validation Errors -->
                         @if ($errors->any())

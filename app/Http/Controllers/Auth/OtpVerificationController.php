@@ -37,7 +37,6 @@ class OtpVerificationController extends Controller
 
         return view('auth.verify-register-otp', [
             'email' => $user->email,
-            'devCode' => (app()->isLocal() && config('mail.default') === 'log') ? $user->email_otp_code : null,
         ]);
     }
 
@@ -168,7 +167,6 @@ class OtpVerificationController extends Controller
 
         return view('auth.verify-login-otp', [
             'email' => $user->email,
-            'devCode' => (app()->isLocal() && config('mail.default') === 'log') ? $user->login_otp_code : null,
         ]);
     }
 
