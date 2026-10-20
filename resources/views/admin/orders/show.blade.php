@@ -54,12 +54,12 @@
                                             <div class="fw-bold text-dark">{{ $item->product_name }}</div>
                                             <small class="text-muted">SKU: <code>{{ $item->sku }}</code></small>
                                         </td>
-                                        <td>${{ number_format((float) $item->unit_price, 2) }}</td>
+                                        <td>£{{ number_format((float) $item->unit_price, 2) }}</td>
                                         <td>
                                             <span class="badge bg-light text-dark border px-3 py-1">× {{ $item->quantity }}</span>
                                         </td>
                                         <td class="text-end fw-bold text-dark">
-                                            ${{ number_format((float) $item->line_total, 2) }}
+                                            £{{ number_format((float) $item->line_total, 2) }}
                                         </td>
                                     </tr>
                                 @endforeach
@@ -72,16 +72,16 @@
                         <div class="col-md-6 col-lg-5">
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Subtotal:</span>
-                                <span class="fw-semibold">${{ number_format((float) $order->subtotal, 2) }}</span>
+                                <span class="fw-semibold">£{{ number_format((float) $order->subtotal, 2) }}</span>
                             </div>
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Shipping Fee:</span>
-                                <span class="fw-semibold">{{ (float) $order->shipping_fee > 0 ? '$' . number_format((float) $order->shipping_fee, 2) : 'FREE' }}</span>
+                                <span class="fw-semibold">{{ (float) $order->shipping_fee > 0 ? '£' . number_format((float) $order->shipping_fee, 2) : 'FREE' }}</span>
                             </div>
                             <hr class="my-2">
                             <div class="d-flex justify-content-between">
                                 <span class="fw-bold fs-5 text-dark">Total:</span>
-                                <span class="fw-bold fs-5 text-success">${{ number_format((float) $order->total, 2) }}</span>
+                                <span class="fw-bold fs-5 text-success">£{{ number_format((float) $order->total, 2) }}</span>
                             </div>
                         </div>
                     </div>
@@ -114,6 +114,47 @@
 
         <!-- Right: Status Update, Tracking & Customer Information -->
         <div class="col-xxl-4 col-xl-5">
+            <!-- Fraud & Security Risk Card -->
+            @php
+                $riskScore = $order->risk_score ?: 'low';
+                $riskCardBorder = match($riskScore) {
+                    'high' => 'border-danger',
+                    'medium' => 'border-warning',
+                    default => 'border-success',
+                };
+            @endphp
+            <div class="card mb-4 border {{ $riskCardBorder }}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fa-solid fa-shield-halved text-primary me-2"></i>Security & Fraud Check
+                    </h5>
+                    <span class="badge {{ $order->risk_badge_class }} px-3 py-1">
+                        {{ $order->risk_label }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">IP Address:</span>
+                        <span class="font-monospace fw-semibold">{{ $order->ip_address ?: 'Not recorded' }}</span>
+                    </div>
+
+                    @if (!empty($order->risk_flags) && is_array($order->risk_flags))
+                        <div class="mt-2 pt-2 border-top">
+                            <span class="text-muted small d-block mb-1 font-monospace">RISK INDICATORS:</span>
+                            <ul class="list-unstyled mb-0 small text-danger">
+                                @foreach ($order->risk_flags as $flag)
+                                    <li class="mb-1"><i class="fa-solid fa-circle-exclamation me-1"></i> {{ $flag }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @else
+                        <div class="small text-success mt-2 pt-2 border-top">
+                            <i class="fa-solid fa-circle-check me-1"></i> No fraud or security anomalies flagged.
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <!-- Fulfillment Status Card -->
             <div class="card mb-4">
                 <div class="card-header">

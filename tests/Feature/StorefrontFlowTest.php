@@ -25,7 +25,7 @@ it('renders database products on home category and product pages', function () {
     $this->get(route('products.show', $product->slug))
         ->assertOk()
         ->assertSee('Garden Tomatoes')
-        ->assertSee('$4.50');
+        ->assertSee('£4.50');
 
     $this->get(route('products.index'))
         ->assertRedirect(route('products.show', $product->slug));
@@ -68,12 +68,12 @@ it('updates the guest cart and calculates totals from catalog prices', function 
     $this->get(route('cart.index'))
         ->assertOk()
         ->assertSee($product->name)
-        ->assertSee('$25.00');
+        ->assertSee('£25.00');
 
     $this->patch(route('cart.update', $product->slug), ['quantity' => 3])
         ->assertRedirect(route('cart.index'));
 
-    $this->get(route('cart.index'))->assertSee('$37.50');
+    $this->get(route('cart.index'))->assertSee('£37.50');
 
     $this->delete(route('cart.destroy', $product->slug))
         ->assertRedirect(route('cart.index'));

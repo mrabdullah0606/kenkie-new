@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\AdminNewOrderNotificationMail;
+use App\Mail\CustomerOrderConfirmationMail;
 use App\Models\Order;
 use App\Models\Product;
+use App\Services\FraudDetectionService;
 use App\Services\StorefrontCart;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -174,12 +178,18 @@ class CheckoutController extends Controller
                 }
             }
 
+            $totalAmount = (float) ($subtotalCents + $shippingFeeCents) / 100;
+            $fraudEval = FraudDetectionService::evaluate($validated, $lineItems, $request, $totalAmount);
+
             $order = Order::query()->create([
                 ...$validated,
                 'uuid' => (string) Str::uuid(),
                 'user_id' => $request->user()?->id,
                 'status' => $initialStatus,
                 'payment_status' => $initialPaymentStatus,
+                'ip_address' => $request->ip(),
+                'risk_score' => $fraudEval['score'],
+                'risk_flags' => $fraudEval['flags'],
                 'subtotal' => $this->money($subtotalCents),
                 'shipping_fee' => $this->money($shippingFeeCents),
                 'total' => $this->money($subtotalCents + $shippingFeeCents),
@@ -272,6 +282,7 @@ class CheckoutController extends Controller
                     'status' => 'processing',
                 ]);
                 $request->session()->forget('cart');
+                self::sendOrderEmails($order);
 
                 return redirect()->route('orders.confirmation', $order->uuid)->with('success', 'Order placed with Stripe (Test Simulation Mode).');
             }
@@ -279,6 +290,7 @@ class CheckoutController extends Controller
 
         // Cash on delivery
         $request->session()->forget('cart');
+        self::sendOrderEmails($order);
 
         return redirect()->route('orders.confirmation', $order->uuid);
     }
@@ -299,6 +311,7 @@ class CheckoutController extends Controller
                         'status' => 'processing',
                         'stripe_payment_intent_id' => is_string($session->payment_intent) ? $session->payment_intent : null,
                     ]);
+                    self::sendOrderEmails($order);
                 }
             } catch (\Throwable $e) {
                 Log::error('Stripe verification failed: '.$e->getMessage());
@@ -322,6 +335,33 @@ class CheckoutController extends Controller
         return view('website.pages.confirmation', [
             'order' => $order->load('items'),
         ]);
+    }
+
+    /**
+     * Dispatch email notifications to Admin and Customer.
+     */
+    public static function sendOrderEmails(Order $order): void
+    {
+        $order->loadMissing('items');
+
+        // 1. Notify Admin of new order
+        try {
+            $adminEmail = config('mail.admin_address') ?: config('mail.from.address', 'info@kenkie.com');
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new AdminNewOrderNotificationMail($order));
+            }
+        } catch (\Throwable $e) {
+            Log::error("Failed to send admin order notification for #{$order->order_number}: ".$e->getMessage());
+        }
+
+        // 2. Notify Customer with order confirmation
+        try {
+            if (! empty($order->email)) {
+                Mail::to($order->email)->send(new CustomerOrderConfirmationMail($order));
+            }
+        } catch (\Throwable $e) {
+            Log::error("Failed to send customer order confirmation for #{$order->order_number}: ".$e->getMessage());
+        }
     }
 
     private function money(int $cents): string

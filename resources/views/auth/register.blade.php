@@ -186,6 +186,11 @@
                             <form method="POST" action="{{ route('register') }}" class="row g-3">
                                 @csrf
 
+                                {{-- Anti-Bot Honeypot Field --}}
+                                <div style="display:none !important; visibility:hidden; position:absolute; left:-9999px;" aria-hidden="true">
+                                    <input type="text" name="hp_username" id="hp_username" value="" tabindex="-1" autocomplete="off">
+                                </div>
+
                                 <div class="col-12">
                                     <div class="form-floating theme-form-floating log-in-form">
                                         <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="Full Name" required autofocus autocomplete="name">

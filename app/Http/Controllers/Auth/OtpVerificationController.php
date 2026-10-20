@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AdminNewUserRegisteredMail;
 use App\Mail\AuthOtpMail;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -79,6 +80,15 @@ class OtpVerificationController extends Controller
         $user->save();
 
         event(new Registered($user));
+
+        try {
+            $adminEmail = config('mail.admin_address') ?: config('mail.from.address', 'info@kenkie.com');
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new AdminNewUserRegisteredMail($user, $request->ip()));
+            }
+        } catch (\Throwable $e) {
+            Log::error("Failed sending admin new user notification for {$user->email}: ".$e->getMessage());
+        }
 
         Auth::login($user);
 

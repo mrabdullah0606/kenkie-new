@@ -74,7 +74,9 @@ use App\Http\Controllers\UserDashboardController;
 
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::post('/checkout', [CheckoutController::class, 'store'])
+        ->middleware('throttle:10,1')
+        ->name('checkout.store');
     Route::get('/checkout/stripe/success/{order:uuid}', [CheckoutController::class, 'stripeSuccess'])->name('checkout.stripe.success');
     Route::get('/checkout/stripe/cancel/{order:uuid}', [CheckoutController::class, 'stripeCancel'])->name('checkout.stripe.cancel');
     Route::get('/orders/{order:uuid}', [CheckoutController::class, 'confirmation'])->name('orders.confirmation');

@@ -89,7 +89,18 @@
                                     <small class="d-block text-muted font-monospace" style="font-size: 11px;">#{{ substr($order->uuid, 0, 8) }}</small>
                                 </td>
                                 <td>
-                                    <div class="fw-semibold text-dark">{{ $order->customer_name }}</div>
+                                    <div class="fw-semibold text-dark d-flex align-items-center gap-1">
+                                        <span>{{ $order->customer_name }}</span>
+                                        @if ($order->risk_score === 'high')
+                                            <span class="badge bg-danger text-white ms-1 px-1 py-0" style="font-size: 10px;" title="High Fraud/Security Risk">
+                                                <i class="fa-solid fa-triangle-exclamation"></i> High Risk
+                                            </span>
+                                        @elseif ($order->risk_score === 'medium')
+                                            <span class="badge bg-warning text-dark ms-1 px-1 py-0" style="font-size: 10px;" title="Medium Risk">
+                                                <i class="fa-solid fa-shield-halved"></i> Med Risk
+                                            </span>
+                                        @endif
+                                    </div>
                                     <small class="text-muted">{{ $order->email }}</small>
                                 </td>
                                 <td>
@@ -98,7 +109,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="fw-bold text-success">${{ number_format((float) $order->total, 2) }}</span>
+                                    <span class="fw-bold text-success">£{{ number_format((float) $order->total, 2) }}</span>
                                 </td>
                                 <td>
                                     @if ($order->payment_method === 'stripe')

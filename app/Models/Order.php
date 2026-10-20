@@ -39,6 +39,9 @@ class Order extends Model
         'delivered_at',
         'stripe_session_id',
         'stripe_payment_intent_id',
+        'ip_address',
+        'risk_score',
+        'risk_flags',
         'subtotal',
         'shipping_fee',
         'total',
@@ -111,9 +114,28 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function getRiskBadgeClassAttribute(): string
+    {
+        return match ($this->risk_score) {
+            'high' => 'bg-danger text-white',
+            'medium' => 'bg-warning text-dark',
+            default => 'bg-success text-white',
+        };
+    }
+
+    public function getRiskLabelAttribute(): string
+    {
+        return match ($this->risk_score) {
+            'high' => 'High Risk',
+            'medium' => 'Medium Risk',
+            default => 'Low Risk',
+        };
+    }
+
     protected function casts(): array
     {
         return [
+            'risk_flags' => 'array',
             'subtotal' => 'decimal:2',
             'shipping_fee' => 'decimal:2',
             'total' => 'decimal:2',
