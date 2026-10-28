@@ -39,6 +39,7 @@ class Order extends Model
         'delivered_at',
         'stripe_session_id',
         'stripe_payment_intent_id',
+        'paypal_order_id',
         'ip_address',
         'risk_score',
         'risk_flags',

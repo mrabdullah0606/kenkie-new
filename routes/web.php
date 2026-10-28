@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 use App\Http\Controllers\Admin\MarketingSettingController as AdminMarketingSettingController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\PaymentSettingController as AdminPaymentSettingController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 use App\Http\Controllers\Admin\PromotionalPopupController as AdminPromotionalPopupController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StorefrontController;
+use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -64,10 +66,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::put('marketing/whatsapp', [AdminMarketingSettingController::class, 'updateWhatsApp'])->name('marketing.whatsapp');
     Route::put('marketing/pixels', [AdminMarketingSettingController::class, 'updatePixels'])->name('marketing.pixels');
     Route::put('marketing/seo', [AdminMarketingSettingController::class, 'updateSeo'])->name('marketing.seo');
+    Route::get('payments', [AdminPaymentSettingController::class, 'index'])->name('payments.index');
+    Route::put('payments/stripe', [AdminPaymentSettingController::class, 'updateStripe'])->name('payments.stripe');
+    Route::post('payments/stripe/test', [AdminPaymentSettingController::class, 'testStripe'])->name('payments.stripe.test');
+    Route::put('payments/cod', [AdminPaymentSettingController::class, 'updateCod'])->name('payments.cod');
+    Route::put('payments/paypal', [AdminPaymentSettingController::class, 'updatePayPal'])->name('payments.paypal');
+    Route::post('payments/paypal/test', [AdminPaymentSettingController::class, 'testPayPal'])->name('payments.paypal.test');
     Route::get('/profile', [AdminProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password');
 });
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 use App\Http\Controllers\TrackOrderController;
 use App\Http\Controllers\UserDashboardController;
@@ -79,6 +89,8 @@ Route::middleware('auth')->group(function () {
         ->name('checkout.store');
     Route::get('/checkout/stripe/success/{order:uuid}', [CheckoutController::class, 'stripeSuccess'])->name('checkout.stripe.success');
     Route::get('/checkout/stripe/cancel/{order:uuid}', [CheckoutController::class, 'stripeCancel'])->name('checkout.stripe.cancel');
+    Route::get('/checkout/paypal/success/{order:uuid}', [CheckoutController::class, 'paypalSuccess'])->name('checkout.paypal.success');
+    Route::get('/checkout/paypal/cancel/{order:uuid}', [CheckoutController::class, 'paypalCancel'])->name('checkout.paypal.cancel');
     Route::get('/orders/{order:uuid}', [CheckoutController::class, 'confirmation'])->name('orders.confirmation');
 
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');

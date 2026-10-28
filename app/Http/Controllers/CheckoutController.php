@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Mail\AdminNewOrderNotificationMail;
 use App\Mail\CustomerOrderConfirmationMail;
 use App\Models\Order;
+use App\Models\PaymentSetting;
 use App\Models\Product;
 use App\Services\FraudDetectionService;
+use App\Services\PayPalService;
 use App\Services\StorefrontCart;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -31,13 +33,62 @@ class CheckoutController extends Controller
 
         $contents['shippingFeeCents'] = $cart->shippingFeeCents($contents['cartSubtotalCents']);
         $contents['orderTotalCents'] = $contents['cartSubtotalCents'] + $contents['shippingFeeCents'];
-        $contents['stripeKey'] = config('services.stripe.key');
+
+        $paymentSettings = PaymentSetting::getSettings();
+        $contents['stripeKey'] = PaymentSetting::getStripeKey();
+        $contents['stripeEnabled'] = $paymentSettings->stripe_enabled;
+        $contents['paypalEnabled'] = $paymentSettings->paypal_enabled;
+        $contents['codEnabled'] = $paymentSettings->cod_enabled;
+        $contents['codInstructions'] = $paymentSettings->cod_instructions;
+
+        $savedDetails = $request->session()->get('checkout_customer_details', []);
+        if (empty($savedDetails) && $request->user()) {
+            $lastOrder = $request->user()->orders()->latest()->first();
+            if ($lastOrder) {
+                $savedDetails = [
+                    'customer_name' => $lastOrder->customer_name,
+                    'email' => $lastOrder->email,
+                    'phone' => $lastOrder->phone,
+                    'address_line' => $lastOrder->address_line,
+                    'city' => $lastOrder->city,
+                    'region' => $lastOrder->region,
+                    'postal_code' => $lastOrder->postal_code,
+                    'country' => $lastOrder->country,
+                ];
+            }
+        }
+
+        if (! empty($savedDetails['country'])) {
+            $countryNorm = strtolower(trim((string) $savedDetails['country']));
+            if (! in_array($countryNorm, ['united kingdom', 'uk', 'gb', 'great britain', 'england', 'scotland', 'wales', 'northern ireland'], true)) {
+                $savedDetails['country'] = 'United Kingdom';
+            }
+        } else {
+            $savedDetails['country'] = 'United Kingdom';
+        }
+
+        $contents['customerDetails'] = $savedDetails;
 
         return view('website.pages.checkout', $contents);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        $paymentSettings = PaymentSetting::getSettings();
+        $allowedPaymentMethods = [];
+        if ($paymentSettings->stripe_enabled) {
+            $allowedPaymentMethods[] = 'stripe';
+        }
+        if ($paymentSettings->paypal_enabled) {
+            $allowedPaymentMethods[] = 'paypal';
+        }
+        if ($paymentSettings->cod_enabled) {
+            $allowedPaymentMethods[] = 'cash_on_delivery';
+        }
+        if (empty($allowedPaymentMethods)) {
+            $allowedPaymentMethods = ['stripe', 'paypal'];
+        }
+
         $validated = $request->validate([
             'customer_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
@@ -46,9 +97,27 @@ class CheckoutController extends Controller
             'city' => ['required', 'string', 'max:120'],
             'region' => ['nullable', 'string', 'max:120'],
             'postal_code' => ['required', 'string', 'max:30'],
-            'country' => ['required', 'string', 'max:120'],
-            'payment_method' => ['required', 'in:cash_on_delivery,stripe'],
+            'country' => [
+                'required',
+                'string',
+                'max:120',
+                function ($attribute, $value, $fail) {
+                    $normalized = strtolower(trim((string) $value));
+                    $allowed = ['united kingdom', 'uk', 'gb', 'great britain', 'england', 'scotland', 'wales', 'northern ireland'];
+                    if (! in_array($normalized, $allowed, true)) {
+                        $fail('Orders can only be accepted and delivered to addresses within the United Kingdom.');
+                    }
+                },
+            ],
+            'payment_method' => ['required', 'in:'.implode(',', $allowedPaymentMethods)],
+        ], [
+            'country.*' => 'Orders can only be accepted and delivered to addresses within the United Kingdom.',
         ]);
+
+        $validated['country'] = 'United Kingdom';
+
+        $request->session()->put('checkout_customer_details', $validated);
+
         $cart = StorefrontCart::sanitizeSessionCart($request);
 
         if (! is_array($cart) || $cart === []) {
@@ -171,8 +240,14 @@ class CheckoutController extends Controller
             $initialPaymentStatus = 'pending';
             $initialStatus = 'pending';
             if ($validated['payment_method'] === 'stripe') {
-                $stripeSecret = config('services.stripe.secret');
+                $stripeSecret = PaymentSetting::getStripeSecret();
                 if (! $stripeSecret || str_contains($stripeSecret, 'placeholder') || ! str_starts_with($stripeSecret, 'sk_')) {
+                    $initialPaymentStatus = 'paid';
+                    $initialStatus = 'processing';
+                }
+            } elseif ($validated['payment_method'] === 'paypal') {
+                $paypalSecret = PaymentSetting::getPayPalSecret();
+                if (! $paypalSecret || str_contains($paypalSecret, 'placeholder')) {
                     $initialPaymentStatus = 'paid';
                     $initialStatus = 'processing';
                 }
@@ -219,7 +294,7 @@ class CheckoutController extends Controller
 
         // Handle Stripe payment
         if ($validated['payment_method'] === 'stripe') {
-            $stripeSecret = config('services.stripe.secret');
+            $stripeSecret = PaymentSetting::getStripeSecret();
 
             if ($stripeSecret && ! str_contains($stripeSecret, 'placeholder') && str_starts_with($stripeSecret, 'sk_')) {
                 try {
@@ -267,7 +342,6 @@ class CheckoutController extends Controller
                     ]);
 
                     $order->update(['stripe_session_id' => $session->id]);
-                    $request->session()->forget('cart');
 
                     return redirect()->away($session->url);
                 } catch (\Throwable $e) {
@@ -281,15 +355,44 @@ class CheckoutController extends Controller
                     'payment_status' => 'paid',
                     'status' => 'processing',
                 ]);
-                $request->session()->forget('cart');
+                $request->session()->forget(['cart', 'checkout_customer_details']);
                 self::sendOrderEmails($order);
 
                 return redirect()->route('orders.confirmation', $order->uuid)->with('success', 'Order placed with Stripe (Test Simulation Mode).');
             }
         }
 
-        // Cash on delivery
-        $request->session()->forget('cart');
+        // Handle PayPal payment
+        if ($validated['payment_method'] === 'paypal') {
+            $paypalClientId = PaymentSetting::getPayPalClientId();
+            $paypalSecret = PaymentSetting::getPayPalSecret();
+
+            if ($paypalClientId && $paypalSecret && ! str_contains($paypalSecret, 'placeholder') && ! str_contains($paypalClientId, 'placeholder')) {
+                try {
+                    $paypalOrder = PayPalService::createOrder($order, $lineItems, $subtotalCents, $shippingFeeCents);
+                    $order->update(['paypal_order_id' => $paypalOrder['id']]);
+
+                    return redirect()->away($paypalOrder['approve_url']);
+                } catch (\Throwable $e) {
+                    Log::error('PayPal checkout session failed: '.$e->getMessage());
+
+                    return redirect()->route('cart.index')->with('error', 'PayPal checkout could not be initiated: '.$e->getMessage());
+                }
+            } else {
+                // Test simulation mode for PayPal
+                $order->update([
+                    'payment_status' => 'paid',
+                    'status' => 'processing',
+                ]);
+                $request->session()->forget(['cart', 'checkout_customer_details']);
+                self::sendOrderEmails($order);
+
+                return redirect()->route('orders.confirmation', $order->uuid)->with('success', 'Order placed with PayPal (Test Simulation Mode).');
+            }
+        }
+
+        // Cash on delivery (if enabled)
+        $request->session()->forget(['cart', 'checkout_customer_details']);
         self::sendOrderEmails($order);
 
         return redirect()->route('orders.confirmation', $order->uuid);
@@ -298,7 +401,7 @@ class CheckoutController extends Controller
     public function stripeSuccess(Request $request, Order $order): RedirectResponse
     {
         $sessionId = $request->query('session_id');
-        $stripeSecret = config('services.stripe.secret');
+        $stripeSecret = PaymentSetting::getStripeSecret();
 
         if ($sessionId && $stripeSecret && ! str_contains($stripeSecret, 'placeholder') && str_starts_with($stripeSecret, 'sk_')) {
             try {
@@ -318,12 +421,100 @@ class CheckoutController extends Controller
             }
         }
 
+        // Only clear the cart and details once payment has succeeded
+        $request->session()->forget(['cart', 'checkout_customer_details']);
+
         return redirect()->route('orders.confirmation', $order->uuid);
     }
 
     public function stripeCancel(Request $request, Order $order): RedirectResponse
     {
-        return redirect()->route('checkout.index')->with('error', 'Payment was cancelled. You can retry or choose a different payment method.');
+        if ($order->payment_status === 'pending') {
+            foreach ($order->items as $item) {
+                if ($item->product_id) {
+                    Product::query()->where('id', $item->product_id)->increment('stock', $item->quantity);
+                }
+            }
+            $order->update([
+                'status' => 'cancelled',
+                'payment_status' => 'cancelled',
+            ]);
+        }
+
+        // Restore customer details into session so inputs stay pre-filled
+        $request->session()->put('checkout_customer_details', [
+            'customer_name' => $order->customer_name,
+            'email' => $order->email,
+            'phone' => $order->phone,
+            'address_line' => $order->address_line,
+            'city' => $order->city,
+            'region' => $order->region,
+            'postal_code' => $order->postal_code,
+            'country' => $order->country,
+            'payment_method' => $order->payment_method,
+        ]);
+
+        return redirect()->route('checkout.index')
+            ->with('error', 'Payment was cancelled. Your details and cart items have been preserved so you can review or choose another payment method.');
+    }
+
+    public function paypalSuccess(Request $request, Order $order): RedirectResponse
+    {
+        $token = $request->query('token');
+        $paypalOrderId = $token ?: $order->paypal_order_id;
+        $paypalSecret = PaymentSetting::getPayPalSecret();
+
+        if ($paypalOrderId && $paypalSecret && ! str_contains($paypalSecret, 'placeholder')) {
+            try {
+                $capture = PayPalService::captureOrder($paypalOrderId);
+                $status = $capture['status'] ?? '';
+
+                if ($status === 'COMPLETED' || $status === 'APPROVED') {
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'status' => 'processing',
+                        'paypal_order_id' => $paypalOrderId,
+                    ]);
+                    self::sendOrderEmails($order);
+                }
+            } catch (\Throwable $e) {
+                Log::error('PayPal capture error: '.$e->getMessage());
+            }
+        }
+
+        $request->session()->forget(['cart', 'checkout_customer_details']);
+
+        return redirect()->route('orders.confirmation', $order->uuid);
+    }
+
+    public function paypalCancel(Request $request, Order $order): RedirectResponse
+    {
+        if ($order->payment_status === 'pending') {
+            foreach ($order->items as $item) {
+                if ($item->product_id) {
+                    Product::query()->where('id', $item->product_id)->increment('stock', $item->quantity);
+                }
+            }
+            $order->update([
+                'status' => 'cancelled',
+                'payment_status' => 'cancelled',
+            ]);
+        }
+
+        $request->session()->put('checkout_customer_details', [
+            'customer_name' => $order->customer_name,
+            'email' => $order->email,
+            'phone' => $order->phone,
+            'address_line' => $order->address_line,
+            'city' => $order->city,
+            'region' => $order->region,
+            'postal_code' => $order->postal_code,
+            'country' => $order->country,
+            'payment_method' => $order->payment_method,
+        ]);
+
+        return redirect()->route('checkout.index')
+            ->with('error', 'PayPal payment was cancelled. Your details and cart items have been preserved so you can review or choose another payment method.');
     }
 
     public function confirmation(Request $request, Order $order): View

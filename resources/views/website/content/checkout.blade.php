@@ -80,52 +80,62 @@
                                                 </div>
 
                                                 <div class="checkout-detail">
+                                                    @php
+                                                        $details = $customerDetails ?? [];
+                                                        $authName = auth()->user()?->name;
+                                                        $authEmail = auth()->user()?->email;
+                                                    @endphp
                                                     <div class="row g-3">
                                                         <div class="col-md-6">
                                                             <label class="form-label fw-bold" for="customer_name">Full Name <span class="text-danger">*</span></label>
-                                                            <input class="form-control @error('customer_name') is-invalid @enderror" id="customer_name" name="customer_name" value="{{ old('customer_name', auth()->user()?->name) }}" placeholder="e.g. John Doe" required>
+                                                            <input class="form-control @error('customer_name') is-invalid @enderror" id="customer_name" name="customer_name" value="{{ old('customer_name', $details['customer_name'] ?? $authName) }}" placeholder="e.g. John Doe" required>
                                                             @error('customer_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
 
                                                         <div class="col-md-6">
                                                             <label class="form-label fw-bold" for="email">Email Address <span class="text-danger">*</span></label>
-                                                            <input class="form-control @error('email') is-invalid @enderror" id="email" type="email" name="email" value="{{ old('email', auth()->user()?->email) }}" placeholder="e.g. john@example.com" required>
+                                                            <input class="form-control @error('email') is-invalid @enderror" id="email" type="email" name="email" value="{{ old('email', $details['email'] ?? $authEmail) }}" placeholder="e.g. john@example.com" required>
                                                             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
 
                                                         <div class="col-md-6">
                                                             <label class="form-label fw-bold" for="phone">Phone Number <span class="text-danger">*</span></label>
-                                                            <input class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}" placeholder="e.g. +1 555 123 4567" required>
+                                                            <input class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone', $details['phone'] ?? '') }}" placeholder="e.g. +44 7123 456789" required>
                                                             @error('phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
 
                                                         <div class="col-md-6">
                                                             <label class="form-label fw-bold" for="country">Country <span class="text-danger">*</span></label>
-                                                            <input class="form-control @error('country') is-invalid @enderror" id="country" name="country" value="{{ old('country', 'United States') }}" required>
+                                                            <select class="form-select @error('country') is-invalid @enderror" id="country" name="country" required>
+                                                                <option value="United Kingdom" selected>🇬🇧 United Kingdom (UK Domestic Delivery)</option>
+                                                            </select>
+                                                            <div class="form-text text-muted" style="font-size: 11px;">
+                                                                <i class="fa-solid fa-circle-check text-success me-1"></i> Orders can only be accepted for delivery within the United Kingdom.
+                                                            </div>
                                                             @error('country')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
 
                                                         <div class="col-12">
                                                             <label class="form-label fw-bold" for="address_line">Street Address <span class="text-danger">*</span></label>
-                                                            <input class="form-control @error('address_line') is-invalid @enderror" id="address_line" name="address_line" value="{{ old('address_line') }}" placeholder="House #, Street name, Apt / Suite" required>
+                                                            <input class="form-control @error('address_line') is-invalid @enderror" id="address_line" name="address_line" value="{{ old('address_line', $details['address_line'] ?? '') }}" placeholder="House #, Street name, Apt / Suite" required>
                                                             @error('address_line')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
 
                                                         <div class="col-md-4">
                                                             <label class="form-label fw-bold" for="city">City <span class="text-danger">*</span></label>
-                                                            <input class="form-control @error('city') is-invalid @enderror" id="city" name="city" value="{{ old('city') }}" placeholder="City" required>
+                                                            <input class="form-control @error('city') is-invalid @enderror" id="city" name="city" value="{{ old('city', $details['city'] ?? '') }}" placeholder="City" required>
                                                             @error('city')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
 
                                                         <div class="col-md-4">
                                                             <label class="form-label fw-bold" for="region">State / Province</label>
-                                                            <input class="form-control @error('region') is-invalid @enderror" id="region" name="region" value="{{ old('region') }}" placeholder="State / Province">
+                                                            <input class="form-control @error('region') is-invalid @enderror" id="region" name="region" value="{{ old('region', $details['region'] ?? '') }}" placeholder="State / Province">
                                                             @error('region')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
 
                                                         <div class="col-md-4">
                                                             <label class="form-label fw-bold" for="postal_code">Postal Code <span class="text-danger">*</span></label>
-                                                            <input class="form-control @error('postal_code') is-invalid @enderror" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" placeholder="Postal / ZIP" required>
+                                                            <input class="form-control @error('postal_code') is-invalid @enderror" id="postal_code" name="postal_code" value="{{ old('postal_code', $details['postal_code'] ?? '') }}" placeholder="e.g. SW1A 1AA or M1 1AE" required>
                                                             @error('postal_code')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                         </div>
                                                     </div>
@@ -143,11 +153,19 @@
                                                 </div>
 
                                                 <div class="checkout-detail">
+                                                    @php
+                                                        $showStripe = $stripeEnabled ?? true;
+                                                        $showPayPal = $paypalEnabled ?? true;
+                                                        $showCod = $codEnabled ?? false;
+                                                        $defaultMethod = $showStripe ? 'stripe' : ($showPayPal ? 'paypal' : ($showCod ? 'cash_on_delivery' : 'stripe'));
+                                                    @endphp
+
                                                     <!-- Stripe Payment Option -->
-                                                    <div class="p-3 mb-3 border rounded-3 payment-method-option" id="stripe-option-box" style="background: #f8fafc; cursor: pointer;">
+                                                    @if($showStripe)
+                                                    <div class="p-3 mb-3 border rounded-3 payment-method-option" id="stripe-option-box" style="background: {{ $defaultMethod === 'stripe' ? '#f8fafc' : '#ffffff' }}; cursor: pointer;">
                                                         <div class="form-check custom-form-check d-flex align-items-center justify-content-between flex-wrap gap-2">
                                                             <div class="d-flex align-items-center gap-2">
-                                                                <input class="form-check-input" type="radio" name="payment_method" id="stripe" value="stripe" checked>
+                                                                <input class="form-check-input" type="radio" name="payment_method" id="stripe" value="stripe" {{ $defaultMethod === 'stripe' ? 'checked' : '' }}>
                                                                 <label class="form-check-label fw-bold fs-6 mb-0 text-dark" for="stripe" style="cursor: pointer;">
                                                                     Credit / Debit Card (Stripe)
                                                                 </label>
@@ -164,19 +182,42 @@
                                                             <i class="fa-solid fa-lock text-success me-1"></i> Fast, secure 256-bit encrypted checkout via Stripe. Supports Visa, MasterCard, Amex, Apple Pay &amp; Google Pay.
                                                         </p>
                                                     </div>
+                                                    @endif
+
+                                                    <!-- PayPal Payment Option -->
+                                                    @if($showPayPal)
+                                                    <div class="p-3 mb-3 border rounded-3 payment-method-option" id="paypal-option-box" style="background: {{ $defaultMethod === 'paypal' ? '#f8fafc' : '#ffffff' }}; cursor: pointer;">
+                                                        <div class="form-check custom-form-check d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <input class="form-check-input" type="radio" name="payment_method" id="paypal" value="paypal" {{ $defaultMethod === 'paypal' ? 'checked' : '' }}>
+                                                                <label class="form-check-label fw-bold fs-6 mb-0 text-dark" for="paypal" style="cursor: pointer;">
+                                                                    PayPal / Pay in 3
+                                                                </label>
+                                                            </div>
+                                                            <div class="d-flex align-items-center gap-2 text-primary fs-4">
+                                                                <i class="fa-brands fa-paypal"></i>
+                                                            </div>
+                                                        </div>
+                                                        <p class="text-muted small mt-2 mb-0 ps-4">
+                                                            <i class="fa-solid fa-shield-halved text-primary me-1"></i> Pay safely with your PayPal balance, linked bank account, or PayPal Pay in 3.
+                                                        </p>
+                                                    </div>
+                                                    @endif
 
                                                     <!-- Cash on Delivery Option -->
-                                                    <div class="p-3 border rounded-3 payment-method-option" id="cod-option-box" style="background: #ffffff; cursor: pointer;">
+                                                    @if($showCod)
+                                                    <div class="p-3 border rounded-3 payment-method-option" id="cod-option-box" style="background: {{ $defaultMethod === 'cash_on_delivery' ? '#f8fafc' : '#ffffff' }}; cursor: pointer;">
                                                         <div class="form-check custom-form-check">
-                                                            <input class="form-check-input" type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery">
+                                                            <input class="form-check-input" type="radio" name="payment_method" id="cash_on_delivery" value="cash_on_delivery" {{ $defaultMethod === 'cash_on_delivery' ? 'checked' : '' }}>
                                                             <label class="form-check-label fw-bold fs-6 mb-0 text-dark" for="cash_on_delivery" style="cursor: pointer;">
                                                                 Cash On Delivery (COD)
                                                             </label>
                                                         </div>
                                                         <p class="text-muted small mt-2 mb-0 ps-4">
-                                                            Pay with cash upon delivery of your items to your doorstep.
+                                                            {{ ! empty($codInstructions) ? $codInstructions : 'Pay with cash upon delivery of your items to your doorstep.' }}
                                                         </p>
                                                     </div>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </li>
@@ -262,41 +303,58 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const stripeRadio = document.getElementById('stripe');
+            const paypalRadio = document.getElementById('paypal');
             const codRadio = document.getElementById('cash_on_delivery');
             const submitBtn = document.getElementById('checkout-submit-btn');
             const stripeBox = document.getElementById('stripe-option-box');
+            const paypalBox = document.getElementById('paypal-option-box');
             const codBox = document.getElementById('cod-option-box');
             const orderTotal = '{{ number_format($orderTotalCents / 100, 2) }}';
 
             function updatePaymentUI() {
+                if (stripeBox) { stripeBox.style.background = '#ffffff'; stripeBox.style.borderColor = '#e2e8f0'; }
+                if (paypalBox) { paypalBox.style.background = '#ffffff'; paypalBox.style.borderColor = '#e2e8f0'; }
+                if (codBox) { codBox.style.background = '#ffffff'; codBox.style.borderColor = '#e2e8f0'; }
+
                 if (stripeRadio && stripeRadio.checked) {
                     if (submitBtn) {
                         submitBtn.innerHTML = '<i class="fa-solid fa-lock me-2"></i> Pay with Stripe (£' + orderTotal + ')';
                         submitBtn.classList.remove('btn-secondary');
                         submitBtn.classList.add('theme-bg-color');
                     }
-                    if (stripeBox) stripeBox.style.background = '#f0fdf4';
-                    if (stripeBox) stripeBox.style.borderColor = '#22c55e';
-                    if (codBox) codBox.style.background = '#ffffff';
-                    if (codBox) codBox.style.borderColor = '#e2e8f0';
+                    if (stripeBox) { stripeBox.style.background = '#f0fdf4'; stripeBox.style.borderColor = '#22c55e'; }
+                } else if (paypalRadio && paypalRadio.checked) {
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fa-brands fa-paypal me-2"></i> Pay with PayPal (£' + orderTotal + ')';
+                        submitBtn.classList.remove('btn-secondary');
+                        submitBtn.classList.add('theme-bg-color');
+                    }
+                    if (paypalBox) { paypalBox.style.background = '#eff6ff'; paypalBox.style.borderColor = '#3b82f6'; }
                 } else if (codRadio && codRadio.checked) {
                     if (submitBtn) {
                         submitBtn.innerHTML = '<i class="fa-solid fa-truck-ramp-box me-2"></i> Place Cash On Delivery Order';
                     }
-                    if (codBox) codBox.style.background = '#f0fdf4';
-                    if (codBox) codBox.style.borderColor = '#22c55e';
-                    if (stripeBox) stripeBox.style.background = '#ffffff';
-                    if (stripeBox) stripeBox.style.borderColor = '#e2e8f0';
+                    if (codBox) { codBox.style.background = '#f0fdf4'; codBox.style.borderColor = '#22c55e'; }
                 }
             }
 
             if (stripeRadio) stripeRadio.addEventListener('change', updatePaymentUI);
+            if (paypalRadio) paypalRadio.addEventListener('change', updatePaymentUI);
             if (codRadio) codRadio.addEventListener('change', updatePaymentUI);
 
             if (stripeBox) {
                 stripeBox.addEventListener('click', function(e) {
                     if (e.target !== stripeRadio) {
                         stripeRadio.checked = true;
+                        updatePaymentUI();
+                    }
+                });
+            }
+
+            if (paypalBox) {
+                paypalBox.addEventListener('click', function(e) {
+                    if (e.target !== paypalRadio) {
+                        paypalRadio.checked = true;
                         updatePaymentUI();
                     }
                 });

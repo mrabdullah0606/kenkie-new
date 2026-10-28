@@ -104,6 +104,13 @@
                     </li>
 
                     <li class="sidebar-list">
+                        <a class="sidebar-link {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}" href="{{ route('admin.payments.index') }}">
+                            <i class="fa-solid fa-credit-card"></i>
+                            <span>Payment Gateways</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-list">
                         <a class="sidebar-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}" href="{{ route('admin.profile.edit') }}">
                             <i class="fa-solid fa-sliders"></i>
                             <span>Settings & Profile</span>

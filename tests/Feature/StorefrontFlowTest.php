@@ -122,8 +122,8 @@ it('places an order using server prices and decrements stock for authenticated u
         'address_line' => '10 Market Street',
         'city' => 'Springfield',
         'region' => 'IL',
-        'postal_code' => '62701',
-        'country' => 'United States',
+        'postal_code' => 'SW1A 1AA',
+        'country' => 'United Kingdom',
         'payment_method' => 'cash_on_delivery',
     ]);
 

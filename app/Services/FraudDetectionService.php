@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class FraudDetectionService
 {
@@ -60,13 +61,14 @@ class FraudDetectionService
         // 2. Check rapid sequential orders from same IP or email (within 15 minutes)
         if ($ip || $email) {
             try {
+                $hasIpColumn = Schema::hasColumn('orders', 'ip_address');
                 $recentOrdersCount = Order::query()
                     ->where('created_at', '>=', now()->subMinutes(15))
-                    ->where(function ($query) use ($ip, $email) {
+                    ->where(function ($query) use ($ip, $email, $hasIpColumn) {
                         if ($email) {
                             $query->where('email', $email);
                         }
-                        if ($ip) {
+                        if ($ip && $hasIpColumn) {
                             $query->orWhere('ip_address', $ip);
                         }
                     })
@@ -77,7 +79,7 @@ class FraudDetectionService
                     $numericScore += 30;
                 }
             } catch (\Throwable $e) {
-                // Graceful fallback if database schema is undergoing migration
+                // Graceful fallback if database schema is undergoing migration or connection glitch
             }
         }
 
