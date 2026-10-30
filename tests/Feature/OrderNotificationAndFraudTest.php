@@ -2,6 +2,7 @@
 
 use App\Mail\AdminNewOrderNotificationMail;
 use App\Mail\AdminNewUserRegisteredMail;
+use App\Mail\AuthOtpMail;
 use App\Mail\CustomerOrderConfirmationMail;
 use App\Models\Category;
 use App\Models\Order;
@@ -109,4 +110,54 @@ test('honeypot traps automated bot submissions on register', function () {
     // Bot is trapped and redirected to login without creating a user
     $response->assertRedirect(route('login'));
     expect(User::where('email', 'bot@example.com')->exists())->toBeFalse();
+});
+
+test('all email templates render responsive html cleanly without errors', function () {
+    $category = Category::factory()->create();
+    $product = Product::factory()->create(['category_id' => $category->id]);
+    $user = User::factory()->create(['name' => 'Jane Tester', 'email' => 'jane@example.com']);
+
+    $order = Order::factory()->create([
+        'user_id' => $user->id,
+        'customer_name' => 'Jane Tester',
+        'email' => 'jane@example.com',
+        'subtotal' => 45.00,
+        'shipping_fee' => 0.00,
+        'total' => 45.00,
+    ]);
+    $order->items()->create([
+        'product_id' => $product->id,
+        'product_name' => 'Premium Storage Pack',
+        'sku' => 'KNK-100',
+        'quantity' => 2,
+        'unit_price' => 22.50,
+        'line_total' => 45.00,
+    ]);
+
+    // 1. Admin New Order Notification
+    $adminOrderMail = new AdminNewOrderNotificationMail($order);
+    $adminOrderHtml = $adminOrderMail->render();
+    expect($adminOrderHtml)->toContain('Kenkie &bull; Store Alert')
+        ->and($adminOrderHtml)->toContain('Fraud & Risk Assessment:')
+        ->and($adminOrderHtml)->toContain('Premium Storage Pack');
+
+    // 2. Customer Order Confirmation
+    $customerOrderMail = new CustomerOrderConfirmationMail($order);
+    $customerOrderHtml = $customerOrderMail->render();
+    expect($customerOrderHtml)->toContain('Order Confirmed')
+        ->and($customerOrderHtml)->toContain('info@kenkie.com')
+        ->and($customerOrderHtml)->toContain('Premium Storage Pack');
+
+    // 3. Auth OTP Mail
+    $otpMail = new AuthOtpMail('654321', 'registration', 'Jane');
+    $otpHtml = $otpMail->render();
+    expect($otpHtml)->toContain('654321')
+        ->and($otpHtml)->toContain('Email Verification')
+        ->and($otpHtml)->toContain('info@kenkie.com');
+
+    // 4. Admin New User Mail
+    $adminUserMail = new AdminNewUserRegisteredMail($user, '127.0.0.1');
+    $adminUserHtml = $adminUserMail->render();
+    expect($adminUserHtml)->toContain('New Customer Registration')
+        ->and($adminUserHtml)->toContain('jane@example.com');
 });
