@@ -217,4 +217,55 @@ class MarketingAndPopupsTest extends TestCase
             ->assertOk()
             ->assertSee('£144.00');
     }
+
+    public function test_admin_can_update_store_whatsapp_number_from_profile_settings(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.profile.edit'));
+        $response->assertOk();
+        $response->assertSee('Store WhatsApp &amp; Contact Number', false);
+
+        $updateResponse = $this->actingAs($this->admin)->put(route('admin.profile.store-contact'), [
+            'whatsapp_number' => '+44 7999 888777',
+            'whatsapp_enabled' => 1,
+            'whatsapp_agent_name' => 'Kenkie Care Team',
+            'whatsapp_default_message' => 'Hello Kenkie Support!',
+        ]);
+
+        $updateResponse->assertRedirect(route('admin.profile.edit'));
+        $updateResponse->assertSessionHas('status');
+
+        $this->assertDatabaseHas('marketing_settings', [
+            'whatsapp_number' => '+44 7999 888777',
+            'whatsapp_agent_name' => 'Kenkie Care Team',
+            'whatsapp_enabled' => 1,
+        ]);
+
+        // Verify storefront reflects the updated number
+        $homeResponse = $this->get(route('home'));
+        $homeResponse->assertOk();
+        $homeResponse->assertSee('447999888777');
+
+        // Verify Contact Us reflects the updated number
+        $contactResponse = $this->get(route('contact.us'));
+        $contactResponse->assertOk();
+        $contactResponse->assertSee('+44 7999 888777');
+        $contactResponse->assertSee('https://wa.me/447999888777');
+
+        // Verify Return Policy reflects the updated number
+        $returnResponse = $this->get(route('return.policy'));
+        $returnResponse->assertOk();
+        $returnResponse->assertSee('+44 7999 888777');
+        $returnResponse->assertSee('https://wa.me/447999888777');
+    }
+
+    public function test_uk_local_phone_format_is_normalized_to_international_wa_link(): void
+    {
+        $settings = MarketingSetting::getSettings();
+        $settings->update([
+            'whatsapp_number' => '07898346397',
+        ]);
+
+        expect($settings->clean_whatsapp_number)->toBe('447898346397');
+        expect($settings->whatsapp_url)->toContain('https://wa.me/447898346397');
+    }
 }

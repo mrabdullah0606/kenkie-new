@@ -191,9 +191,14 @@
                             </div>
                         </div>
 
+                        @php
+                            $mktSettings = $mktSettings ?? \App\Models\MarketingSetting::getSettings();
+                            $storePhone = $mktSettings->whatsapp_number ?: '07898346397';
+                            $waUrl = 'https://wa.me/' . ($mktSettings->clean_whatsapp_number ?: '447898346397');
+                        @endphp
                         <h3>How to Request a Return or Refund</h3>
                         <p>
-                            To initiate a return or exchange, please email our support team at <a href="mailto:info@kenkie.com" class="theme-color text-decoration-none fw-semibold">info@kenkie.com</a> or message us on WhatsApp at <a href="https://wa.me/447898346397" target="_blank" rel="noopener noreferrer" class="theme-color text-decoration-none fw-semibold">07898346397</a> with your order number, reason for return, and attached photo/video proof.
+                            To initiate a return or exchange, please email our support team at <a href="mailto:info@kenkie.com" class="theme-color text-decoration-none fw-semibold">info@kenkie.com</a> or message us on WhatsApp at <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer" class="theme-color text-decoration-none fw-semibold">{{ $storePhone }}</a> with your order number, reason for return, and attached photo/video proof.
                         </p>
 
                         <div class="d-flex flex-wrap gap-3 mt-4 pt-3 border-top">

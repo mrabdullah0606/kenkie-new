@@ -85,7 +85,12 @@
                                                 <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
                                                 <input type="text" class="form-control @error('whatsapp_number') is-invalid @enderror" id="whatsapp_number" name="whatsapp_number" value="{{ old('whatsapp_number', $settings->whatsapp_number) }}" placeholder="+447123456789" required>
                                             </div>
-                                            <small class="text-muted">Format: +44... without spaces or hyphens.</small>
+                                            <div class="mt-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                                <small class="text-muted">Accepts UK domestic (e.g. <code>07898 346397</code>) or international (e.g. <code>+44 7898 346397</code>).</small>
+                                                <a href="{{ $settings->whatsapp_url }}" target="_blank" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size: 11px;">
+                                                    <i class="fa-brands fa-whatsapp"></i> Test Live Link
+                                                </a>
+                                            </div>
                                             @error('whatsapp_number')
                                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror

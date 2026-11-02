@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\MarketingSetting;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -101,6 +102,7 @@ class DashboardController extends Controller
             'lowStockProducts' => $lowStockProducts,
             'latestOrders' => Order::query()->with('items')->latest()->take(6)->get(),
             'featuredProducts' => Product::query()->with('category')->where('is_active', true)->orderByDesc('is_featured')->take(5)->get(),
+            'marketingSettings' => MarketingSetting::getSettings(),
         ]);
     }
 }

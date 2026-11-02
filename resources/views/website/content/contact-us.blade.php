@@ -137,14 +137,19 @@
                             </div>
 
                             <!-- Phone / WhatsApp -->
+                            @php
+                                $mktSettings = $mktSettings ?? \App\Models\MarketingSetting::getSettings();
+                                $storePhone = $mktSettings->whatsapp_number ?: '07898346397';
+                                $waUrl = 'https://wa.me/' . ($mktSettings->clean_whatsapp_number ?: '447898346397');
+                            @endphp
                             <div class="contact-item d-flex align-items-start gap-3 mb-4">
                                 <div class="contact-icon-box whatsapp-box">
                                     <i class="fa-brands fa-whatsapp"></i>
                                 </div>
                                 <div>
                                     <span class="text-muted small d-block">WhatsApp & Direct Phone:</span>
-                                    <a href="https://wa.me/447898346397" target="_blank" rel="noopener noreferrer" class="fw-bold text-dark fs-5 text-decoration-none">
-                                        07898346397
+                                    <a href="{{ $waUrl }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-dark fs-5 text-decoration-none">
+                                        {{ $storePhone }}
                                     </a>
                                 </div>
                             </div>

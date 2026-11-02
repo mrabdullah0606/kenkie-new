@@ -102,4 +102,34 @@ class MarketingSetting extends Model
             'google_ads_enabled' => 'boolean',
         ];
     }
+
+    /**
+     * Get international digits for wa.me link.
+     */
+    public function getCleanWhatsappNumberAttribute(): string
+    {
+        $phone = preg_replace('/[^0-9]/', '', (string) $this->whatsapp_number);
+
+        if (empty($phone)) {
+            return '447898346397';
+        }
+
+        // Convert UK domestic 07xxx (11 digits) to 447xxx
+        if (str_starts_with($phone, '0') && strlen($phone) === 11) {
+            $phone = '44'.substr($phone, 1);
+        }
+
+        return $phone;
+    }
+
+    /**
+     * Get full direct wa.me link.
+     */
+    public function getWhatsappUrlAttribute(): string
+    {
+        $phone = $this->clean_whatsapp_number;
+        $msg = urlencode($this->whatsapp_default_message ?: 'Hello Kenkie Support! I would like some assistance with my order / product.');
+
+        return "https://wa.me/{$phone}?text={$msg}";
+    }
 }

@@ -20,6 +20,41 @@
         </div>
     </div>
 
+    <!-- Store Contact & WhatsApp Quick Bar -->
+    <div class="card mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-left: 4px solid #0da487 !important;">
+        <div class="card-body p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="rounded-circle text-white d-inline-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background-color: #25d366; font-size: 22px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </span>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h6 class="fw-bold mb-0 text-dark">Live Store WhatsApp &amp; Contact Phone:</h6>
+                        @if($marketingSettings->whatsapp_enabled)
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5" style="font-size: 11px;">
+                                <i class="fa-solid fa-circle-check me-1"></i>Active on Store
+                            </span>
+                        @else
+                            <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-0.5" style="font-size: 11px;">
+                                Disabled
+                            </span>
+                        @endif
+                    </div>
+                    <span class="text-dark fw-bold fs-5 font-monospace">{{ $marketingSettings->whatsapp_number }}</span>
+                    <small class="text-muted ms-2">(Powers the floating chat widget &amp; support pages)</small>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <a href="{{ $marketingSettings->whatsapp_url }}" target="_blank" class="btn btn-sm btn-outline-success d-inline-flex align-items-center gap-1">
+                    <i class="fa-brands fa-whatsapp"></i> Test Live Link
+                </a>
+                <a href="{{ route('admin.profile.edit') }}#store-contact" class="btn btn-sm btn-success text-white d-inline-flex align-items-center gap-1" style="background-color: #0da487; border-color: #0da487;">
+                    <i class="fa-solid fa-pen-to-square"></i> Update Number
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Stat Metric Cards Row 1: High Level Store Performance -->
     <div class="row g-3 mb-4">
         <div class="col-xxl-3 col-md-6">

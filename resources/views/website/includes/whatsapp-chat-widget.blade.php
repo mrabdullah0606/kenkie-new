@@ -461,7 +461,7 @@
 
     // Launch WhatsApp
     window.launchWhatsApp = function() {
-        const phone = '{{ preg_replace("/[^0-9]/", "", $mktSettings->whatsapp_number) }}';
+        const phone = '{{ $mktSettings->clean_whatsapp_number }}';
         const defaultMsg = @json($mktSettings->whatsapp_default_message ?: 'Hello Kenkie Support! I have a question about products.');
         const inputField = document.getElementById('whatsappUserMsg');
         let userMsg = inputField && inputField.value.trim().length > 0 ? inputField.value.trim() : defaultMsg;
