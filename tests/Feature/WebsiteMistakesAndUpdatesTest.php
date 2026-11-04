@@ -309,3 +309,13 @@ test('payments page is distinct and correctly linked in footers', function () {
     $home->assertOk();
     $home->assertSee(route('payments'));
 });
+
+test('instagram links are updated to official kenkie profile', function () {
+    $contact = $this->get(route('contact.us'));
+    $contact->assertOk();
+    $contact->assertSee('https://www.instagram.com/kenkieofficial');
+
+    $home = $this->get(route('home'));
+    $home->assertOk();
+    $home->assertSee('https://www.instagram.com/kenkieofficial');
+});

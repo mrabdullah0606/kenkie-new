@@ -104,7 +104,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
+                            <a href="https://www.instagram.com/kenkieofficial?utm_source=ig_web_button_share_sheet&obrf=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" class="light-text d-inline-flex align-items-center gap-2">
                                 <i class="fa-brands fa-instagram text-white" style="width: 16px;"></i> Instagram
                             </a>
                         </li>

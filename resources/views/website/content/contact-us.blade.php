@@ -188,7 +188,7 @@
                                 <a href="https://www.facebook.com/share/1JC6RQXui7/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="Facebook">
                                     <i class="fa-brands fa-facebook-f"></i>
                                 </a>
-                                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="Instagram">
+                                <a href="https://www.instagram.com/kenkieofficial?utm_source=ig_web_button_share_sheet&obrf=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="Instagram">
                                     <i class="fa-brands fa-instagram"></i>
                                 </a>
                                 <a href="https://youtube.com/@kenkieofficial?si=oNQG40unIDlNw2rH" target="_blank" rel="noopener noreferrer" class="social-circle-btn" aria-label="YouTube">
