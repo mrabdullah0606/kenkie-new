@@ -29,6 +29,7 @@ Route::get('/about-us', [StorefrontController::class, 'about'])->name('about');
 Route::get('/contact-us', [StorefrontController::class, 'contact'])->name('contact.us');
 Route::get('/privacy-policy', [StorefrontController::class, 'privacyPolicy'])->name('privacy.policy');
 Route::get('/return-policy', [StorefrontController::class, 'returnPolicy'])->name('return.policy');
+Route::get('/payments', [StorefrontController::class, 'payments'])->name('payments');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/{product:slug}', [CartController::class, 'store'])->name('cart.store');

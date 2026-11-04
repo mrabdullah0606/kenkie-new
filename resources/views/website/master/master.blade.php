@@ -1267,7 +1267,7 @@
                         </div>
                         <div class="service-text">
                             <h5>Free Shipping</h5>
-                            <p>Free Shipping world wide</p>
+                            <p>All over United Kingdom 🇬🇧</p>
                         </div>
                     </div>
                 </div>

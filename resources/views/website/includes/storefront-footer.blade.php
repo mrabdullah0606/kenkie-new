@@ -84,7 +84,7 @@
                                     <a href="{{ route('contact.us') }}" class="text-content">Contact Us</a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('about') }}" class="text-content">Payments</a>
+                                    <a href="{{ route('payments') }}" class="text-content">Payments</a>
                                 </li>
                                 <li>
                                     <a href="{{ route('track-order.show') }}" class="text-content">Track My Order</a>

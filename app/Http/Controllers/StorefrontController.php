@@ -300,6 +300,11 @@ class StorefrontController extends Controller
         return view('website.content.return-policy');
     }
 
+    public function payments(): View
+    {
+        return view('website.content.payments');
+    }
+
     public function contact(): View
     {
         return view('website.content.contact-us');

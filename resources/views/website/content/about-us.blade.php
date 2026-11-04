@@ -127,7 +127,7 @@
             <div class="row justify-content-center">
                 <div class="col-xl-9 col-lg-10">
                     <p class="text-content fs-6 mb-4">
-                        The brand has developed rapidly in a short period. Our goal is to provide customers with a â€œreassuringâ€ experience as we always strive to provide the highest quality products. KENKIEâ€™s main focus is customer service, quality, value for money, and innovation from the very start.
+                        The brand has developed rapidly in a short period. Our goal is to provide customers with a "reassuring" experience as we always strive to provide the highest quality products. KENKIE's main focus is customer service, quality, value for money, and innovation from the very start.
                     </p>
 
                     <div class="business-details-card mt-4">
@@ -135,9 +135,9 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <p class="mb-1 text-muted small"><strong>Company Legal Entity:</strong></p>
-                                <p class="mb-2 fw-semibold text-dark">KENKIE LTD UK based private registered company since 2018</p>
+                                <p class="mb-2 fw-semibold text-dark">KENKIE LTD UK based private registered company since 2024</p>
                                 <p class="mb-1 text-muted small"><strong>Company Number:</strong></p>
-                                <p class="mb-0 fw-semibold text-dark">15579321 &middot; ICO Registered: 11147305</p>
+                                <p class="mb-0 fw-semibold text-dark">15579321</p>
                             </div>
                             <div class="col-md-6">
                                 <p class="mb-1 text-muted small"><strong>Company Registered Address:</strong></p>
@@ -186,7 +186,7 @@
                 <div class="col">
                     <div class="value-card">
                         <div class="value-icon">
-                            <i class="fa-solid fa-shield-halved"></i>
+                            <i class="fa-solid fa-shield-alt"></i>
                         </div>
                         <h5 class="fw-bold mb-2 text-dark">Product Warranty</h5>
                         <p class="text-content mb-0">We also offer our customers product warranty. Their prices are also reasonable. The tech used in our electronic products is also up to the mark.</p>
@@ -219,15 +219,15 @@
                     </div>
                 </div>
 
-                <!-- Naveed Azhar -->
+                <!-- Faisal Zahid -->
                 <div class="col">
                     <div class="team-card">
                         <div class="team-avatar-wrapper">
-                            <img src="{{ asset('assets/images/team-naveed.jpg') }}" alt="Naveed Azhar" class="team-avatar-img">
+                            <img src="{{ asset('assets/images/team-faisal.jpeg') }}" alt="Faisal Zahid" class="team-avatar-img">
                         </div>
-                        <h5 class="fw-bold mb-1 text-dark">NAVEED AZHAR</h5>
-                        <p class="mb-2 text-muted small"><a href="mailto:naveed@kenkie.com" class="theme-color text-decoration-none">naveed@kenkie.com</a></p>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">Operational Manager</span>
+                        <h5 class="fw-bold mb-1 text-dark">FAISAL ZAHID</h5>
+                        <p class="mb-2 text-muted small"><a href="mailto:faisal@kenkie.com" class="theme-color text-decoration-none">faisal@kenkie.com</a></p>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1">Sales Manager</span>
                     </div>
                 </div>
 

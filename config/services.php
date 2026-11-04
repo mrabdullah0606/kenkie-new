@@ -56,7 +56,8 @@ return [
     'turnstile' => [
         'site_key' => env('TURNSTILE_SITE_KEY'),
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
-        'enabled' => strtolower((string) env('APP_ENV', 'production')) !== 'testing'
+        'enabled' => filter_var(env('TURNSTILE_ENABLED', true), FILTER_VALIDATE_BOOLEAN)
+            && strtolower((string) env('APP_ENV', 'production')) !== 'testing'
             && (! in_array(strtolower((string) env('APP_ENV', 'production')), ['local'], true)
                 || (! empty(env('TURNSTILE_SITE_KEY')) && ! empty(env('TURNSTILE_SECRET_KEY')))),
     ],

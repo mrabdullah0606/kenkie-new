@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Rules\ValidTurnstileToken;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 
@@ -232,4 +233,67 @@ test('users can logout', function () {
 
     $this->assertGuest();
     $response->assertRedirect('/');
+});
+
+test('turnstile rule validates successfully on matching request host', function () {
+    config([
+        'services.turnstile.secret_key' => 'dummy-secret',
+    ]);
+
+    Http::fake([
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response([
+            'success' => true,
+            'hostname' => 'localhost',
+        ]),
+    ]);
+
+    $rule = new ValidTurnstileToken;
+    $failed = false;
+    $rule->validate('cf-turnstile-response', 'valid-token', function () use (&$failed) {
+        $failed = true;
+    });
+
+    expect($failed)->toBeFalse();
+});
+
+test('turnstile rule validates successfully when domain is compilinglogics or kenkie', function () {
+    config([
+        'services.turnstile.secret_key' => 'dummy-secret',
+    ]);
+
+    Http::fake([
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response([
+            'success' => true,
+            'hostname' => 'kenkie2.compilinglogics.com',
+        ]),
+    ]);
+
+    $rule = new ValidTurnstileToken;
+    $failed = false;
+    $rule->validate('cf-turnstile-response', 'valid-token', function () use (&$failed) {
+        $failed = true;
+    });
+
+    expect($failed)->toBeFalse();
+});
+
+test('turnstile rule rejects failed response from cloudflare', function () {
+    config([
+        'services.turnstile.secret_key' => 'dummy-secret',
+    ]);
+
+    Http::fake([
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify' => Http::response([
+            'success' => false,
+            'error-codes' => ['invalid-input-response'],
+        ]),
+    ]);
+
+    $rule = new ValidTurnstileToken;
+    $errorMessage = '';
+    $rule->validate('cf-turnstile-response', 'bad-token', function ($message) use (&$errorMessage) {
+        $errorMessage = (string) $message;
+    });
+
+    expect($errorMessage)->toBe('Please complete the captcha verification.');
 });

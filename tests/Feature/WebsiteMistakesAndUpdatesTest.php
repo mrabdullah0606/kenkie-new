@@ -271,3 +271,41 @@ test('cart real-time ajax update dynamically recalculates multi-buy savings, lin
             'isEmpty' => true,
         ]);
 });
+
+test('storefront header/service banner displays UK delivery instead of worldwide', function () {
+    $response = $this->get(route('home'));
+
+    $response->assertOk();
+    $response->assertSee('All over United Kingdom 🇬🇧');
+    $response->assertDontSee('Free Shipping world wide');
+});
+
+test('about us page displays updated company details and team members', function () {
+    $response = $this->get(route('about'));
+
+    $response->assertOk();
+    $response->assertSee('KENKIE LTD UK based private registered company since 2024');
+    $response->assertDontSee('since 2018');
+    $response->assertSee('15579321');
+    $response->assertDontSee('ICO Registered: 11147305');
+
+    // Team member check for Faisal Zahid replacing Naveed Azhar
+    $response->assertSee('FAISAL ZAHID');
+    $response->assertSee('Sales Manager');
+    $response->assertSee('faisal@kenkie.com');
+    $response->assertDontSee('NAVEED AZHAR');
+});
+
+test('payments page is distinct and correctly linked in footers', function () {
+    $response = $this->get(route('payments'));
+
+    $response->assertOk();
+    $response->assertSee('Payment Methods &amp; Security', false);
+    $response->assertSee('Stripe');
+    $response->assertSee('PayPal');
+
+    // Verify footer links to payments route, not about us
+    $home = $this->get(route('home'));
+    $home->assertOk();
+    $home->assertSee(route('payments'));
+});
