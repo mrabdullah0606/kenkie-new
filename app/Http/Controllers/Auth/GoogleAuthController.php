@@ -15,7 +15,7 @@ class GoogleAuthController extends Controller
     public function redirect(): RedirectResponse
     {
         $clientId = config('services.google.client_id');
-        $redirectUri = config('services.google.redirect');
+        $redirectUri = $this->getRedirectUri();
 
         if (blank($clientId) || blank(config('services.google.client_secret')) || blank($redirectUri)) {
             return redirect()->route('login')->withErrors([
@@ -67,7 +67,7 @@ class GoogleAuthController extends Controller
                 'code' => $code,
                 'code_verifier' => $verifier,
                 'grant_type' => 'authorization_code',
-                'redirect_uri' => config('services.google.redirect'),
+                'redirect_uri' => $this->getRedirectUri(),
             ]);
 
             $accessToken = $tokenResponse->json('access_token');
@@ -137,5 +137,16 @@ class GoogleAuthController extends Controller
         return redirect()->route('login')->withErrors([
             'google' => 'Google sign-in could not be completed. Please try again.',
         ]);
+    }
+
+    private function getRedirectUri(): ?string
+    {
+        $redirectUri = config('services.google.redirect');
+
+        if (! is_string($redirectUri) || blank($redirectUri)) {
+            return null;
+        }
+
+        return preg_replace('#(?<!:)//+#', '/', trim($redirectUri));
     }
 }

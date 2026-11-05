@@ -297,3 +297,19 @@ test('turnstile rule rejects failed response from cloudflare', function () {
 
     expect($errorMessage)->toBe('Please complete the captcha verification.');
 });
+
+test('google redirect normalizes double slashes in redirect uri', function () {
+    config([
+        'services.google.client_id' => 'test-client-id',
+        'services.google.client_secret' => 'test-client-secret',
+        'services.google.redirect' => 'https://kenkie.com//auth/google/callback',
+    ]);
+
+    $response = $this->get(route('google.redirect'));
+
+    $response->assertRedirect();
+    $targetUrl = $response->getTargetUrl();
+
+    expect($targetUrl)->toContain('redirect_uri=https%3A%2F%2Fkenkie.com%2Fauth%2Fgoogle%2Fcallback');
+    expect($targetUrl)->not->toContain('kenkie.com%2F%2Fauth');
+});
