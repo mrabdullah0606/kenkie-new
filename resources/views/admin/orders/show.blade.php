@@ -67,29 +67,31 @@
                         </table>
                     </div>
                 </div>
-                <div class="card-footer bg-light p-4">
+                <div class="card-footer p-4" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
                     <div class="row justify-content-end">
                         <div class="col-md-6 col-lg-5">
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Subtotal:</span>
-                                <span class="fw-semibold">£{{ number_format((float) $order->subtotal, 2) }}</span>
+                                <span class="fw-semibold text-secondary" style="color: #475569 !important;">Subtotal:</span>
+                                <span class="fw-bold text-dark fs-6" style="color: #0f172a !important;">£{{ number_format((float) $order->subtotal, 2) }}</span>
                             </div>
                             @if ((float) ($order->discount_amount ?? 0) > 0)
                                 <div class="d-flex justify-content-between mb-2 text-success">
                                     <span class="fw-semibold">
                                         <i class="fa-solid fa-ticket me-1"></i> Coupon Discount {{ $order->coupon_code ? '(' . $order->coupon_code . ')' : '' }}:
                                     </span>
-                                    <span class="fw-bold">-£{{ number_format((float) $order->discount_amount, 2) }}</span>
+                                    <span class="fw-bold fs-6 text-success">-£{{ number_format((float) $order->discount_amount, 2) }}</span>
                                 </div>
                             @endif
                             <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Shipping Fee:</span>
-                                <span class="fw-semibold">{{ (float) $order->shipping_fee > 0 ? '£' . number_format((float) $order->shipping_fee, 2) : 'FREE' }}</span>
+                                <span class="fw-semibold text-secondary" style="color: #475569 !important;">Shipping Fee:</span>
+                                <span class="fw-bold fs-6 {{ (float) $order->shipping_fee > 0 ? 'text-dark' : 'text-success' }}" style="{{ (float) $order->shipping_fee > 0 ? 'color: #0f172a !important;' : '' }}">
+                                    {{ (float) $order->shipping_fee > 0 ? '£' . number_format((float) $order->shipping_fee, 2) : 'FREE' }}
+                                </span>
                             </div>
-                            <hr class="my-2">
-                            <div class="d-flex justify-content-between">
-                                <span class="fw-bold fs-5 text-dark">Total:</span>
-                                <span class="fw-bold fs-5 text-success">£{{ number_format((float) $order->total, 2) }}</span>
+                            <hr class="my-2 border-secondary-subtle">
+                            <div class="d-flex justify-content-between align-items-center pt-1">
+                                <span class="fw-bold fs-5 text-dark" style="color: #0f172a !important;">Total:</span>
+                                <span class="fw-bold fs-4 text-success">£{{ number_format((float) $order->total, 2) }}</span>
                             </div>
                         </div>
                     </div>

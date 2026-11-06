@@ -432,4 +432,17 @@ test('promotional popup discount code applies and deducts price on cart and chec
     expect($order)->not->toBeNull();
     expect($order->coupon_code)->toBe('SPRING20');
     expect((float) $order->discount_amount)->toBe(10.00);
+
+    // Order success / confirmation page displays coupon discount
+    $orderConfirmation = $this->get(route('orders.confirmation', $order->uuid));
+    $orderConfirmation->assertOk();
+    $orderConfirmation->assertSee('Coupon Discount (SPRING20)');
+    $orderConfirmation->assertSee('-£10.00');
+
+    // Admin order show page displays coupon discount
+    $admin = User::factory()->admin()->create();
+    $adminOrder = $this->actingAs($admin)->get(route('admin.orders.show', $order));
+    $adminOrder->assertOk();
+    $adminOrder->assertSee('Coupon Discount (SPRING20):');
+    $adminOrder->assertSee('-£10.00');
 });
