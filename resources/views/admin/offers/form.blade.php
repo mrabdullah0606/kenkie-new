@@ -48,7 +48,7 @@
 
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold" for="subtitle">Subtitle / Discount Condition</label>
-                                <input class="form-control @error('subtitle') is-invalid @enderror" id="subtitle" name="subtitle" value="{{ old('subtitle', $offer->subtitle) }}" placeholder="e.g. When you spend $20">
+                                <input class="form-control @error('subtitle') is-invalid @enderror" id="subtitle" name="subtitle" value="{{ old('subtitle', $offer->subtitle) }}" placeholder="e.g. When you spend £20">
                                 @error('subtitle')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

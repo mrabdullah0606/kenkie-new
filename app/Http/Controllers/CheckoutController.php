@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Stripe\Checkout\Session as StripeSession;
+use Stripe\Coupon;
 use Stripe\Stripe;
 
 class CheckoutController extends Controller
@@ -32,7 +33,9 @@ class CheckoutController extends Controller
         }
 
         $contents['shippingFeeCents'] = $cart->shippingFeeCents($contents['cartSubtotalCents']);
-        $contents['orderTotalCents'] = $contents['cartSubtotalCents'] + $contents['shippingFeeCents'];
+        $contents['couponDiscountCents'] = $contents['couponDiscountCents'] ?? StorefrontCart::getAppliedCouponDiscountCents($contents['cartSubtotalCents']);
+        $contents['appliedCoupon'] = $request->session()->get('applied_coupon');
+        $contents['orderTotalCents'] = max(0, $contents['cartSubtotalCents'] - $contents['couponDiscountCents'] + $contents['shippingFeeCents']);
 
         $paymentSettings = PaymentSetting::getSettings();
         $contents['stripeKey'] = PaymentSetting::getStripeKey();
@@ -127,8 +130,10 @@ class CheckoutController extends Controller
         $lineItems = [];
         $subtotalCents = 0;
         $shippingFeeCents = 0;
+        $couponDiscountCents = 0;
+        $couponCode = null;
 
-        $order = DB::transaction(function () use ($request, $validated, $cart, &$lineItems, &$subtotalCents, &$shippingFeeCents): Order {
+        $order = DB::transaction(function () use ($request, $validated, $cart, &$lineItems, &$subtotalCents, &$shippingFeeCents, &$couponDiscountCents, &$couponCode): Order {
             $productIds = [];
             foreach (array_keys($cart) as $cartKey) {
                 $pId = str_contains((string) $cartKey, ':')
@@ -233,9 +238,11 @@ class CheckoutController extends Controller
                 ];
             }
 
-            $shippingFeeCents = $subtotalCents >= StorefrontCart::FREE_SHIPPING_THRESHOLD_CENTS
-                ? 0
-                : StorefrontCart::SHIPPING_FEE_CENTS;
+            $shippingFeeCents = StorefrontCart::calculateShippingFeeCents($subtotalCents);
+            $couponDiscountCents = StorefrontCart::getAppliedCouponDiscountCents($subtotalCents);
+            $appliedCoupon = $request->session()->get('applied_coupon');
+            $couponCode = ($couponDiscountCents > 0 && is_array($appliedCoupon)) ? ($appliedCoupon['code'] ?? null) : null;
+            $orderTotalCents = max(0, $subtotalCents - $couponDiscountCents + $shippingFeeCents);
 
             $initialPaymentStatus = 'pending';
             $initialStatus = 'pending';
@@ -253,7 +260,7 @@ class CheckoutController extends Controller
                 }
             }
 
-            $totalAmount = (float) ($subtotalCents + $shippingFeeCents) / 100;
+            $totalAmount = (float) $orderTotalCents / 100;
             $fraudEval = FraudDetectionService::evaluate($validated, $lineItems, $request, $totalAmount);
 
             $order = Order::query()->create([
@@ -266,8 +273,10 @@ class CheckoutController extends Controller
                 'risk_score' => $fraudEval['score'],
                 'risk_flags' => $fraudEval['flags'],
                 'subtotal' => $this->money($subtotalCents),
+                'discount_amount' => $this->money($couponDiscountCents),
+                'coupon_code' => $couponCode,
                 'shipping_fee' => $this->money($shippingFeeCents),
-                'total' => $this->money($subtotalCents + $shippingFeeCents),
+                'total' => $this->money($orderTotalCents),
             ]);
 
             foreach ($lineItems as $lineItem) {
@@ -291,6 +300,11 @@ class CheckoutController extends Controller
 
             return $order;
         });
+
+        $couponDiscountCents = (int) round(((float) ($order->discount_amount ?? 0)) * 100);
+        $couponCode = $order->coupon_code;
+        $shippingFeeCents = (int) round(((float) ($order->shipping_fee ?? 0)) * 100);
+        $subtotalCents = (int) round(((float) ($order->subtotal ?? 0)) * 100);
 
         // Handle Stripe payment
         if ($validated['payment_method'] === 'stripe') {
@@ -328,7 +342,7 @@ class CheckoutController extends Controller
                         ];
                     }
 
-                    $session = StripeSession::create([
+                    $sessionParams = [
                         'payment_method_types' => ['card'],
                         'customer_email' => $order->email,
                         'line_items' => $stripeLineItems,
@@ -339,7 +353,23 @@ class CheckoutController extends Controller
                             'order_id' => $order->id,
                             'order_uuid' => $order->uuid,
                         ],
-                    ]);
+                    ];
+
+                    if ($couponDiscountCents > 0) {
+                        try {
+                            $stripeCoupon = Coupon::create([
+                                'amount_off' => $couponDiscountCents,
+                                'currency' => 'gbp',
+                                'duration' => 'once',
+                                'name' => ($couponCode ?: 'COUPON').' Discount',
+                            ]);
+                            $sessionParams['discounts'] = [['coupon' => $stripeCoupon->id]];
+                        } catch (\Throwable) {
+                            // Proceed without Stripe coupon parameter
+                        }
+                    }
+
+                    $session = StripeSession::create($sessionParams);
 
                     $order->update(['stripe_session_id' => $session->id]);
 
@@ -355,7 +385,7 @@ class CheckoutController extends Controller
                     'payment_status' => 'paid',
                     'status' => 'processing',
                 ]);
-                $request->session()->forget(['cart', 'checkout_customer_details']);
+                $request->session()->forget(['cart', 'checkout_customer_details', 'applied_coupon']);
                 self::sendOrderEmails($order);
 
                 return redirect()->route('orders.confirmation', $order->uuid)->with('success', 'Order placed with Stripe (Test Simulation Mode).');
@@ -369,7 +399,7 @@ class CheckoutController extends Controller
 
             if ($paypalClientId && $paypalSecret && ! str_contains($paypalSecret, 'placeholder') && ! str_contains($paypalClientId, 'placeholder')) {
                 try {
-                    $paypalOrder = PayPalService::createOrder($order, $lineItems, $subtotalCents, $shippingFeeCents);
+                    $paypalOrder = PayPalService::createOrder($order, $lineItems, $subtotalCents, $shippingFeeCents, $couponDiscountCents);
                     $order->update(['paypal_order_id' => $paypalOrder['id']]);
 
                     return redirect()->away($paypalOrder['approve_url']);
@@ -384,7 +414,7 @@ class CheckoutController extends Controller
                     'payment_status' => 'paid',
                     'status' => 'processing',
                 ]);
-                $request->session()->forget(['cart', 'checkout_customer_details']);
+                $request->session()->forget(['cart', 'checkout_customer_details', 'applied_coupon']);
                 self::sendOrderEmails($order);
 
                 return redirect()->route('orders.confirmation', $order->uuid)->with('success', 'Order placed with PayPal (Test Simulation Mode).');
@@ -392,7 +422,7 @@ class CheckoutController extends Controller
         }
 
         // Cash on delivery (if enabled)
-        $request->session()->forget(['cart', 'checkout_customer_details']);
+        $request->session()->forget(['cart', 'checkout_customer_details', 'applied_coupon']);
         self::sendOrderEmails($order);
 
         return redirect()->route('orders.confirmation', $order->uuid);

@@ -79,6 +79,9 @@ class PromotionalPopupController extends Controller
             'subtitle' => ['nullable', 'string', 'max:255'],
             'content' => ['nullable', 'string', 'max:2000'],
             'discount_code' => ['nullable', 'string', 'max:50'],
+            'discount_type' => ['nullable', 'string', 'in:percentage,fixed'],
+            'discount_value' => ['nullable', 'numeric', 'min:0', 'max:9999.99'],
+            'min_order_amount' => ['nullable', 'numeric', 'min:0', 'max:9999.99'],
             'button_text' => ['required', 'string', 'max:100'],
             'button_url' => ['required', 'string', 'max:255'],
             'image' => ['nullable', 'string', 'max:255'],
@@ -98,6 +101,10 @@ class PromotionalPopupController extends Controller
 
         unset($validated['image_file'], $validated['remove_image']);
 
+        $validated['discount_code'] = ! empty($validated['discount_code']) ? strtoupper(trim($validated['discount_code'])) : null;
+        $validated['discount_type'] = $validated['discount_type'] ?? 'percentage';
+        $validated['discount_value'] = (float) ($validated['discount_value'] ?? 0);
+        $validated['min_order_amount'] = (float) ($validated['min_order_amount'] ?? 0);
         $validated['is_active'] = $request->boolean('is_active', $popup?->is_active ?? true);
 
         return $validated;

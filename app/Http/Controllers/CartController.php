@@ -142,8 +142,10 @@ class CartController extends Controller
                 'subtotal' => number_format($cartData['cartSubtotalCents'] / 100, 2),
                 'savings' => number_format($cartData['cartSavingsCents'] / 100, 2),
                 'hasSavings' => $cartData['cartSavingsCents'] > 0,
+                'couponDiscount' => $cartData['couponDiscountCents'] > 0 ? '£'.number_format($cartData['couponDiscountCents'] / 100, 2) : null,
+                'hasCoupon' => $cartData['couponDiscountCents'] > 0,
                 'shipping' => $shippingFeeCents === 0 ? 'FREE' : '£'.number_format($shippingFeeCents / 100, 2),
-                'total' => number_format(($cartData['cartSubtotalCents'] + $shippingFeeCents) / 100, 2),
+                'total' => number_format($cartData['orderTotalCents'] / 100, 2),
                 'isEmpty' => $cartData['cartItems']->isEmpty(),
             ]);
         }
@@ -191,8 +193,10 @@ class CartController extends Controller
                 'subtotal' => number_format($cartData['cartSubtotalCents'] / 100, 2),
                 'savings' => number_format($cartData['cartSavingsCents'] / 100, 2),
                 'hasSavings' => $cartData['cartSavingsCents'] > 0,
+                'couponDiscount' => $cartData['couponDiscountCents'] > 0 ? '£'.number_format($cartData['couponDiscountCents'] / 100, 2) : null,
+                'hasCoupon' => $cartData['couponDiscountCents'] > 0,
                 'shipping' => $shippingFeeCents === 0 ? 'FREE' : '£'.number_format($shippingFeeCents / 100, 2),
-                'total' => number_format(($cartData['cartSubtotalCents'] + $shippingFeeCents) / 100, 2),
+                'total' => number_format($cartData['orderTotalCents'] / 100, 2),
                 'isEmpty' => $cartData['cartItems']->isEmpty(),
             ]);
         }

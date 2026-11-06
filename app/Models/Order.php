@@ -44,6 +44,8 @@ class Order extends Model
         'risk_score',
         'risk_flags',
         'subtotal',
+        'discount_amount',
+        'coupon_code',
         'shipping_fee',
         'total',
     ];
@@ -138,6 +140,7 @@ class Order extends Model
         return [
             'risk_flags' => 'array',
             'subtotal' => 'decimal:2',
+            'discount_amount' => 'decimal:2',
             'shipping_fee' => 'decimal:2',
             'total' => 'decimal:2',
             'shipped_at' => 'datetime',

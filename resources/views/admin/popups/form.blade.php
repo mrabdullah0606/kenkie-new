@@ -92,6 +92,50 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
                             </div>
+
+                            {{-- Coupon Price Deduction Configuration --}}
+                            <div class="col-12">
+                                <div class="p-3 rounded-3 border bg-light">
+                                    <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-calculator text-success me-2"></i>Coupon Price Deduction Rules</h6>
+                                    <p class="text-muted small mb-3">Configure how much price discount is automatically deducted when a customer enters this promo code at checkout.</p>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="discount_type" class="form-label fw-semibold text-dark" style="color: #1f2937 !important;">Discount Type <span class="text-danger">*</span></label>
+                                            <select class="form-select @error('discount_type') is-invalid @enderror" id="discount_type" name="discount_type" required>
+                                                <option value="percentage" @selected(old('discount_type', $popup->discount_type ?? 'percentage') === 'percentage')>Percentage Discount (%)</option>
+                                                <option value="fixed" @selected(old('discount_type', $popup->discount_type ?? 'percentage') === 'fixed')>Fixed Amount Off (£ GBP)</option>
+                                            </select>
+                                            @error('discount_type')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label for="discount_value" class="form-label fw-semibold text-dark" style="color: #1f2937 !important;">Discount Value <span class="text-danger">*</span></label>
+                                            <div class="input-group">
+                                                <span class="input-group-text" id="discount-symbol">%</span>
+                                                <input type="number" step="0.01" min="0.01" max="9999.99" class="form-control @error('discount_value') is-invalid @enderror" id="discount_value" name="discount_value" value="{{ old('discount_value', $popup->discount_value ?? 10.00) }}" placeholder="10" required>
+                                            </div>
+                                            <small class="text-muted" style="color: #64748b !important;">e.g. 10 for 10% OFF, or 5.00 for £5.00 OFF.</small>
+                                            @error('discount_value')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label for="min_order_amount" class="form-label fw-semibold text-dark" style="color: #1f2937 !important;">Minimum Spend (£ GBP)</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">£</span>
+                                                <input type="number" step="0.01" min="0.01" max="9999.99" class="form-control @error('min_order_amount') is-invalid @enderror" id="min_order_amount" name="min_order_amount" value="{{ old('min_order_amount', $popup->min_order_amount ?? 0.00) }}" placeholder="0.00">
+                                            </div>
+                                            <small class="text-muted" style="color: #64748b !important;">Minimum cart subtotal required to apply this coupon (0 = no minimum).</small>
+                                            @error('min_order_amount')
+                                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -184,4 +228,18 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const typeSelect = document.getElementById('discount_type');
+        const symbolSpan = document.getElementById('discount-symbol');
+        if (typeSelect && symbolSpan) {
+            function updateSymbol() {
+                symbolSpan.textContent = typeSelect.value === 'fixed' ? '£' : '%';
+            }
+            typeSelect.addEventListener('change', updateSymbol);
+            updateSymbol();
+        }
+    });
+</script>
 @endsection

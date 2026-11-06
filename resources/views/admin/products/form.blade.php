@@ -265,9 +265,9 @@
 
                         <!-- Regular Price (Original / Strike-through) -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="regular_price">Regular / Compare Price ($ USD)</label>
+                            <label class="form-label fw-semibold" for="regular_price">Regular / Compare Price (£ GBP)</label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text">£</span>
                                 <input class="form-control @error('regular_price') is-invalid @enderror" id="regular_price" type="number" name="regular_price" min="0.01" step="0.01" value="{{ old('regular_price', $product->regular_price) }}" placeholder="e.g. 59.99">
                             </div>
                             <small class="text-muted">Original list price before discount (shown struck through).</small>
@@ -278,9 +278,9 @@
 
                         <!-- Sale Price (Active Selling Price) -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="price">Sale / Selling Price ($ USD) <span class="text-danger">*</span></label>
+                            <label class="form-label fw-semibold" for="price">Sale / Selling Price (£ GBP) <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text">£</span>
                                 <input class="form-control @error('price') is-invalid @enderror" id="price" type="number" name="price" min="0.01" step="0.01" value="{{ old('price', $product->price) }}" placeholder="e.g. 44.99" required>
                             </div>
                             <div id="discountBadgeContainer" class="mt-2 {{ ($product->regular_price && $product->price && $product->regular_price > $product->price) ? '' : 'd-none' }}">
@@ -296,9 +296,9 @@
 
                         <!-- Cost Price (Internal Margin) -->
                         <div class="mb-3">
-                            <label class="form-label fw-semibold" for="cost_price">Cost Price ($ USD - Private)</label>
+                            <label class="form-label fw-semibold" for="cost_price">Cost Price (£ GBP - Private)</label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text">£</span>
                                 <input class="form-control @error('cost_price') is-invalid @enderror" id="cost_price" type="number" name="cost_price" min="0.01" step="0.01" value="{{ old('cost_price', $product->cost_price) }}" placeholder="e.g. 20.00">
                             </div>
                             <small class="text-muted">For internal profit calculation only (never displayed to customers).</small>

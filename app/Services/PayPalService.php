@@ -64,7 +64,7 @@ class PayPalService
      * @param  array<int, mixed>  $lineItems
      * @return array{id: string, approve_url: string}
      */
-    public static function createOrder(Order $order, array $lineItems, int $subtotalCents, int $shippingFeeCents): array
+    public static function createOrder(Order $order, array $lineItems, int $subtotalCents, int $shippingFeeCents, int $couponDiscountCents = 0): array
     {
         $accessToken = self::getAccessToken();
 
@@ -82,7 +82,26 @@ class PayPalService
 
         $subtotal = number_format($subtotalCents / 100, 2, '.', '');
         $shipping = number_format($shippingFeeCents / 100, 2, '.', '');
-        $total = number_format(($subtotalCents + $shippingFeeCents) / 100, 2, '.', '');
+        $totalCents = max(0, $subtotalCents - $couponDiscountCents + $shippingFeeCents);
+        $total = number_format($totalCents / 100, 2, '.', '');
+
+        $breakdown = [
+            'item_total' => [
+                'currency_code' => 'GBP',
+                'value' => $subtotal,
+            ],
+            'shipping' => [
+                'currency_code' => 'GBP',
+                'value' => $shipping,
+            ],
+        ];
+
+        if ($couponDiscountCents > 0) {
+            $breakdown['discount'] = [
+                'currency_code' => 'GBP',
+                'value' => number_format($couponDiscountCents / 100, 2, '.', ''),
+            ];
+        }
 
         $payload = [
             'intent' => 'CAPTURE',
@@ -94,16 +113,7 @@ class PayPalService
                     'amount' => [
                         'currency_code' => 'GBP',
                         'value' => $total,
-                        'breakdown' => [
-                            'item_total' => [
-                                'currency_code' => 'GBP',
-                                'value' => $subtotal,
-                            ],
-                            'shipping' => [
-                                'currency_code' => 'GBP',
-                                'value' => $shipping,
-                            ],
-                        ],
+                        'breakdown' => $breakdown,
                     ],
                     'items' => $items,
                 ],

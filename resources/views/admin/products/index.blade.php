@@ -132,12 +132,12 @@
                                 <td>
                                     @if ($product->regular_price && (float) $product->regular_price > (float) $product->price)
                                         <div>
-                                            <span class="fw-bold text-success">${{ number_format((float) $product->price, 2) }}</span>
+                                            <span class="fw-bold text-success">£{{ number_format((float) $product->price, 2) }}</span>
                                             <span class="badge bg-danger-subtle text-danger border border-danger-subtle ms-1" style="font-size: 10px;">-{{ $product->discount_percentage }}%</span>
                                         </div>
-                                        <del class="text-muted small">${{ number_format((float) $product->regular_price, 2) }}</del>
+                                        <del class="text-muted small">£{{ number_format((float) $product->regular_price, 2) }}</del>
                                     @else
-                                        <span class="fw-bold text-dark">${{ number_format((float) $product->price, 2) }}</span>
+                                        <span class="fw-bold text-dark">£{{ number_format((float) $product->price, 2) }}</span>
                                     @endif
                                 </td>
                                 <td>

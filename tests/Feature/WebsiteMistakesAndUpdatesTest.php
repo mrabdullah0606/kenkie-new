@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 use App\Models\Category;
 use App\Models\Order;
@@ -6,7 +6,10 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductOffer;
 use App\Models\ProductVariation;
+use App\Models\PromotionalPopup;
+use App\Models\ShippingSetting;
 use App\Models\User;
+use App\Services\StorefrontCart;
 
 test('product page renders variations and multi-buyer offers dynamically', function () {
     $category = Category::factory()->create(['name' => 'Fashion & Apparel', 'slug' => 'fashion-apparel']);
@@ -97,7 +100,8 @@ test('storefront cart and checkout properly process product variations and prici
     ]);
 
     // Cart index renders variation name and pricing
-    $cartResponse = $this->get(route('cart.index'));
+    $cartResponse = $this->withSession(['cart' => ["{$product->id}:{$variation->id}" => 2]])
+        ->get(route('cart.index'));
     $cartResponse->assertOk();
     $cartResponse->assertSee('Winter Jacket (Large / Black)');
     $cartResponse->assertSee('85.00');
@@ -318,4 +322,114 @@ test('instagram links are updated to official kenkie profile', function () {
     $home = $this->get(route('home'));
     $home->assertOk();
     $home->assertSee('https://www.instagram.com/kenkieofficial');
+});
+
+test('admin dashboard displays metrics and chart in GBP £', function () {
+    $admin = User::factory()->admin()->create();
+
+    $response = $this->actingAs($admin)->get(route('admin.dashboard'));
+
+    $response->assertOk();
+    $response->assertSee('TOTAL REVENUE');
+    $response->assertSee('£');
+    $response->assertSee('AVG ORDER VALUE (AOV)');
+    $response->assertSee('Revenue (£)');
+    $response->assertDontSee('Revenue ($)');
+});
+
+test('admin can edit shipping cost and cart calculates shipping dynamically', function () {
+    $admin = User::factory()->admin()->create();
+
+    // Update shipping rates via admin profile
+    $updateResponse = $this->actingAs($admin)->put(route('admin.profile.shipping'), [
+        'standard_shipping_fee' => '12.50',
+        'free_shipping_enabled' => true,
+        'free_shipping_threshold' => '60.00',
+        'estimated_delivery_text' => '1-2 Days Fast Tracked',
+    ]);
+
+    $updateResponse->assertRedirect(route('admin.profile.edit'));
+    $updateResponse->assertSessionHas('status');
+
+    $shipping = ShippingSetting::getSettings();
+    expect((float) $shipping->standard_shipping_fee)->toBe(12.50);
+    expect((float) $shipping->free_shipping_threshold)->toBe(60.00);
+
+    // Below threshold (£40 spend) => £12.50 shipping fee
+    $cart = new StorefrontCart;
+    expect($cart->shippingFeeCents(4000))->toBe(1250);
+
+    // At or above threshold (£60 spend) => FREE (£0)
+    expect($cart->shippingFeeCents(6000))->toBe(0);
+});
+
+test('promotional popup discount code applies and deducts price on cart and checkout', function () {
+    $popup = PromotionalPopup::create([
+        'title' => 'Spring Clearance 20% OFF',
+        'subtitle' => 'Save on your basket',
+        'discount_code' => 'SPRING20',
+        'discount_type' => 'percentage',
+        'discount_value' => 20.00,
+        'min_order_amount' => 25.00,
+        'button_text' => 'Shop Now',
+        'button_url' => '/shop-category',
+        'is_active' => true,
+    ]);
+
+    $product = Product::factory()->create([
+        'name' => 'Garden Shovel',
+        'price' => 50.00,
+        'stock' => 10,
+        'is_active' => true,
+    ]);
+
+    // Add product to cart
+    $this->post(route('cart.store', $product->slug), ['quantity' => 1]);
+
+    $customer = User::factory()->create();
+
+    // Apply coupon
+    $couponResponse = $this->withSession(['cart' => [(string) $product->id => 1]])
+        ->post(route('cart.coupon.apply'), [
+            'code' => 'SPRING20',
+        ]);
+
+    $couponResponse->assertSessionHas('applied_coupon');
+    $appliedCoupon = session('applied_coupon');
+    expect($appliedCoupon['code'])->toBe('SPRING20');
+
+    // Checkout page reflects coupon discount
+    $checkout = $this->actingAs($customer)
+        ->withSession([
+            'cart' => [(string) $product->id => 1],
+            'applied_coupon' => $appliedCoupon,
+        ])
+        ->get(route('checkout.index'));
+    $checkout->assertOk();
+    $checkout->assertSee('SPRING20');
+    $checkout->assertSee('-£10.00');
+
+    // Post checkout with coupon
+    $checkoutSubmit = $this->actingAs($customer)
+        ->withSession([
+            'cart' => [(string) $product->id => 1],
+            'applied_coupon' => $appliedCoupon,
+        ])
+        ->post(route('checkout.store'), [
+            'customer_name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'phone' => '07987654321',
+            'address_line' => '44 Oxford Street',
+            'city' => 'London',
+            'region' => 'Greater London',
+            'postal_code' => 'W1D 1BS',
+            'country' => 'United Kingdom',
+            'payment_method' => 'cash_on_delivery',
+        ]);
+
+    $checkoutSubmit->assertSessionHasNoErrors();
+    $order = Order::latest()->first();
+    expect($order)->not->toBeNull();
+    expect($order->coupon_code)->toBe('SPRING20');
+    expect((float) $order->discount_amount)->toBe(10.00);
 });

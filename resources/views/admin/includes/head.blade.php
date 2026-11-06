@@ -205,6 +205,10 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 
+.form-label, label {
+    color: #1f2937 !important;
+}
+
 /* Quill Rich Text Editor */
 .ql-toolbar.ql-snow {
     border: 1px solid #ced4da !important;

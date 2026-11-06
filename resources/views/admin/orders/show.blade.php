@@ -74,6 +74,14 @@
                                 <span class="text-muted">Subtotal:</span>
                                 <span class="fw-semibold">£{{ number_format((float) $order->subtotal, 2) }}</span>
                             </div>
+                            @if ((float) ($order->discount_amount ?? 0) > 0)
+                                <div class="d-flex justify-content-between mb-2 text-success">
+                                    <span class="fw-semibold">
+                                        <i class="fa-solid fa-ticket me-1"></i> Coupon Discount {{ $order->coupon_code ? '(' . $order->coupon_code . ')' : '' }}:
+                                    </span>
+                                    <span class="fw-bold">-£{{ number_format((float) $order->discount_amount, 2) }}</span>
+                                </div>
+                            @endif
                             <div class="d-flex justify-content-between mb-2">
                                 <span class="text-muted">Shipping Fee:</span>
                                 <span class="fw-semibold">{{ (float) $order->shipping_fee > 0 ? '£' . number_format((float) $order->shipping_fee, 2) : 'FREE' }}</span>

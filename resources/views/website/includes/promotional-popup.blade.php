@@ -57,13 +57,23 @@
 
                         @if ($activePopup->discount_code)
                             <div class="promo-coupon-box mb-4">
-                                <span class="promo-coupon-label">Use Promo Code</span>
+                                <span class="promo-coupon-label">
+                                    Use Promo Code:
+                                    <strong class="text-success ms-1">
+                                        {{ ($activePopup->discount_type ?? 'percentage') === 'fixed' ? '£' . number_format((float) $activePopup->discount_value, 2) : (float) $activePopup->discount_value . '%' }} OFF
+                                    </strong>
+                                </span>
                                 <div class="d-flex align-items-center justify-content-center gap-2 mt-1">
                                     <span class="promo-coupon-code" id="promoCodeText">{{ $activePopup->discount_code }}</span>
                                     <button type="button" class="btn btn-sm btn-outline-success btn-copy-coupon" id="copyCouponBtn" onclick="copyPromoCode('{{ $activePopup->discount_code }}')">
                                         <i class="fa-regular fa-copy me-1" id="copyIcon"></i> <span id="copyBtnText">Copy</span>
                                     </button>
                                 </div>
+                                @if(($activePopup->min_order_amount ?? 0) > 0)
+                                    <small class="d-block text-muted mt-1" style="font-size: 11px;">
+                                        Min basket spend: £{{ number_format((float) $activePopup->min_order_amount, 2) }}
+                                    </small>
+                                @endif
                             </div>
                         @endif
 

@@ -1026,7 +1026,7 @@
                                     </div>
                                     <div class="bank-name">
                                         <h2>GET 10% OFF</h2>
-                                        <h5 class="discount text-content">When you spend $20</h5>
+                                        <h5 class="discount text-content">When you spend £20</h5>
                                         <h5 class="valid text-content">Valid for 30 days</h5>
                                     </div>
                                 </div>

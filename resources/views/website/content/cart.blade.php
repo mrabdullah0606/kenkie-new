@@ -198,7 +198,6 @@
             </div>
 
             @if (!$cartItems->isEmpty())
-                @php($shippingFeeCents = $cartSubtotalCents >= \App\Services\StorefrontCart::FREE_SHIPPING_THRESHOLD_CENTS ? 0 : \App\Services\StorefrontCart::SHIPPING_FEE_CENTS)
                 <div class="row g-4" id="cart-active-wrapper">
                     <!-- Cart Table Column -->
                     <div class="col-xxl-9 col-lg-8">
@@ -216,8 +215,10 @@
                                     </thead>
                                     <tbody id="cart-items-tbody">
                                         @foreach ($cartItems as $item)
-                                            @php($product = $item['product'])
-                                            @php($safeKey = str_replace(':', '-', $item['key']))
+                                            @php
+                                                $product = $item['product'];
+                                                $safeKey = str_replace(':', '-', $item['key']);
+                                            @endphp
                                             <tr class="cart-item-row" id="cart-row-{{ $safeKey }}" data-cart-key="{{ $item['key'] }}" data-slug="{{ $product->slug }}" data-has-variation="{{ !empty($item['variation']) ? '1' : '0' }}">
                                                 <td class="product-info-cell">
                                                     <div class="d-flex align-items-center gap-3">
@@ -300,12 +301,36 @@
                         <div class="cart-summary-card position-sticky" style="top: 100px;">
                             <h4 class="fw-bold mb-3 pb-2 border-bottom text-dark">Cart Total</h4>
 
-                            <div class="coupon-block mb-4">
+                            @php
+                                $appliedCoupon = session('applied_coupon');
+                                $couponDiscountCents = \App\Services\StorefrontCart::getAppliedCouponDiscountCents($cartSubtotalCents);
+                                $orderTotalCents = max(0, $cartSubtotalCents - $couponDiscountCents + $shippingFeeCents);
+                            @endphp
+
+                            <div class="coupon-block mb-4" id="coupon-container">
                                 <label class="form-label text-muted small fw-semibold mb-1">Coupon Apply</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control coupon-input" placeholder="Enter Coupon Code...">
-                                    <button class="btn theme-bg-color text-white px-3 fw-semibold" type="button">Apply</button>
+                                <div id="applied-coupon-view" class="{{ (!empty($appliedCoupon) && $couponDiscountCents > 0) ? '' : 'd-none' }}">
+                                    <div class="alert alert-success d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 border-success-subtle">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="fa-solid fa-circle-check text-success fs-5"></i>
+                                            <div>
+                                                <strong class="font-monospace text-uppercase text-dark" id="applied-coupon-code">{{ $appliedCoupon['code'] ?? '' }}</strong>
+                                                <small class="text-success d-block fw-semibold" id="applied-coupon-label">{{ $appliedCoupon['label'] ?? 'Applied' }}</small>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2" id="remove-coupon-btn" title="Remove coupon">
+                                            <i class="fa-solid fa-xmark me-1"></i>Remove
+                                        </button>
+                                    </div>
                                 </div>
+
+                                <div id="coupon-input-view" class="{{ (!empty($appliedCoupon) && $couponDiscountCents > 0) ? 'd-none' : '' }}">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control coupon-input font-monospace text-uppercase" id="coupon-code-input" placeholder="Enter Coupon Code...">
+                                        <button class="btn theme-bg-color text-white px-3 fw-semibold" id="apply-coupon-btn" type="button">Apply</button>
+                                    </div>
+                                </div>
+                                <div id="coupon-message" class="small mt-1 d-none"></div>
                             </div>
 
                             <div class="summary-breakdown mb-3">
@@ -316,6 +341,10 @@
                                 <div class="justify-content-between align-items-center mb-2 text-success {{ (!empty($cartSavingsCents) && $cartSavingsCents > 0) ? 'd-flex' : 'd-none' }}" id="cart-summary-savings-row">
                                     <span><i class="fa-solid fa-tag me-1"></i> Multi-Buy Savings</span>
                                     <span class="fw-bold" id="cart-summary-savings">-£{{ number_format(($cartSavingsCents ?? 0) / 100, 2) }}</span>
+                                </div>
+                                <div class="justify-content-between align-items-center mb-2 text-success {{ $couponDiscountCents > 0 ? 'd-flex' : 'd-none' }}" id="cart-summary-coupon-row">
+                                    <span><i class="fa-solid fa-ticket me-1"></i> Coupon Discount</span>
+                                    <span class="fw-bold" id="cart-summary-coupon">-£{{ number_format($couponDiscountCents / 100, 2) }}</span>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center mb-2">
                                     <span class="text-muted">Delivery</span>
@@ -331,7 +360,7 @@
 
                             <div class="d-flex justify-content-between align-items-center py-3 border-top border-bottom mb-4">
                                 <span class="fw-bold text-dark fs-5">Total (GBP)</span>
-                                <span class="fw-bold theme-color fs-4" id="cart-summary-total">£{{ number_format(($cartSubtotalCents + $shippingFeeCents) / 100, 2) }}</span>
+                                <span class="fw-bold theme-color fs-4" id="cart-summary-total">£{{ number_format($orderTotalCents / 100, 2) }}</span>
                             </div>
 
                             <div class="d-grid gap-2">
@@ -504,12 +533,143 @@
                     }
                 }
 
+                // Update Coupon Discount Row
+                const couponRowEl = document.getElementById('cart-summary-coupon-row');
+                const couponEl = document.getElementById('cart-summary-coupon');
+                if (couponRowEl && couponEl) {
+                    if (res.hasCoupon && res.couponDiscount) {
+                        const discountVal = String(res.couponDiscount).replace(/^-?£?/, '');
+                        couponEl.textContent = '-£' + discountVal;
+                        couponRowEl.classList.remove('d-none');
+                        couponRowEl.classList.add('d-flex');
+                    } else {
+                        couponRowEl.classList.add('d-none');
+                        couponRowEl.classList.remove('d-flex');
+                    }
+                }
+
                 // Update Total (GBP)
                 const totalEl = document.getElementById('cart-summary-total');
                 if (totalEl && res.total !== undefined) {
                     totalEl.textContent = '£' + res.total;
                 }
             }
+
+            // Coupon Apply / Remove Handlers
+            const applyCouponBtn = document.getElementById('apply-coupon-btn');
+            const couponInput = document.getElementById('coupon-code-input');
+            const couponMsg = document.getElementById('coupon-message');
+            const removeCouponBtn = document.getElementById('remove-coupon-btn');
+            const appliedView = document.getElementById('applied-coupon-view');
+            const inputView = document.getElementById('coupon-input-view');
+            const appliedCodeEl = document.getElementById('applied-coupon-code');
+            const appliedLabelEl = document.getElementById('applied-coupon-label');
+
+            if (applyCouponBtn && couponInput) {
+                applyCouponBtn.addEventListener('click', async function () {
+                    const code = couponInput.value.trim();
+                    if (!code) {
+                        if (couponMsg) {
+                            couponMsg.textContent = 'Please enter a coupon code.';
+                            couponMsg.className = 'small mt-1 text-danger d-block';
+                        }
+                        return;
+                    }
+                    applyCouponBtn.disabled = true;
+                    applyCouponBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                    try {
+                        const res = await fetch('{{ route('cart.coupon.apply') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: JSON.stringify({ code: code })
+                        });
+                        const data = await res.json();
+                        if (data && data.success) {
+                            if (appliedCodeEl) appliedCodeEl.textContent = data.coupon.code;
+                            if (appliedLabelEl) appliedLabelEl.textContent = data.coupon.label;
+                            if (appliedView) appliedView.classList.remove('d-none');
+                            if (inputView) inputView.classList.add('d-none');
+                            if (couponMsg) {
+                                couponMsg.textContent = data.message;
+                                couponMsg.className = 'small mt-1 text-success d-block';
+                            }
+                            applyCartResponse(data);
+                        } else {
+                            if (couponMsg) {
+                                couponMsg.textContent = (data && data.message) ? data.message : 'Invalid coupon code.';
+                                couponMsg.className = 'small mt-1 text-danger d-block';
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Coupon apply error:', err);
+                    } finally {
+                        applyCouponBtn.disabled = false;
+                        applyCouponBtn.textContent = 'Apply';
+                    }
+                });
+
+                couponInput.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        applyCouponBtn.click();
+                    }
+                });
+            }
+
+            async function performRemoveCoupon(btn) {
+                if (btn) btn.disabled = true;
+                try {
+                    const res = await fetch('{{ route('cart.coupon.remove') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    const data = await res.json();
+                    if (data && data.success) {
+                        if (appliedView) appliedView.classList.add('d-none');
+                        if (inputView) inputView.classList.remove('d-none');
+                        if (couponInput) couponInput.value = '';
+                        if (couponMsg) {
+                            couponMsg.textContent = '';
+                            couponMsg.className = 'small mt-1 d-none';
+                        }
+                        applyCartResponse({
+                            subtotal: data.subtotal,
+                            shipping: data.shipping,
+                            total: data.total,
+                            hasCoupon: false
+                        });
+                    }
+                } catch (err) {
+                    console.error('Coupon remove error:', err);
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            }
+
+            if (removeCouponBtn) {
+                removeCouponBtn.addEventListener('click', function () {
+                    performRemoveCoupon(removeCouponBtn);
+                });
+            }
+
+            // Event delegation for Remove Coupon button
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('#remove-coupon-btn');
+                if (btn) {
+                    e.preventDefault();
+                    performRemoveCoupon(btn);
+                }
+            });
 
             async function sendCartUpdate(slug, key, newQty, btn) {
                 if (btn) {

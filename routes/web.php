@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\PromotionalPopupController as AdminPromotionalPop
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\StripeWebhookController;
@@ -32,6 +33,8 @@ Route::get('/return-policy', [StorefrontController::class, 'returnPolicy'])->nam
 Route::get('/payments', [StorefrontController::class, 'payments'])->name('payments');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/coupon/apply', [CouponController::class, 'apply'])->name('cart.coupon.apply');
+Route::match(['post', 'delete'], '/cart/coupon/remove', [CouponController::class, 'remove'])->name('cart.coupon.remove');
 Route::post('/cart/{product:slug}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/cart/{product:slug}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product:slug}', [CartController::class, 'destroy'])->name('cart.destroy');
@@ -77,6 +80,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     Route::patch('/profile', [AdminProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [AdminProfileController::class, 'updatePassword'])->name('profile.password');
     Route::put('/profile/store-contact', [AdminProfileController::class, 'updateStoreContact'])->name('profile.store-contact');
+    Route::put('/profile/shipping', [AdminProfileController::class, 'updateShipping'])->name('profile.shipping');
 });
 
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])->name('stripe.webhook');

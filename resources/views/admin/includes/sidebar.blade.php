@@ -115,6 +115,17 @@
                             <i class="fa-solid fa-sliders"></i>
                             <span>Settings & Profile</span>
                         </a>
+                        <ul class="sidebar-submenu">
+                            <li>
+                                <a href="{{ route('admin.profile.edit') }}#shipping-settings">Shipping &amp; Delivery</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.profile.edit') }}#store-contact">Store Contact &amp; WhatsApp</a>
+                            </li>
+                            <li>
+                                <a href="{{ route('admin.profile.edit') }}">Profile &amp; Password</a>
+                            </li>
+                        </ul>
                     </li>
 
                     <li class="sidebar-list mt-3 pt-3 border-top border-white-50">

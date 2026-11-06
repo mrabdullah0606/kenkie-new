@@ -252,6 +252,15 @@
                                             <h4 class="price">£{{ number_format($cartSubtotalCents / 100, 2) }}</h4>
                                         </li>
 
+                                        @if(!empty($appliedCoupon) && ($couponDiscountCents ?? 0) > 0)
+                                            <li class="text-success">
+                                                <h4 class="text-success">
+                                                    <i class="fa-solid fa-ticket me-1"></i> Coupon ({{ $appliedCoupon['code'] }})
+                                                </h4>
+                                                <h4 class="price text-success">-£{{ number_format($couponDiscountCents / 100, 2) }}</h4>
+                                            </li>
+                                        @endif
+
                                         <li>
                                             <h4>Shipping</h4>
                                             <h4 class="price">

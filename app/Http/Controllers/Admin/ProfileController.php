@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\MarketingSetting;
+use App\Models\ShippingSetting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,7 @@ class ProfileController extends Controller
         return view('admin.profile.edit', [
             'user' => $request->user(),
             'marketingSettings' => MarketingSetting::getSettings(),
+            'shippingSettings' => ShippingSetting::getSettings(),
         ]);
     }
 
@@ -73,5 +75,25 @@ class ProfileController extends Controller
         ]);
 
         return redirect()->route('admin.profile.edit')->with('status', 'Store WhatsApp & contact number updated successfully! The storefront widget and contact pages have been updated.');
+    }
+
+    public function updateShipping(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'standard_shipping_fee' => ['required', 'numeric', 'min:0', 'max:999.99'],
+            'free_shipping_enabled' => ['sometimes', 'boolean'],
+            'free_shipping_threshold' => ['required', 'numeric', 'min:0', 'max:9999.99'],
+            'estimated_delivery_text' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $settings = ShippingSetting::getSettings();
+        $settings->update([
+            'standard_shipping_fee' => $validated['standard_shipping_fee'],
+            'free_shipping_enabled' => $request->boolean('free_shipping_enabled'),
+            'free_shipping_threshold' => $validated['free_shipping_threshold'],
+            'estimated_delivery_text' => $validated['estimated_delivery_text'] ?: '2-3 Business Days via Evri / Royal Mail',
+        ]);
+
+        return redirect()->route('admin.profile.edit')->with('status', 'Store Shipping & Delivery settings updated successfully! Cart and checkout rates have been updated.');
     }
 }

@@ -59,6 +59,12 @@
                                         <td>
                                             @if($popup->discount_code)
                                                 <span class="badge bg-success-subtle text-success border border-success fw-bold px-2 py-1 font-monospace">{{ $popup->discount_code }}</span>
+                                                <div class="small text-muted mt-1">
+                                                    {{ ($popup->discount_type ?? 'percentage') === 'fixed' ? '£' . number_format((float) ($popup->discount_value ?? 0), 2) : (float) ($popup->discount_value ?? 0) . '%' }} OFF
+                                                    @if(($popup->min_order_amount ?? 0) > 0)
+                                                        · Min £{{ number_format((float) $popup->min_order_amount, 2) }}
+                                                    @endif
+                                                </div>
                                             @else
                                                 <span class="text-muted small">—</span>
                                             @endif

@@ -75,6 +75,27 @@
                 </a>
             </div>
 
+            <!-- Shipping Quick Summary Card -->
+            <div class="card p-4 mb-4 border-0 shadow-sm" style="background: #f0fdf9; border-left: 4px solid #0da487 !important;">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fa-solid fa-truck-fast text-success fs-4"></i>
+                    <h6 class="fw-bold text-dark mb-0">Active Shipping Rates</h6>
+                </div>
+                <div class="fw-bold text-dark fs-5 font-monospace mb-1">
+                    Standard: £{{ number_format((float) $shippingSettings->standard_shipping_fee, 2) }}
+                </div>
+                <p class="text-muted small mb-3">
+                    @if($shippingSettings->free_shipping_enabled)
+                        <span class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i> Free Shipping:</span> Orders over £{{ number_format((float) $shippingSettings->free_shipping_threshold, 2) }}
+                    @else
+                        <span class="text-secondary"><i class="fa-solid fa-circle-xmark me-1"></i> Free shipping threshold disabled</span>
+                    @endif
+                </p>
+                <a href="#shipping-settings" class="btn btn-sm btn-outline-success w-100 d-flex align-items-center justify-content-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Shipping Cost
+                </a>
+            </div>
+
             <!-- Quick Storefront Link Card -->
             <div class="card p-4 bg-light border-0">
                 <h6 class="fw-bold text-dark mb-2">Live Storefront</h6>
@@ -177,6 +198,89 @@
                                 </div>
                                 <button class="btn btn-success d-inline-flex align-items-center gap-2" type="submit" style="background-color: #0da487; border-color: #0da487;">
                                     <i class="fa-solid fa-floppy-disk"></i> Save &amp; Update Store Number
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Store Shipping & Delivery Settings Card -->
+            <div class="card mb-4 border-0 shadow-sm" id="shipping-settings">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded p-2 text-white d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #0da487;">
+                            <i class="fa-solid fa-truck-fast fs-5"></i>
+                        </span>
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">Store Shipping &amp; Delivery Settings</h5>
+                            <small class="text-muted">Controls standard UK delivery cost, free shipping thresholds, and cart calculations</small>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                            <i class="fa-solid fa-sterling-sign me-1"></i> Currency: GBP (£)
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ route('admin.profile.shipping') }}">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="standard_shipping_fee">
+                                    Standard Shipping Fee (£ GBP) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text fw-bold">£</span>
+                                    <input type="number" step="0.01" min="0" max="999.99" class="form-control @error('standard_shipping_fee') is-invalid @enderror" id="standard_shipping_fee" name="standard_shipping_fee" value="{{ old('standard_shipping_fee', $shippingSettings->standard_shipping_fee) }}" placeholder="8.95" required>
+                                </div>
+                                <div class="form-text text-muted small">Standard flat rate applied when free delivery threshold is not met. Set to 0.00 for always free shipping.</div>
+                                @error('standard_shipping_fee')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="free_shipping_threshold">
+                                    Free Shipping Spend Threshold (£ GBP) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text fw-bold">£</span>
+                                    <input type="number" step="0.01" min="0" max="9999.99" class="form-control @error('free_shipping_threshold') is-invalid @enderror" id="free_shipping_threshold" name="free_shipping_threshold" value="{{ old('free_shipping_threshold', $shippingSettings->free_shipping_threshold) }}" placeholder="50.00" required>
+                                </div>
+                                <div class="form-text text-muted small">Orders with subtotal at or above this amount automatically receive FREE Delivery.</div>
+                                @error('free_shipping_threshold')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch p-3 bg-light rounded-3 border">
+                                    <input class="form-check-input ms-0 me-3" type="checkbox" role="switch" id="free_shipping_enabled" name="free_shipping_enabled" value="1" @checked(old('free_shipping_enabled', $shippingSettings->free_shipping_enabled))>
+                                    <label class="form-check-label fw-semibold text-dark" for="free_shipping_enabled">
+                                        Enable Free Shipping Above Threshold
+                                    </label>
+                                    <div class="text-muted small ms-5">When enabled, any order basket reaching the threshold qualifies for £0 delivery fee.</div>
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label fw-semibold" for="estimated_delivery_text">
+                                    Estimated Delivery Times Label
+                                </label>
+                                <input type="text" class="form-control @error('estimated_delivery_text') is-invalid @enderror" id="estimated_delivery_text" name="estimated_delivery_text" value="{{ old('estimated_delivery_text', $shippingSettings->estimated_delivery_text) }}" placeholder="e.g. 2-3 Business Days via Evri / Royal Mail">
+                                <div class="form-text text-muted small">Displayed on product and checkout delivery info sections.</div>
+                                @error('estimated_delivery_text')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12 mt-3 pt-3 border-top text-end">
+                                <button class="btn btn-success d-inline-flex align-items-center gap-2" type="submit" style="background-color: #0da487; border-color: #0da487;">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save &amp; Update Shipping Rates
                                 </button>
                             </div>
                         </div>

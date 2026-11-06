@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Model;
     'subtitle',
     'content',
     'discount_code',
+    'discount_type',
+    'discount_value',
+    'min_order_amount',
     'button_text',
     'button_url',
     'image',
@@ -36,9 +39,36 @@ class PromotionalPopup extends Model
         });
     }
 
+    /**
+     * Calculate discount in pence/cents given a subtotal in pence/cents.
+     */
+    public function calculateDiscountCents(int $subtotalCents): int
+    {
+        $minSpendCents = (int) round(((float) ($this->min_order_amount ?? 0)) * 100);
+        if ($minSpendCents > 0 && $subtotalCents < $minSpendCents) {
+            return 0;
+        }
+
+        $value = (float) ($this->discount_value ?? 0);
+        if ($value <= 0) {
+            return 0;
+        }
+
+        if (($this->discount_type ?? 'percentage') === 'fixed') {
+            $fixedCents = (int) round($value * 100);
+
+            return min($subtotalCents, $fixedCents);
+        }
+
+        // Percentage
+        return min($subtotalCents, (int) round($subtotalCents * ($value / 100)));
+    }
+
     protected function casts(): array
     {
         return [
+            'discount_value' => 'decimal:2',
+            'min_order_amount' => 'decimal:2',
             'delay_seconds' => 'integer',
             'is_active' => 'boolean',
         ];

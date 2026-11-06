@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Models\Product;
 use App\Models\ProductVariation;
+use App\Models\ShippingSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Throwable;
 
 class StorefrontCart
 {
@@ -232,16 +234,74 @@ class StorefrontCart
             ->filter()
             ->values();
 
+        $cartSubtotalCents = $cartItems->sum('lineTotalCents');
+        $cartSavingsCents = $cartItems->sum('savedCents');
+        $couponDiscountCents = static::getAppliedCouponDiscountCents($cartSubtotalCents);
+        $appliedCoupon = session('applied_coupon');
+        $shippingFeeCents = $this->shippingFeeCents($cartSubtotalCents);
+        $orderTotalCents = max(0, $cartSubtotalCents - $couponDiscountCents + $shippingFeeCents);
+
         return [
             'cartItems' => $cartItems,
             'cartItemCount' => $cartItems->sum('quantity'),
-            'cartSubtotalCents' => $cartItems->sum('lineTotalCents'),
-            'cartSavingsCents' => $cartItems->sum('savedCents'),
+            'cartSubtotalCents' => $cartSubtotalCents,
+            'cartSavingsCents' => $cartSavingsCents,
+            'couponDiscountCents' => $couponDiscountCents,
+            'appliedCoupon' => $appliedCoupon,
+            'shippingFeeCents' => $shippingFeeCents,
+            'orderTotalCents' => $orderTotalCents,
         ];
+    }
+
+    public static function calculateShippingFeeCents(int $subtotalCents): int
+    {
+        try {
+            return ShippingSetting::getSettings()->calculateShippingCents($subtotalCents);
+        } catch (Throwable) {
+            return $subtotalCents >= self::FREE_SHIPPING_THRESHOLD_CENTS ? 0 : self::SHIPPING_FEE_CENTS;
+        }
     }
 
     public function shippingFeeCents(int $subtotalCents): int
     {
-        return $subtotalCents >= self::FREE_SHIPPING_THRESHOLD_CENTS ? 0 : self::SHIPPING_FEE_CENTS;
+        return self::calculateShippingFeeCents($subtotalCents);
+    }
+
+    public static function freeShippingThresholdCents(): int
+    {
+        try {
+            return ShippingSetting::getSettings()->freeShippingThresholdCents();
+        } catch (Throwable) {
+            return self::FREE_SHIPPING_THRESHOLD_CENTS;
+        }
+    }
+
+    /**
+     * Re-calculate applied coupon discount in cents for given subtotal in cents.
+     */
+    public static function getAppliedCouponDiscountCents(int $subtotalCents): int
+    {
+        if ($subtotalCents <= 0) {
+            return 0;
+        }
+
+        $coupon = session('applied_coupon');
+        if (! is_array($coupon) || empty($coupon['code'])) {
+            return 0;
+        }
+
+        $minSpendCents = (int) round(((float) ($coupon['min_order_amount'] ?? 0)) * 100);
+        if ($minSpendCents > 0 && $subtotalCents < $minSpendCents) {
+            return 0;
+        }
+
+        $type = $coupon['discount_type'] ?? 'percentage';
+        $value = (float) ($coupon['discount_value'] ?? 0);
+
+        if ($type === 'fixed') {
+            return min($subtotalCents, (int) round($value * 100));
+        }
+
+        return min($subtotalCents, (int) round($subtotalCents * ($value / 100)));
     }
 }

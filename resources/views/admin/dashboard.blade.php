@@ -61,8 +61,8 @@
             <div class="metric-card bg-white p-3 rounded-3 border shadow-sm h-100 d-flex justify-content-between align-items-center">
                 <div>
                     <span class="text-muted fw-semibold d-block mb-1 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">TOTAL REVENUE</span>
-                    <h3 class="fw-bold mb-1 text-dark">${{ number_format($totalRevenue, 2) }}</h3>
-                    <small class="text-success fw-semibold"><i class="fa-solid fa-calendar-day me-1"></i> Today: ${{ number_format($todayRevenue, 2) }}</small>
+                    <h3 class="fw-bold mb-1 text-dark">£{{ number_format($totalRevenue, 2) }}</h3>
+                    <small class="text-success fw-semibold"><i class="fa-solid fa-calendar-day me-1"></i> Today: £{{ number_format($todayRevenue, 2) }}</small>
                 </div>
                 <div class="icon-box green rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(13, 164, 135, 0.12); color: #0da487; font-size: 20px;">
                     <i class="fa-solid fa-wallet"></i>
@@ -87,7 +87,7 @@
             <div class="metric-card bg-white p-3 rounded-3 border shadow-sm h-100 d-flex justify-content-between align-items-center">
                 <div>
                     <span class="text-muted fw-semibold d-block mb-1 text-uppercase" style="font-size: 11px; letter-spacing: 0.5px;">AVG ORDER VALUE (AOV)</span>
-                    <h3 class="fw-bold mb-1 text-dark">${{ number_format($averageOrderValue, 2) }}</h3>
+                    <h3 class="fw-bold mb-1 text-dark">£{{ number_format($averageOrderValue, 2) }}</h3>
                     <small class="text-muted"><i class="fa-solid fa-chart-pie me-1"></i> Per Successful Order</small>
                 </div>
                 <div class="icon-box purple rounded-circle d-flex align-items-center justify-content-center" style="width: 52px; height: 52px; background: rgba(139, 92, 246, 0.12); color: #8b5cf6; font-size: 20px;">
@@ -199,7 +199,7 @@
                                             <span class="badge bg-primary px-2 py-1">{{ $item->total_qty }}</span>
                                         </td>
                                         <td class="text-end pe-3 fw-bold text-success">
-                                            ${{ number_format((float) $item->total_sales, 2) }}
+                                            £{{ number_format((float) $item->total_sales, 2) }}
                                         </td>
                                     </tr>
                                 @empty
@@ -248,7 +248,7 @@
                                             </div>
                                         </td>
                                         <td><span class="badge bg-light text-dark border">{{ $prod->category?->name ?? 'General' }}</span></td>
-                                        <td>${{ number_format((float) $prod->price, 2) }}</td>
+                                        <td>£{{ number_format((float) $prod->price, 2) }}</td>
                                         <td>
                                             @if ($prod->stock <= 0)
                                                 <span class="badge bg-danger">0 Out of Stock</span>
@@ -311,7 +311,7 @@
                                             <small class="text-muted">{{ $order->email }}</small>
                                         </td>
                                         <td>
-                                            <span class="fw-bold text-success">${{ number_format((float) $order->total, 2) }}</span>
+                                            <span class="fw-bold text-success">£{{ number_format((float) $order->total, 2) }}</span>
                                         </td>
                                         <td>
                                             <span class="badge bg-light text-dark border">{{ ucfirst($order->payment_method ?? 'card') }}</span>
@@ -365,7 +365,7 @@
                                     <small class="text-muted d-block text-truncate" style="font-size: 12px;">{{ $prod->category?->name ?? 'General' }} · Stock: {{ $prod->stock }}</small>
                                 </div>
                                 <div class="text-end flex-shrink-0" style="min-width: 70px;">
-                                    <span class="fw-bold text-success d-block" style="font-size: 13.5px;">${{ number_format((float) $prod->price, 2) }}</span>
+                                    <span class="fw-bold text-success d-block" style="font-size: 13.5px;">£{{ number_format((float) $prod->price, 2) }}</span>
                                     <a href="{{ route('admin.products.edit', $prod) }}" class="btn btn-sm btn-outline-primary py-0 px-2 mt-1" style="font-size: 11px;">Edit</a>
                                 </div>
                             </li>
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 labels: @json($chartLabels),
                 datasets: [
                     {
-                        label: 'Revenue ($)',
+                        label: 'Revenue (£)',
                         data: @json($chartRevenueData),
                         borderColor: '#0da487',
                         backgroundColor: 'rgba(13, 164, 135, 0.1)',
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         display: true,
                         position: 'left',
                         ticks: {
-                            callback: function(value) { return '$' + value; }
+                            callback: function(value) { return '£' + value; }
                         },
                         grid: { color: 'rgba(0,0,0,0.05)' }
                     },
@@ -450,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         callbacks: {
                             label: function(context) {
                                 if (context.dataset.yAxisID === 'y') {
-                                    return 'Revenue: $' + context.raw.toFixed(2);
+                                    return 'Revenue: £' + context.raw.toFixed(2);
                                 }
                                 return 'Orders: ' + context.raw;
                             }
