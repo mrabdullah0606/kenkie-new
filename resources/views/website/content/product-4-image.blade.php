@@ -607,9 +607,45 @@
                             </a>
                         </div>
 
+                        {{-- eBay-style Postage & Delivery Box --}}
+                        <div class="product-postage-box p-3 my-3 rounded-3 border" style="background:#f8fafc; border-color:#e2e8f0;">
+                            <div class="d-flex align-items-center justify-content-between mb-2 pb-2 border-bottom">
+                                <span class="fw-bold text-dark d-flex align-items-center gap-2" style="font-size:14px;">
+                                    <i class="fa-solid fa-truck-fast text-success fs-5"></i>
+                                    Postage &amp; Delivery
+                                </span>
+                                <span class="badge {{ $product->shipping_type === 'free' ? 'bg-success' : 'bg-primary' }} text-white px-2 py-1" style="font-size:12px; font-weight:600;">
+                                    {{ $product->formatted_postage }}
+                                </span>
+                            </div>
+
+                            <div class="row g-2" style="font-size:13px;">
+                                <div class="col-sm-6 d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-box-open text-muted mt-1"></i>
+                                    <div>
+                                        <span class="text-muted d-block" style="font-size:11.5px;">Delivery Courier</span>
+                                        <strong class="text-dark">{{ $product->courier_display_name }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-sm-6 d-flex align-items-start gap-2">
+                                    <i class="fa-solid fa-clock text-muted mt-1"></i>
+                                    <div>
+                                        <span class="text-muted d-block" style="font-size:11.5px;">Estimated Delivery</span>
+                                        <strong class="text-dark">{{ $product->delivery_time_text ?: '2-3 Business Days' }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 pt-2 border-top d-flex align-items-center justify-content-between flex-wrap gap-2 text-muted" style="font-size:12px;">
+                                    <span><i class="fa-solid fa-location-dot me-1 text-primary"></i> Dispatched from United Kingdom</span>
+                                    <span><i class="fa-solid fa-shield-halved me-1 text-success"></i> Tracked &amp; Insured Transit</span>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Trust strip --}}
                         <div class="trust-strip">
-                            <div class="trust-item"><i class="fa-solid fa-truck-fast"></i> Free shipping over $50</div>
+                            <div class="trust-item"><i class="fa-solid fa-truck-fast"></i> Free shipping over {{ \App\Models\ShippingSetting::getSettings()->formatted_threshold }}</div>
                             <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> Secure checkout</div>
                             <div class="trust-item"><i class="fa-solid fa-rotate-left"></i> 14-day returns</div>
                             <div class="trust-item"><i class="fa-solid fa-headset"></i> 24/7 support</div>
@@ -655,6 +691,11 @@
                                     </button>
                                 </li>
                             @endif
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="postage-tab" data-bs-toggle="tab" data-bs-target="#postage-pane" type="button" role="tab">
+                                    <i class="fa-solid fa-truck-fast me-2"></i>Postage &amp; Delivery
+                                </button>
+                            </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="return-tab" data-bs-toggle="tab" data-bs-target="#return-pane" type="button" role="tab">
                                     <i class="fa-solid fa-shield-halved me-2"></i>Return Policy
@@ -803,6 +844,43 @@
                                                 <li>Refunds processed within 2–4 business days of receiving the item.</li>
                                                 <li>Credited back to your original payment method.</li>
                                                 <li>Our support team is available 24/7 for return assistance.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Postage & Packaging --}}
+                            <div class="tab-pane fade" id="postage-pane" role="tabpanel">
+                                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-3 border">
+                                    <div class="rounded-circle bg-primary-subtle text-primary d-inline-flex align-items-center justify-content-center" style="width:50px;height:50px;flex-shrink:0;">
+                                        <i class="fa-solid fa-truck-fast fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="fw-bold mb-1 text-dark">Fast &amp; Tracked UK Shipping</h5>
+                                        <p class="text-muted mb-0 small">All items are inspected, carefully packed and dispatched with reputable UK couriers.</p>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded h-100 bg-white">
+                                            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-box-open text-primary me-2"></i>Postage Details</h6>
+                                            <table class="table table-sm table-borderless mb-0 small">
+                                                <tr><th class="text-muted ps-0" style="width:140px;">Postage Fee:</th><td class="fw-bold text-dark">{{ $product->formatted_postage }}</td></tr>
+                                                <tr><th class="text-muted ps-0">Delivery Courier:</th><td class="fw-bold text-primary">{{ $product->courier_display_name }}</td></tr>
+                                                <tr><th class="text-muted ps-0">Estimated Time:</th><td class="fw-semibold text-dark">{{ $product->delivery_time_text ?: '2-3 Business Days' }}</td></tr>
+                                                <tr><th class="text-muted ps-0">Item Location:</th><td>United Kingdom</td></tr>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="p-3 border rounded h-100 bg-white">
+                                            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-barcode text-success me-2"></i>Tracking &amp; Dispatch</h6>
+                                            <ul class="text-muted small ps-3 mb-0">
+                                                <li>Dispatched promptly after payment confirmation.</li>
+                                                <li>Official courier tracking link provided on your Order Tracking page.</li>
+                                                <li>Direct 1-click tracking via <strong>{{ $product->courier_display_name }}</strong> portal.</li>
+                                                <li>Fully insured against loss or damage in transit.</li>
                                             </ul>
                                         </div>
                                     </div>

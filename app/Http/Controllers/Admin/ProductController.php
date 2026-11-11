@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Product;
+use App\Services\CourierShippingService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -65,6 +66,7 @@ class ProductController extends Controller
         return view('admin.products.form', [
             'product' => new Product,
             'categories' => $this->getHierarchicalCategories(),
+            'couriers' => CourierShippingService::supportedCouriers(),
         ]);
     }
 
@@ -86,6 +88,7 @@ class ProductController extends Controller
         return view('admin.products.form', [
             'product' => $product,
             'categories' => $this->getHierarchicalCategories(),
+            'couriers' => CourierShippingService::supportedCouriers(),
         ]);
     }
 
@@ -263,6 +266,10 @@ class ProductController extends Controller
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:1000'],
             'meta_keywords' => ['nullable', 'string', 'max:500'],
+            'shipping_type' => ['nullable', 'string', 'in:default,free,custom'],
+            'shipping_fee' => ['nullable', 'numeric', 'min:0', 'max:99999.99'],
+            'courier_name' => ['nullable', 'string', 'max:50'],
+            'delivery_time_text' => ['nullable', 'string', 'max:150'],
         ]);
 
         if ($request->hasFile('image_file')) {
@@ -303,6 +310,13 @@ class ProductController extends Controller
         $validated['images'] = $galleryPaths;
 
         unset($validated['image_file'], $validated['size_chart_file'], $validated['gallery_files'], $validated['remove_primary_image'], $validated['remove_size_chart'], $validated['keep_gallery_images']);
+
+        $validated['shipping_type'] = $validated['shipping_type'] ?? 'default';
+        $validated['shipping_fee'] = ($validated['shipping_type'] === 'custom' && isset($validated['shipping_fee']))
+            ? (float) $validated['shipping_fee']
+            : null;
+        $validated['courier_name'] = ! empty($validated['courier_name']) ? trim($validated['courier_name']) : null;
+        $validated['delivery_time_text'] = ! empty($validated['delivery_time_text']) ? trim($validated['delivery_time_text']) : null;
 
         $validated['is_featured'] = $request->boolean('is_featured');
         $validated['is_top_deal'] = $request->boolean('is_top_deal');

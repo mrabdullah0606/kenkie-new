@@ -238,7 +238,7 @@ class StorefrontCart
         $cartSavingsCents = $cartItems->sum('savedCents');
         $couponDiscountCents = static::getAppliedCouponDiscountCents($cartSubtotalCents);
         $appliedCoupon = session('applied_coupon');
-        $shippingFeeCents = $this->shippingFeeCents($cartSubtotalCents);
+        $shippingFeeCents = $this->shippingFeeCents($cartSubtotalCents, $cartItems);
         $orderTotalCents = max(0, $cartSubtotalCents - $couponDiscountCents + $shippingFeeCents);
 
         return [
@@ -253,8 +253,36 @@ class StorefrontCart
         ];
     }
 
-    public static function calculateShippingFeeCents(int $subtotalCents): int
+    public static function calculateShippingFeeCents(int $subtotalCents, ?iterable $cartItems = null): int
     {
+        if ($cartItems) {
+            $items = collect($cartItems);
+            if ($items->isNotEmpty()) {
+                $allFree = $items->every(function ($item) {
+                    $product = is_array($item) ? ($item['product'] ?? null) : ($item->product ?? null);
+
+                    return $product && $product->shipping_type === 'free';
+                });
+
+                if ($allFree) {
+                    return 0;
+                }
+
+                $customFees = $items->map(function ($item) {
+                    $product = is_array($item) ? ($item['product'] ?? null) : ($item->product ?? null);
+                    if ($product && $product->shipping_type === 'custom' && $product->shipping_fee !== null) {
+                        return (int) round(((float) $product->shipping_fee) * 100);
+                    }
+
+                    return null;
+                })->filter(fn ($fee) => $fee !== null);
+
+                if ($customFees->isNotEmpty()) {
+                    return (int) $customFees->max();
+                }
+            }
+        }
+
         try {
             return ShippingSetting::getSettings()->calculateShippingCents($subtotalCents);
         } catch (Throwable) {
@@ -262,9 +290,9 @@ class StorefrontCart
         }
     }
 
-    public function shippingFeeCents(int $subtotalCents): int
+    public function shippingFeeCents(int $subtotalCents, ?iterable $cartItems = null): int
     {
-        return self::calculateShippingFeeCents($subtotalCents);
+        return self::calculateShippingFeeCents($subtotalCents, $cartItems);
     }
 
     public static function freeShippingThresholdCents(): int

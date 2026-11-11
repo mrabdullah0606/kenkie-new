@@ -4,10 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class GoogleAuthController extends Controller
@@ -57,7 +58,7 @@ class GoogleAuthController extends Controller
             || ! is_string($verifier)
             || ! is_string($code)
             || $code === '') {
-            return $this->failedSignIn();
+            return $this->failedSignIn('Invalid OAuth state or authorization code mismatch.');
         }
 
         try {
@@ -73,14 +74,23 @@ class GoogleAuthController extends Controller
             $accessToken = $tokenResponse->json('access_token');
 
             if (! $tokenResponse->successful() || ! is_string($accessToken) || $accessToken === '') {
-                return $this->failedSignIn();
+                Log::warning('Google OAuth token exchange failed', [
+                    'status' => $tokenResponse->status(),
+                    'body' => $tokenResponse->json() ?? $tokenResponse->body(),
+                ]);
+
+                return $this->failedSignIn('Unable to exchange authorization code with Google.');
             }
 
             $profileResponse = Http::withToken($accessToken)
                 ->timeout(10)
                 ->get('https://openidconnect.googleapis.com/v1/userinfo');
-        } catch (ConnectionException) {
-            return $this->failedSignIn();
+        } catch (\Throwable $e) {
+            Log::error('Google OAuth API communication error: '.$e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return $this->failedSignIn('Failed to connect to Google authentication service.');
         }
 
         $profile = $profileResponse->json();
@@ -92,10 +102,15 @@ class GoogleAuthController extends Controller
             || ! is_string($email)
             || $email === ''
             || ($profile['email_verified'] ?? false) !== true) {
-            return $this->failedSignIn();
+            Log::warning('Google OAuth profile verification failed', [
+                'status' => $profileResponse->status(),
+                'profile' => $profile,
+            ]);
+
+            return $this->failedSignIn('Google account profile or email verification is incomplete.');
         }
 
-        $email = Str::lower($email);
+        $email = Str::lower(trim($email));
         $user = User::where('email', $email)->first();
 
         if (! $user) {
@@ -108,32 +123,36 @@ class GoogleAuthController extends Controller
                 'role' => 'customer',
             ]);
             $user->forceFill(['email_verified_at' => now()])->save();
-        } elseif ($user->email_verified_at === null) {
-            $user->forceFill([
-                'email_verified_at' => now(),
-                'email_otp_code' => null,
-                'email_otp_expires_at' => null,
-            ])->save();
+        } else {
+            // Existing user (registered normally with email/password or previously)
+            // Google OAuth proves email ownership: ensure account is verified & clear pending OTPs
+            if ($user->email_verified_at === null) {
+                $user->email_verified_at = now();
+            }
+            $user->email_otp_code = null;
+            $user->email_otp_expires_at = null;
+            $user->login_otp_code = null;
+            $user->login_otp_expires_at = null;
+            $user->save();
         }
 
-        $otpCode = (string) random_int(100000, 999999);
-        $user->login_otp_code = $otpCode;
-        $user->login_otp_expires_at = now()->addMinutes(10);
-        $user->save();
-
-        OtpVerificationController::sendOtpEmail($user, $otpCode, 'login');
-
+        // Direct authenticated session without redundant OTP challenge
         $request->session()->regenerate();
-        $request->session()->put([
-            'login_2fa_user_id' => $user->id,
-            'login_2fa_remember' => false,
-        ]);
+        Auth::login($user, true);
 
-        return redirect()->route('login.otp');
+        if ($user->isAdmin()) {
+            return redirect()->intended(route('admin.dashboard', absolute: false));
+        }
+
+        return redirect()->intended(route('home', absolute: false));
     }
 
-    private function failedSignIn(): RedirectResponse
+    private function failedSignIn(?string $reason = null): RedirectResponse
     {
+        if ($reason) {
+            Log::info('Google sign-in attempt rejected: '.$reason);
+        }
+
         return redirect()->route('login')->withErrors([
             'google' => 'Google sign-in could not be completed. Please try again.',
         ]);

@@ -10,6 +10,7 @@ use App\Models\PromotionalPopup;
 use App\Models\ShippingSetting;
 use App\Models\User;
 use App\Services\StorefrontCart;
+use Illuminate\Support\Facades\Http;
 
 test('product page renders variations and multi-buyer offers dynamically', function () {
     $category = Category::factory()->create(['name' => 'Fashion & Apparel', 'slug' => 'fashion-apparel']);
@@ -445,4 +446,100 @@ test('promotional popup discount code applies and deducts price on cart and chec
     $adminOrder->assertOk();
     $adminOrder->assertSee('Coupon Discount (SPRING20):');
     $adminOrder->assertSee('-£10.00');
+});
+
+test('admin can set product postage and courier options which appear on storefront and cart', function () {
+    $admin = User::factory()->admin()->create();
+    $category = Category::factory()->create();
+
+    $product = Product::factory()->create([
+        'category_id' => $category->id,
+        'name' => 'Heavy Duty Garden Spade',
+        'price' => 32.00,
+        'stock' => 15,
+        'shipping_type' => 'custom',
+        'shipping_fee' => 2.95,
+        'courier_name' => 'inpost',
+        'delivery_time_text' => '2-3 Working Days Tracked',
+        'is_active' => true,
+    ]);
+
+    // Storefront product page renders the eBay-style postage & courier box
+    $response = $this->get(route('products.show', $product->slug));
+    $response->assertOk();
+    $response->assertSee('Postage &amp; Delivery', false);
+    $response->assertSee('£2.95');
+    $response->assertSee('InPost');
+    $response->assertSee('2-3 Working Days Tracked');
+    $response->assertSee('Postage Details');
+
+    // Cart shipping fee calculates custom product fee
+    $cartFee = StorefrontCart::calculateShippingFeeCents(3200, [
+        ['product' => $product, 'quantity' => 1],
+    ]);
+    expect($cartFee)->toBe(295);
+
+    // Free shipping product
+    $freeProduct = Product::factory()->create([
+        'category_id' => $category->id,
+        'name' => 'Lightweight Pruning Shears',
+        'price' => 18.00,
+        'stock' => 20,
+        'shipping_type' => 'free',
+        'courier_name' => 'royal_mail',
+        'delivery_time_text' => '1-2 Days Tracked 24',
+        'is_active' => true,
+    ]);
+
+    $freeResponse = $this->get(route('products.show', $freeProduct->slug));
+    $freeResponse->assertOk();
+    $freeResponse->assertSee('Free Delivery');
+    $freeResponse->assertSee('Royal Mail');
+
+    $freeCartFee = StorefrontCart::calculateShippingFeeCents(1800, [
+        ['product' => $freeProduct, 'quantity' => 1],
+    ]);
+    expect($freeCartFee)->toBe(0);
+});
+
+test('google oauth callback seamlessly authenticates existing registered user without redundant otp', function () {
+    $existingUser = User::factory()->create([
+        'name' => 'Alex Smith',
+        'email' => 'alex@example.com',
+        'password' => bcrypt('secret123'),
+        'email_verified_at' => null,
+    ]);
+
+    config([
+        'services.google.client_id' => 'dummy-client-id',
+        'services.google.client_secret' => 'dummy-client-secret',
+        'services.google.redirect' => 'https://kenkie.com/auth/google/callback',
+    ]);
+
+    Http::fake([
+        'https://oauth2.googleapis.com/token' => Http::response([
+            'access_token' => 'dummy-access-token',
+        ]),
+        'https://openidconnect.googleapis.com/v1/userinfo' => Http::response([
+            'sub' => 'google-user-id-12345',
+            'email' => 'alex@example.com',
+            'email_verified' => true,
+            'name' => 'Alex Smith',
+        ]),
+    ]);
+
+    $response = $this->withSession([
+        'google_oauth_state' => 'test-state-string',
+        'google_oauth_code_verifier' => 'test-code-verifier',
+    ])->get(route('google.callback', [
+        'state' => 'test-state-string',
+        'code' => 'test-auth-code',
+    ]));
+
+    $response->assertRedirect(route('home', absolute: false));
+    $this->assertAuthenticatedAs($existingUser);
+
+    $existingUser->refresh();
+    expect($existingUser->email_verified_at)->not->toBeNull();
+    expect($existingUser->login_otp_code)->toBeNull();
 });

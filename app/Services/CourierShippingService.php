@@ -10,6 +10,12 @@ class CourierShippingService
 
     public const string COURIER_DPD = 'dpd';
 
+    public const string COURIER_DHL = 'dhl';
+
+    public const string COURIER_FEDEX = 'fedex';
+
+    public const string COURIER_INPOST = 'inpost';
+
     public const string COURIER_OTHER = 'other';
 
     /**
@@ -52,6 +58,33 @@ class CourierShippingService
                 'badge_class' => 'bg-dark text-white',
                 'icon' => 'fa-solid fa-truck-fast',
                 'placeholder' => 'e.g. 14-digit consignment or parcel number',
+            ],
+            self::COURIER_DHL => [
+                'code' => self::COURIER_DHL,
+                'name' => 'DHL',
+                'website' => 'https://track.dhlparcel.co.uk',
+                'tracking_url_template' => 'https://track.dhlparcel.co.uk/?tracking_number={tracking}',
+                'badge_class' => 'bg-warning text-dark',
+                'icon' => 'fa-solid fa-truck-fast',
+                'placeholder' => 'e.g. 10 or 14-digit tracking number',
+            ],
+            self::COURIER_FEDEX => [
+                'code' => self::COURIER_FEDEX,
+                'name' => 'FedEx',
+                'website' => 'https://www.fedex.com/en-gb/home.html',
+                'tracking_url_template' => 'https://www.fedex.com/fedextrack/?trknbr={tracking}',
+                'badge_class' => 'bg-purple text-white',
+                'icon' => 'fa-solid fa-plane',
+                'placeholder' => 'e.g. 12-digit FedEx tracking number',
+            ],
+            self::COURIER_INPOST => [
+                'code' => self::COURIER_INPOST,
+                'name' => 'InPost',
+                'website' => 'https://inpost.co.uk',
+                'tracking_url_template' => 'https://inpost.co.uk/track-a-parcel/?parcel_number={tracking}',
+                'badge_class' => 'bg-warning text-dark',
+                'icon' => 'fa-solid fa-box',
+                'placeholder' => 'e.g. InPost parcel number',
             ],
             self::COURIER_OTHER => [
                 'code' => self::COURIER_OTHER,
@@ -121,6 +154,12 @@ class CourierShippingService
             $courierCode = self::COURIER_ROYAL_MAIL;
         } elseif (str_contains($courierCode, 'dpd')) {
             $courierCode = self::COURIER_DPD;
+        } elseif (str_contains($courierCode, 'dhl')) {
+            $courierCode = self::COURIER_DHL;
+        } elseif (str_contains($courierCode, 'fedex')) {
+            $courierCode = self::COURIER_FEDEX;
+        } elseif (str_contains($courierCode, 'inpost')) {
+            $courierCode = self::COURIER_INPOST;
         }
 
         $supported = self::supportedCouriers();
@@ -145,6 +184,15 @@ class CourierShippingService
         }
         if (str_contains($normalized, 'dpd')) {
             return self::COURIER_DPD;
+        }
+        if (str_contains($normalized, 'dhl')) {
+            return self::COURIER_DHL;
+        }
+        if (str_contains($normalized, 'fedex')) {
+            return self::COURIER_FEDEX;
+        }
+        if (str_contains($normalized, 'inpost')) {
+            return self::COURIER_INPOST;
         }
 
         return self::COURIER_OTHER;

@@ -11,7 +11,7 @@ test('login screen can be rendered', function () {
     $response->assertStatus(200);
 });
 
-test('Google sign in creates a verified customer and continues through login otp', function () {
+test('Google sign in creates a verified customer and logs in directly', function () {
     config([
         'services.google.client_id' => 'google-client-id',
         'services.google.client_secret' => 'google-client-secret',
@@ -38,12 +38,10 @@ test('Google sign in creates a verified customer and continues through login otp
 
     $user = User::where('email', 'new.customer@example.com')->firstOrFail();
 
-    $response->assertRedirect(route('login.otp', absolute: false));
-    $response->assertSessionHas('login_2fa_user_id', $user->id);
-    $this->assertGuest();
+    $response->assertRedirect(route('home', absolute: false));
+    $this->assertAuthenticatedAs($user);
     expect($user->email_verified_at)->not->toBeNull()
-        ->and($user->role)->toBe('customer')
-        ->and($user->login_otp_code)->not->toBeNull();
+        ->and($user->role)->toBe('customer');
 });
 
 test('Google sign in rejects an invalid oauth state', function () {

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\CourierShippingService;
 use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,6 +31,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'meta_title',
     'meta_description',
     'meta_keywords',
+    'shipping_type',
+    'shipping_fee',
+    'courier_name',
+    'delivery_time_text',
 ])]
 class Product extends Model
 {
@@ -96,6 +101,46 @@ class Product extends Model
         return ['assets/images/vegetable/product/1.png'];
     }
 
+    public function getShippingFeeCentsAttribute(): ?int
+    {
+        if ($this->shipping_type === 'free') {
+            return 0;
+        }
+
+        if ($this->shipping_type === 'custom' && $this->shipping_fee !== null) {
+            return (int) round((float) $this->shipping_fee * 100);
+        }
+
+        return null;
+    }
+
+    public function getFormattedPostageAttribute(): string
+    {
+        if ($this->shipping_type === 'free') {
+            return 'Free Delivery';
+        }
+
+        if ($this->shipping_type === 'custom' && $this->shipping_fee !== null) {
+            return (float) $this->shipping_fee === 0.0
+                ? 'Free Delivery'
+                : '£'.number_format((float) $this->shipping_fee, 2);
+        }
+
+        return 'Standard Delivery';
+    }
+
+    public function getCourierDisplayNameAttribute(): string
+    {
+        if (! empty($this->courier_name)) {
+            $couriers = CourierShippingService::supportedCouriers();
+            $code = CourierShippingService::detectCourierCode($this->courier_name);
+
+            return $couriers[$code]['name'] ?? ucfirst($this->courier_name);
+        }
+
+        return 'Evri / Royal Mail';
+    }
+
     protected function casts(): array
     {
         return [
@@ -103,6 +148,7 @@ class Product extends Model
             'price' => 'decimal:2',
             'regular_price' => 'decimal:2',
             'cost_price' => 'decimal:2',
+            'shipping_fee' => 'decimal:2',
             'stock' => 'integer',
             'is_featured' => 'boolean',
             'is_top_deal' => 'boolean',

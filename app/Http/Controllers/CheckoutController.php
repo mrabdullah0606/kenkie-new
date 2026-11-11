@@ -238,7 +238,7 @@ class CheckoutController extends Controller
                 ];
             }
 
-            $shippingFeeCents = StorefrontCart::calculateShippingFeeCents($subtotalCents);
+            $shippingFeeCents = StorefrontCart::calculateShippingFeeCents($subtotalCents, $lineItems);
             $couponDiscountCents = StorefrontCart::getAppliedCouponDiscountCents($subtotalCents);
             $appliedCoupon = $request->session()->get('applied_coupon');
             $couponCode = ($couponDiscountCents > 0 && is_array($appliedCoupon)) ? ($appliedCoupon['code'] ?? null) : null;

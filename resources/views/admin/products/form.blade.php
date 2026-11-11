@@ -332,6 +332,76 @@
                     </div>
                 </div>
 
+                <!-- Postage & Courier Settings -->
+                <div class="card mb-4 shadow-sm border">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="fa-solid fa-truck-fast text-primary me-2"></i>Postage & Courier Settings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Postage Rule / Type -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="shipping_type">Postage Type <span class="text-danger">*</span></label>
+                            <select class="form-select @error('shipping_type') is-invalid @enderror" id="shipping_type" name="shipping_type" onchange="toggleCustomPostageInput(this.value)">
+                                <option value="default" @selected(old('shipping_type', $product->shipping_type ?? 'default') === 'default')>
+                                    Standard (Use Store-wide Shipping Rules)
+                                </option>
+                                <option value="free" @selected(old('shipping_type', $product->shipping_type) === 'free')>
+                                    Free Delivery (Qualifies for £0 Postage)
+                                </option>
+                                <option value="custom" @selected(old('shipping_type', $product->shipping_type) === 'custom')>
+                                    Custom Postage Rate (e.g. £2.00, £3.75)
+                                </option>
+                            </select>
+                            <small class="text-muted d-block mt-1">Choose whether this product has custom postage or uses store default rules.</small>
+                            @error('shipping_type')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Custom Postage Fee (Visible only if custom) -->
+                        <div class="mb-3 {{ old('shipping_type', $product->shipping_type) === 'custom' ? '' : 'd-none' }}" id="customShippingFeeWrapper">
+                            <label class="form-label fw-semibold" for="shipping_fee">Custom Postage Charge (£ GBP) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">£</span>
+                                <input class="form-control @error('shipping_fee') is-invalid @enderror" id="shipping_fee" type="number" name="shipping_fee" min="0" step="0.01" value="{{ old('shipping_fee', $product->shipping_fee) }}" placeholder="e.g. 2.50">
+                            </div>
+                            <small class="text-muted">Flat delivery charge applied for this product at checkout.</small>
+                            @error('shipping_fee')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Courier Service Provider -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold" for="courier_name">Delivery Courier / Supplier</label>
+                            <select class="form-select @error('courier_name') is-invalid @enderror" id="courier_name" name="courier_name">
+                                <option value="">Auto / Store Default (Evri / Royal Mail)</option>
+                                @foreach (\App\Services\CourierShippingService::supportedCouriers() as $code => $c)
+                                    <option value="{{ $code }}" @selected(old('courier_name', $product->courier_name) === $code || old('courier_name', strtolower($product->courier_name ?? '')) === strtolower($c['name']))>
+                                        {{ $c['name'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="text-muted">Courier service that delivers this product (shown on product page and tracking link).</small>
+                            @error('courier_name')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Delivery Timeframe -->
+                        <div class="mb-0">
+                            <label class="form-label fw-semibold" for="delivery_time_text">Estimated Delivery Time</label>
+                            <input class="form-control @error('delivery_time_text') is-invalid @enderror" id="delivery_time_text" name="delivery_time_text" value="{{ old('delivery_time_text', $product->delivery_time_text) }}" placeholder="e.g. 2-3 Business Days (Tracked)">
+                            <small class="text-muted">Shown to customers on the product page (e.g. "Delivered in 2-3 working days").</small>
+                            @error('delivery_time_text')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Visibility & Status -->
                 <div class="card mb-4 shadow-sm border">
                     <div class="card-header bg-white py-3">
@@ -973,6 +1043,17 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    window.toggleCustomPostageInput = function(val) {
+        const wrapper = document.getElementById('customShippingFeeWrapper');
+        if (wrapper) {
+            if (val === 'custom') {
+                wrapper.classList.remove('d-none');
+            } else {
+                wrapper.classList.add('d-none');
+            }
+        }
+    };
 });
 </script>
 @endpush
