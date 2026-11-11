@@ -37,6 +37,129 @@
         height: 100%;
         object-fit: contain;
     }
+    /* Gallery Reorderable Cards */
+    .gallery-item-card {
+        width: 130px;
+        height: 155px;
+        border-radius: 10px;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        cursor: grab;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        user-select: none;
+    }
+    .gallery-item-card:hover {
+        border-color: #0da487;
+        box-shadow: 0 4px 14px rgba(13, 164, 135, 0.18);
+    }
+    .gallery-item-card:active {
+        cursor: grabbing;
+    }
+    .gallery-item-card.dragging {
+        opacity: 0.35;
+        transform: scale(0.92);
+        border-color: #0da487;
+    }
+    .gallery-item-card.drag-over {
+        border-color: #0da487;
+        border-style: dashed;
+        background: #f0fdfa;
+        transform: scale(1.04);
+    }
+    .gallery-item-card .img-thumb-wrap {
+        width: 100%;
+        height: 110px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8fafc;
+        overflow: hidden;
+        position: relative;
+    }
+    .gallery-item-card .img-thumb-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        padding: 4px;
+        pointer-events: none;
+    }
+    .gallery-item-card .card-actions-bar {
+        height: 45px;
+        background: #ffffff;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 6px;
+        gap: 3px;
+    }
+    .gallery-item-card .gallery-btn {
+        width: 27px;
+        height: 27px;
+        padding: 0;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        color: #475569;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .gallery-item-card .gallery-btn:hover {
+        background: #0da487;
+        border-color: #0da487;
+        color: #ffffff;
+    }
+    .gallery-item-card .gallery-btn:disabled,
+    .gallery-item-card .gallery-btn.btn-disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+    .gallery-item-card .gallery-btn-remove {
+        border-color: #fee2e2;
+        background: #fef2f2;
+        color: #dc2626;
+    }
+    .gallery-item-card .gallery-btn-remove:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #ffffff;
+    }
+    .gallery-order-badge {
+        position: absolute;
+        top: 6px;
+        left: 6px;
+        background: rgba(15, 23, 42, 0.85);
+        color: #ffffff;
+        font-size: 10.5px;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 5px;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .gallery-new-badge {
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+        background: #2563eb;
+        color: #ffffff;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 4px;
+        z-index: 2;
+        pointer-events: none;
+    }
     .card-header-toggle {
         cursor: pointer;
         user-select: none;
@@ -177,28 +300,48 @@
 
                         <!-- Gallery Multi-Image Upload -->
                         <div>
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="form-label fw-semibold mb-0" for="gallery_files">Upload Gallery Images (Multiple)</label>
+                            <div class="d-flex justify-content-between align-items-center mb-1 flex-wrap gap-2">
+                                <div>
+                                    <label class="form-label fw-semibold mb-0" for="gallery_files">Upload Gallery Images (Multiple)</label>
+                                    <span class="badge bg-light text-dark border ms-2" id="galleryCountBadge"></span>
+                                </div>
                                 <button type="button" class="btn btn-sm btn-outline-secondary d-none" id="clearNewGalleryBtn">
                                     <i class="fa-solid fa-xmark me-1"></i> Clear Selected Files
                                 </button>
                             </div>
                             <input class="form-control @error('gallery_files') is-invalid @enderror" type="file" id="gallery_files" name="gallery_files[]" multiple accept="image/*">
-                            <small class="text-muted d-block mt-1">Select one or multiple images for the product photo gallery. Click the red <strong>&times;</strong> on any image to remove it.</small>
+                            <small class="text-muted d-block mt-1">
+                                <i class="fa-solid fa-arrows-up-down-left-right text-primary me-1"></i>
+                                <strong>Drag &amp; Drop</strong> images or use the <strong>&larr; / &rarr;</strong> buttons or <strong>#</strong> to change their order. Image #1 will display first on the storefront.
+                            </small>
                             @error('gallery_files')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
 
                             <!-- Gallery Previews Grid -->
-                            <div class="d-flex flex-wrap gap-2 mt-3" id="galleryPreviewContainer">
+                            <div class="d-flex flex-wrap gap-3 mt-3 align-items-center" id="galleryPreviewContainer">
                                 @if (is_array($product->images) && count($product->images) > 0)
                                     @foreach ($product->images as $index => $img)
-                                        <div class="preview-box position-relative existing-gallery-item">
-                                            <input type="hidden" name="keep_gallery_images[]" value="{{ $img }}">
-                                            <img src="{{ asset($img) }}" alt="Gallery Image" onerror="this.src='{{ asset('assets/images/furniture/1.png') }}'">
-                                            <button type="button" class="btn btn-danger btn-sm remove-existing-gallery-btn position-absolute top-0 end-0 m-1 p-0 rounded-circle d-flex align-items-center justify-content-center" style="width: 22px; height: 22px; font-size: 11px;" title="Remove this gallery image">
-                                                <i class="fa-solid fa-xmark"></i>
-                                            </button>
+                                        <div class="gallery-item-card existing-gallery-item" draggable="true" data-type="existing">
+                                            <span class="gallery-order-badge">#{{ $index + 1 }}</span>
+                                            <input type="hidden" name="keep_gallery_images[]" value="{{ $img }}" class="gallery-input-val">
+                                            <div class="img-thumb-wrap">
+                                                <img src="{{ asset($img) }}" alt="Gallery Image {{ $index + 1 }}" onerror="this.src='{{ asset('assets/images/furniture/1.png') }}'">
+                                            </div>
+                                            <div class="card-actions-bar">
+                                                <button type="button" class="gallery-btn btn-gallery-left" title="Move earlier in gallery">
+                                                    <i class="fa-solid fa-arrow-left"></i>
+                                                </button>
+                                                <button type="button" class="gallery-btn btn-gallery-pos" title="Jump to position number">
+                                                    <i class="fa-solid fa-hashtag"></i>
+                                                </button>
+                                                <button type="button" class="gallery-btn btn-gallery-right" title="Move later in gallery">
+                                                    <i class="fa-solid fa-arrow-right"></i>
+                                                </button>
+                                                <button type="button" class="gallery-btn gallery-btn-remove remove-existing-gallery-btn" title="Remove this image from gallery">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </div>
                                         </div>
                                     @endforeach
                                 @endif
@@ -848,43 +991,228 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 4. Gallery Files Live Previews & Image Removal
+    // 4. Gallery Files Live Previews, Drag & Drop Reordering, & Image Removal
     const galleryFileInput = document.getElementById('gallery_files');
     const galleryContainer = document.getElementById('galleryPreviewContainer');
     const clearNewGalleryBtn = document.getElementById('clearNewGalleryBtn');
+    const galleryCountBadge = document.getElementById('galleryCountBadge');
 
-    // Remove existing gallery image items
+    let draggedCard = null;
+    let selectedFilesMap = new Map();
+    let fileIdCounter = 0;
+
+    function reindexGallery() {
+        const cards = Array.from(galleryContainer.querySelectorAll('.gallery-item-card'));
+        const total = cards.length;
+        if (galleryCountBadge) {
+            galleryCountBadge.textContent = total > 0 ? `${total} ${total === 1 ? 'image' : 'images'}` : '';
+        }
+        cards.forEach((card, idx) => {
+            const badge = card.querySelector('.gallery-order-badge');
+            if (badge) badge.textContent = `#${idx + 1}`;
+
+            const leftBtn = card.querySelector('.btn-gallery-left');
+            const rightBtn = card.querySelector('.btn-gallery-right');
+            if (leftBtn) {
+                if (idx === 0) {
+                    leftBtn.classList.add('btn-disabled');
+                } else {
+                    leftBtn.classList.remove('btn-disabled');
+                }
+            }
+            if (rightBtn) {
+                if (idx === total - 1) {
+                    rightBtn.classList.add('btn-disabled');
+                } else {
+                    rightBtn.classList.remove('btn-disabled');
+                }
+            }
+        });
+    }
+
+    function syncNewFilesDataTransfer() {
+        if (!galleryFileInput || typeof DataTransfer === 'undefined') return;
+        try {
+            const dt = new DataTransfer();
+            const newCards = galleryContainer.querySelectorAll('.new-gallery-item');
+            newCards.forEach(card => {
+                const fileId = card.getAttribute('data-file-id');
+                if (fileId && selectedFilesMap.has(fileId)) {
+                    dt.items.add(selectedFilesMap.get(fileId));
+                }
+            });
+            galleryFileInput.files = dt.files;
+            if (clearNewGalleryBtn) {
+                if (dt.files.length > 0) {
+                    clearNewGalleryBtn.classList.remove('d-none');
+                } else {
+                    clearNewGalleryBtn.classList.add('d-none');
+                }
+            }
+        } catch (err) {
+            console.warn('DataTransfer sync notice:', err);
+        }
+    }
+
+    function attachCardDragEvents(card) {
+        card.setAttribute('draggable', 'true');
+
+        card.addEventListener('dragstart', function(e) {
+            draggedCard = this;
+            e.dataTransfer.effectAllowed = 'move';
+            try { e.dataTransfer.setData('text/plain', ''); } catch (err) {}
+            setTimeout(() => this.classList.add('dragging'), 0);
+        });
+
+        card.addEventListener('dragend', function() {
+            this.classList.remove('dragging');
+            galleryContainer.querySelectorAll('.gallery-item-card').forEach(c => c.classList.remove('drag-over'));
+            draggedCard = null;
+            reindexGallery();
+            syncNewFilesDataTransfer();
+        });
+
+        card.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (draggedCard && draggedCard !== this) {
+                this.classList.add('drag-over');
+            }
+        });
+
+        card.addEventListener('dragleave', function() {
+            this.classList.remove('drag-over');
+        });
+
+        card.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('drag-over');
+            if (draggedCard && draggedCard !== this) {
+                const cards = Array.from(galleryContainer.children);
+                const fromIdx = cards.indexOf(draggedCard);
+                const toIdx = cards.indexOf(this);
+                if (fromIdx < toIdx) {
+                    this.after(draggedCard);
+                } else {
+                    this.before(draggedCard);
+                }
+                reindexGallery();
+                syncNewFilesDataTransfer();
+            }
+        });
+    }
+
+    // Initialize drag-and-drop on existing gallery cards
+    galleryContainer.querySelectorAll('.gallery-item-card').forEach(attachCardDragEvents);
+    reindexGallery();
+
+    // Delegate click actions (Left, Right, Jump to #, Remove)
     galleryContainer.addEventListener('click', function(e) {
-        const removeBtn = e.target.closest('.remove-existing-gallery-btn');
-        if (removeBtn) {
-            const item = removeBtn.closest('.existing-gallery-item');
-            if (item) {
-                item.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-                item.style.opacity = '0';
-                item.style.transform = 'scale(0.8)';
-                setTimeout(() => item.remove(), 200);
+        const leftBtn = e.target.closest('.btn-gallery-left');
+        const rightBtn = e.target.closest('.btn-gallery-right');
+        const posBtn = e.target.closest('.btn-gallery-pos');
+        const removeExistingBtn = e.target.closest('.remove-existing-gallery-btn');
+        const removeNewBtn = e.target.closest('.remove-new-gallery-btn');
+
+        if (leftBtn) {
+            const card = leftBtn.closest('.gallery-item-card');
+            const prev = card.previousElementSibling;
+            if (prev) {
+                prev.before(card);
+                reindexGallery();
+                syncNewFilesDataTransfer();
+            }
+        } else if (rightBtn) {
+            const card = rightBtn.closest('.gallery-item-card');
+            const next = card.nextElementSibling;
+            if (next) {
+                next.after(card);
+                reindexGallery();
+                syncNewFilesDataTransfer();
+            }
+        } else if (posBtn) {
+            const card = posBtn.closest('.gallery-item-card');
+            const cards = Array.from(galleryContainer.querySelectorAll('.gallery-item-card'));
+            const currentPos = cards.indexOf(card) + 1;
+            const input = prompt(`Move image from position #${currentPos} to which position? (1 - ${cards.length}):`, currentPos);
+            if (input !== null) {
+                const targetPos = parseInt(input.trim(), 10);
+                if (!isNaN(targetPos) && targetPos >= 1 && targetPos <= cards.length && targetPos !== currentPos) {
+                    const targetCard = cards[targetPos - 1];
+                    if (targetPos < currentPos) {
+                        targetCard.before(card);
+                    } else {
+                        targetCard.after(card);
+                    }
+                    reindexGallery();
+                    syncNewFilesDataTransfer();
+                }
+            }
+        } else if (removeExistingBtn) {
+            const card = removeExistingBtn.closest('.gallery-item-card');
+            if (card) {
+                card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    card.remove();
+                    reindexGallery();
+                }, 200);
+            }
+        } else if (removeNewBtn) {
+            const card = removeNewBtn.closest('.gallery-item-card');
+            if (card) {
+                const fileId = card.getAttribute('data-file-id');
+                if (fileId) selectedFilesMap.delete(fileId);
+                card.remove();
+                reindexGallery();
+                syncNewFilesDataTransfer();
             }
         }
     });
 
-    // Preview new gallery files
+    // Preview newly selected gallery files
     galleryFileInput.addEventListener('change', function(e) {
         const files = e.target.files;
-        // Remove only previous "new-preview-item" elements, keep existing saved gallery items
         document.querySelectorAll('.new-gallery-item').forEach(el => el.remove());
+        selectedFilesMap.clear();
 
         if (files && files.length > 0) {
             if (clearNewGalleryBtn) clearNewGalleryBtn.classList.remove('d-none');
-            Array.from(files).forEach((file, idx) => {
+            Array.from(files).forEach((file) => {
+                const fileId = 'file_' + (++fileIdCounter);
+                selectedFilesMap.set(fileId, file);
+
                 const reader = new FileReader();
                 reader.onload = function(event) {
                     const box = document.createElement('div');
-                    box.className = 'preview-box position-relative new-gallery-item border-primary';
+                    box.className = 'gallery-item-card new-gallery-item';
+                    box.setAttribute('draggable', 'true');
+                    box.setAttribute('data-file-id', fileId);
                     box.innerHTML = `
-                        <img src="${event.target.result}" alt="New Preview">
-                        <span class="badge bg-primary position-absolute bottom-0 start-0 m-1 px-1 small" style="font-size: 9px;">New</span>
+                        <span class="gallery-order-badge">#</span>
+                        <span class="gallery-new-badge">NEW</span>
+                        <div class="img-thumb-wrap">
+                            <img src="${event.target.result}" alt="New Preview">
+                        </div>
+                        <div class="card-actions-bar">
+                            <button type="button" class="gallery-btn btn-gallery-left" title="Move earlier">
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </button>
+                            <button type="button" class="gallery-btn btn-gallery-pos" title="Jump to position">
+                                <i class="fa-solid fa-hashtag"></i>
+                            </button>
+                            <button type="button" class="gallery-btn btn-gallery-right" title="Move later">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                            <button type="button" class="gallery-btn gallery-btn-remove remove-new-gallery-btn" title="Remove this new file">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
                     `;
+                    attachCardDragEvents(box);
                     galleryContainer.appendChild(box);
+                    reindexGallery();
                 };
                 reader.readAsDataURL(file);
             });
@@ -896,8 +1224,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (clearNewGalleryBtn) {
         clearNewGalleryBtn.addEventListener('click', function() {
             galleryFileInput.value = '';
+            selectedFilesMap.clear();
             document.querySelectorAll('.new-gallery-item').forEach(el => el.remove());
             clearNewGalleryBtn.classList.add('d-none');
+            reindexGallery();
         });
     }
 

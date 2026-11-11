@@ -646,3 +646,51 @@ test('admin can update product slug or auto-regenerate it from the updated produ
     expect($product->name)->toBe('Premium Stainless Steel Water Bottle');
     expect($product->slug)->toBe('premium-stainless-steel-water-bottle');
 });
+
+test('admin can reorder product gallery images and preserve custom sort order', function () {
+    $admin = User::factory()->admin()->create();
+    $category = Category::factory()->create();
+
+    $product = Product::factory()->create([
+        'category_id' => $category->id,
+        'name' => 'Multi Angle Shoe Rack',
+        'slug' => 'multi-angle-shoe-rack',
+        'sku' => 'SHOE-009',
+        'price' => 29.99,
+        'stock' => 15,
+        'unit' => 'piece',
+        'images' => [
+            'storage/products/gallery/img1.jpg',
+            'storage/products/gallery/img2.jpg',
+            'storage/products/gallery/img3.jpg',
+            'storage/products/gallery/img4.jpg',
+        ],
+    ]);
+
+    // Reorder: move img4 to 2nd position -> [img1, img4, img2, img3]
+    $response = $this->actingAs($admin)->put(route('admin.products.update', $product), [
+        'category_id' => $category->id,
+        'name' => 'Multi Angle Shoe Rack',
+        'slug' => 'multi-angle-shoe-rack',
+        'sku' => 'SHOE-009',
+        'price' => 29.99,
+        'stock' => 15,
+        'unit' => 'piece',
+        'keep_gallery_images' => [
+            'storage/products/gallery/img1.jpg',
+            'storage/products/gallery/img4.jpg',
+            'storage/products/gallery/img2.jpg',
+            'storage/products/gallery/img3.jpg',
+        ],
+    ]);
+
+    $response->assertSessionHasNoErrors();
+    $product->refresh();
+
+    expect($product->images)->toBe([
+        'storage/products/gallery/img1.jpg',
+        'storage/products/gallery/img4.jpg',
+        'storage/products/gallery/img2.jpg',
+        'storage/products/gallery/img3.jpg',
+    ]);
+});
