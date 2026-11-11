@@ -645,7 +645,7 @@
 
                         {{-- Trust strip --}}
                         <div class="trust-strip">
-                            <div class="trust-item"><i class="fa-solid fa-truck-fast"></i> Free shipping over {{ \App\Models\ShippingSetting::getSettings()->formatted_threshold }}</div>
+                            <div class="trust-item"><i class="fa-solid fa-truck-fast"></i> Tracked UK delivery</div>
                             <div class="trust-item"><i class="fa-solid fa-shield-halved"></i> Secure checkout</div>
                             <div class="trust-item"><i class="fa-solid fa-rotate-left"></i> 14-day returns</div>
                             <div class="trust-item"><i class="fa-solid fa-headset"></i> 24/7 support</div>
