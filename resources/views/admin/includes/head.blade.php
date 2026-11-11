@@ -199,6 +199,35 @@ body {
     color: #ffffff !important;
 }
 
+/* High-contrast Stock Badges */
+.badge-stock-in {
+    background-color: #d1fae5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+    font-weight: 600 !important;
+    font-size: 11.5px !important;
+}
+.badge-stock-warning {
+    background-color: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+}
+.badge-stock-danger {
+    background-color: #fee2e2 !important;
+    color: #991b1b !important;
+    border: 1px solid #fca5a5 !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+}
+.badge-stock-out {
+    background-color: #dc2626 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    font-size: 11.5px !important;
+}
+
 .card {
     border-radius: 12px;
     border: 1px solid rgba(0, 0, 0, 0.06);

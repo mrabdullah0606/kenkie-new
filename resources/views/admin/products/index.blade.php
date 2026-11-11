@@ -142,13 +142,13 @@
                                 </td>
                                 <td>
                                     @if ($product->stock <= 0)
-                                        <span class="badge bg-danger text-white px-2 py-1"><i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock</span>
+                                        <span class="badge badge-stock-out px-2 py-1"><i class="fa-solid fa-circle-xmark me-1"></i> Out of Stock</span>
                                     @elseif ($product->stock <= 5)
-                                        <span class="badge bg-danger text-white px-2 py-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Low: {{ $product->stock }}</span>
+                                        <span class="badge badge-stock-danger px-2 py-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Low: {{ $product->stock }}</span>
                                     @elseif ($product->stock <= 15)
-                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-1">{{ $product->stock }} left</span>
+                                        <span class="badge badge-stock-warning px-2 py-1"><i class="fa-solid fa-clock me-1"></i> {{ $product->stock }} left</span>
                                     @else
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">{{ $product->stock }} in stock</span>
+                                        <span class="badge badge-stock-in px-2 py-1"><i class="fa-solid fa-check me-1"></i> {{ $product->stock }} in stock</span>
                                     @endif
 
                                     @if ($product->variations && $product->variations->isNotEmpty())

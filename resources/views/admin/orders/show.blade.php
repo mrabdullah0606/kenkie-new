@@ -366,11 +366,11 @@
                             @endif
 
                             @if ($order->payment_status === 'paid')
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 fw-semibold">
+                                <span class="badge badge-stock-in px-3 py-2 fw-semibold">
                                     <i class="fa-solid fa-check me-1"></i> Paid
                                 </span>
                             @else
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 fw-semibold">
+                                <span class="badge badge-stock-warning px-3 py-2 fw-bold">
                                     <i class="fa-regular fa-clock me-1"></i> Pending Payment
                                 </span>
                             @endif
