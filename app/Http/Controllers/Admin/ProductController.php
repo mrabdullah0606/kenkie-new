@@ -9,6 +9,7 @@ use App\Services\CourierShippingService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -239,6 +240,17 @@ class ProductController extends Controller
      */
     private function validatedData(Request $request, ?Product $product = null): array
     {
+        $rawSlug = $request->input('slug');
+        if (blank($rawSlug) && $request->filled('name')) {
+            $rawSlug = Str::slug($request->input('name'));
+        } elseif (filled($rawSlug)) {
+            $rawSlug = Str::slug($rawSlug);
+        }
+
+        if (filled($rawSlug)) {
+            $request->merge(['slug' => $rawSlug]);
+        }
+
         $validated = $request->validate([
             'category_id' => ['required', 'integer', 'exists:categories,id'],
             'name' => ['required', 'string', 'max:255'],

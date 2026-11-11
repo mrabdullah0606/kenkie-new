@@ -599,3 +599,50 @@ test('checkout respects product-wise custom postage fee instead of global defaul
     expect((float) $order->shipping_fee)->toBe(5.00);
     expect((float) $order->total)->toBe(45.00);
 });
+
+test('admin can update product slug or auto-regenerate it from the updated product name', function () {
+    $admin = User::factory()->admin()->create();
+    $category = Category::factory()->create();
+
+    $product = Product::factory()->create([
+        'category_id' => $category->id,
+        'name' => 'test product abdullah',
+        'slug' => 'test-product-abdi',
+        'sku' => 'TEST-001',
+        'price' => 15.00,
+        'stock' => 10,
+        'unit' => 'piece',
+    ]);
+
+    // 1. Explicit slug update
+    $response = $this->actingAs($admin)->put(route('admin.products.update', $product), [
+        'category_id' => $category->id,
+        'name' => 'Black 6 Tier Adjustable Shoe Rack Storage Organiser',
+        'slug' => 'black-6-tier-adjustable-shoe-rack-storage-organiser',
+        'sku' => 'TEST-001',
+        'price' => 15.00,
+        'stock' => 10,
+        'unit' => 'piece',
+    ]);
+
+    $response->assertSessionHasNoErrors();
+    $product->refresh();
+    expect($product->name)->toBe('Black 6 Tier Adjustable Shoe Rack Storage Organiser');
+    expect($product->slug)->toBe('black-6-tier-adjustable-shoe-rack-storage-organiser');
+
+    // 2. Blank slug in request automatically regenerates from the name
+    $response2 = $this->actingAs($admin)->put(route('admin.products.update', $product), [
+        'category_id' => $category->id,
+        'name' => 'Premium Stainless Steel Water Bottle',
+        'slug' => '', // Left empty -> backend regenerates from name
+        'sku' => 'TEST-001',
+        'price' => 22.00,
+        'stock' => 5,
+        'unit' => 'piece',
+    ]);
+
+    $response2->assertSessionHasNoErrors();
+    $product->refresh();
+    expect($product->name)->toBe('Premium Stainless Steel Water Bottle');
+    expect($product->slug)->toBe('premium-stainless-steel-water-bottle');
+});

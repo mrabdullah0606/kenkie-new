@@ -96,12 +96,20 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="slug">URL Slug <span class="text-danger">*</span></label>
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <label class="form-label fw-semibold mb-0" for="slug">URL Slug <span class="text-danger">*</span></label>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none fw-semibold text-primary" id="btnSyncSlug" style="font-size:12px;">
+                                        <i class="fa-solid fa-arrows-rotate me-1"></i> Regenerate from Name
+                                    </button>
+                                </div>
                                 <div class="input-group">
                                     <span class="input-group-text bg-light text-muted small">/product/</span>
                                     <input class="form-control @error('slug') is-invalid @enderror" id="slug" name="slug" value="{{ old('slug', $product->slug) }}" placeholder="organic-cotton-sheet" required>
+                                    <button type="button" class="btn btn-outline-secondary" id="btnSyncSlugInput" title="Generate slug from product name">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                    </button>
                                 </div>
-                                <small class="text-muted">Auto-generated from name. You can also customize it.</small>
+                                <small class="text-muted d-block mt-1">Auto-generated from name. You can also customize it or click <strong>Regenerate from Name</strong>.</small>
                                 @error('slug')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
@@ -761,21 +769,46 @@ document.addEventListener('DOMContentLoaded', function() {
     // 2. Dynamic Slug Generator from Product Name
     const nameInput = document.getElementById('name');
     const slugInput = document.getElementById('slug');
-    let isSlugManuallyEdited = {{ $product->exists ? 'true' : 'false' }};
+    const btnSyncSlug = document.getElementById('btnSyncSlug');
+    const btnSyncSlugInput = document.getElementById('btnSyncSlugInput');
+
+    function generateSlug(text) {
+        return text
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/[\s-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    function syncSlugFromName() {
+        if (nameInput && nameInput.value.trim().length > 0) {
+            slugInput.value = generateSlug(nameInput.value);
+            slugInput.dispatchEvent(new Event('change'));
+            slugInput.classList.add('is-valid');
+            setTimeout(() => slugInput.classList.remove('is-valid'), 1200);
+        }
+    }
+
+    if (btnSyncSlug) btnSyncSlug.addEventListener('click', syncSlugFromName);
+    if (btnSyncSlugInput) btnSyncSlugInput.addEventListener('click', syncSlugFromName);
+
+    const initialName = nameInput ? nameInput.value.trim() : '';
+    const initialSlug = slugInput ? slugInput.value.trim() : '';
+    // Auto-sync if creating a new product OR if slug matches the generated slug of current name
+    let autoSyncSlug = {{ $product->exists ? 'false' : 'true' }};
+    if (initialName && initialSlug === generateSlug(initialName)) {
+        autoSyncSlug = true;
+    }
 
     slugInput.addEventListener('input', function() {
-        isSlugManuallyEdited = slugInput.value.trim().length > 0;
+        // If user explicitly types into slug input, pause auto-sync unless field is completely emptied
+        autoSyncSlug = slugInput.value.trim().length === 0;
     });
 
     nameInput.addEventListener('input', function() {
-        if (!isSlugManuallyEdited) {
-            const slug = nameInput.value
-                .toLowerCase()
-                .trim()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/[\s-]+/g, '-')
-                .replace(/^-+|-+$/g, '');
-            slugInput.value = slug;
+        if (autoSyncSlug || slugInput.value.trim().length === 0) {
+            slugInput.value = generateSlug(nameInput.value);
         }
     });
 
