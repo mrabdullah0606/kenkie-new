@@ -32,7 +32,7 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', 'Your cart is empty.');
         }
 
-        $contents['shippingFeeCents'] = $cart->shippingFeeCents($contents['cartSubtotalCents']);
+        $contents['shippingFeeCents'] = $contents['shippingFeeCents'] ?? $cart->shippingFeeCents($contents['cartSubtotalCents'], $contents['cartItems']);
         $contents['couponDiscountCents'] = $contents['couponDiscountCents'] ?? StorefrontCart::getAppliedCouponDiscountCents($contents['cartSubtotalCents']);
         $contents['appliedCoupon'] = $request->session()->get('applied_coupon');
         $contents['orderTotalCents'] = max(0, $contents['cartSubtotalCents'] - $contents['couponDiscountCents'] + $contents['shippingFeeCents']);

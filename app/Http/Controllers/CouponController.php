@@ -108,7 +108,7 @@ class CouponController extends Controller
 
         $request->session()->put('applied_coupon', $couponData);
 
-        $shippingFeeCents = $cartService->shippingFeeCents($subtotalCents);
+        $shippingFeeCents = $cartData['shippingFeeCents'] ?? $cartService->shippingFeeCents($subtotalCents, $cartData['cartItems'] ?? null);
         $totalCents = max(0, $subtotalCents - $discountCents + $shippingFeeCents);
 
         $successMsg = "Coupon '{$code}' ({$couponData['label']}) applied successfully!";
@@ -143,7 +143,7 @@ class CouponController extends Controller
         $request->session()->forget('applied_coupon');
         $cartData = $cartService->contents($request);
         $subtotalCents = $cartData['cartSubtotalCents'];
-        $shippingFeeCents = $cartService->shippingFeeCents($subtotalCents);
+        $shippingFeeCents = $cartData['shippingFeeCents'] ?? $cartService->shippingFeeCents($subtotalCents, $cartData['cartItems'] ?? null);
         $totalCents = max(0, $subtotalCents + $shippingFeeCents);
 
         $msg = 'Coupon removed.';

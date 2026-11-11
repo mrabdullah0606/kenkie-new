@@ -106,7 +106,7 @@ class CartController extends Controller
         $request->session()->put('cart', $cart);
         $cart = StorefrontCart::sanitizeSessionCart($request);
         $cartData = $cartService->contents($request);
-        $shippingFeeCents = $cartService->shippingFeeCents($cartData['cartSubtotalCents']);
+        $shippingFeeCents = $cartData['shippingFeeCents'];
 
         $itemsMap = $cartData['cartItems']->mapWithKeys(function ($i) {
             return [
@@ -168,7 +168,7 @@ class CartController extends Controller
         $request->session()->put('cart', $cart);
         $cart = StorefrontCart::sanitizeSessionCart($request);
         $cartData = $cartService->contents($request);
-        $shippingFeeCents = $cartService->shippingFeeCents($cartData['cartSubtotalCents']);
+        $shippingFeeCents = $cartData['shippingFeeCents'];
 
         $itemsMap = $cartData['cartItems']->mapWithKeys(function ($i) {
             return [

@@ -255,6 +255,22 @@ class StorefrontCart
 
     public static function calculateShippingFeeCents(int $subtotalCents, ?iterable $cartItems = null): int
     {
+        if ($cartItems === null && function_exists('request') && request()?->hasSession()) {
+            $cart = (array) request()->session()->get('cart', []);
+            if (! empty($cart)) {
+                $pIds = [];
+                foreach (array_keys($cart) as $cartKey) {
+                    $pIds[] = str_contains((string) $cartKey, ':')
+                        ? (int) explode(':', (string) $cartKey)[0]
+                        : (int) $cartKey;
+                }
+                $products = Product::query()
+                    ->whereIn('id', array_unique($pIds))
+                    ->get();
+                $cartItems = $products->map(fn ($p) => ['product' => $p]);
+            }
+        }
+
         if ($cartItems) {
             $items = collect($cartItems);
             if ($items->isNotEmpty()) {

@@ -543,3 +543,59 @@ test('google oauth callback seamlessly authenticates existing registered user wi
     expect($existingUser->email_verified_at)->not->toBeNull();
     expect($existingUser->login_otp_code)->toBeNull();
 });
+
+test('checkout respects product-wise custom postage fee instead of global default rate', function () {
+    // Set global standard shipping to £8.95
+    ShippingSetting::query()->updateOrCreate(['id' => 1], [
+        'standard_shipping_fee' => 8.95,
+        'free_shipping_enabled' => true,
+        'free_shipping_threshold' => 50.00,
+    ]);
+
+    $category = Category::factory()->create();
+    $product = Product::factory()->create([
+        'category_id' => $category->id,
+        'name' => 'Test Product Abdullah',
+        'price' => 40.00,
+        'stock' => 10,
+        'shipping_type' => 'custom',
+        'shipping_fee' => 5.00,
+        'courier_name' => 'dpd',
+        'delivery_time_text' => 'Delivered in 2-3 working days',
+        'is_active' => true,
+    ]);
+
+    $customer = User::factory()->create();
+
+    // Visit checkout page with this item in cart
+    $checkout = $this->actingAs($customer)
+        ->withSession(['cart' => [(string) $product->id => 1]])
+        ->get(route('checkout.index'));
+
+    $checkout->assertOk();
+    $checkout->assertSee('£40.00'); // Subtotal
+    $checkout->assertSee('£5.00');  // Custom Product Shipping fee
+    $checkout->assertDontSee('£8.95'); // Must not use default £8.95 fee
+    $checkout->assertSee('£45.00'); // Total (40 + 5)
+
+    // Complete order checkout
+    $orderResponse = $this->actingAs($customer)
+        ->withSession(['cart' => [(string) $product->id => 1]])
+        ->post(route('checkout.store'), [
+            'customer_name' => 'Muhammad Abdullah',
+            'email' => 'abdullah@example.com',
+            'phone' => '+447123456789',
+            'address_line' => '12 High Street',
+            'city' => 'London',
+            'region' => 'Greater London',
+            'postal_code' => 'SW1A 1AA',
+            'country' => 'United Kingdom',
+            'payment_method' => 'cash_on_delivery',
+        ]);
+
+    $orderResponse->assertSessionHasNoErrors();
+    $order = Order::latest()->first();
+    expect($order)->not->toBeNull();
+    expect((float) $order->shipping_fee)->toBe(5.00);
+    expect((float) $order->total)->toBe(45.00);
+});
