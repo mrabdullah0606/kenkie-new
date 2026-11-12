@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -24,12 +25,19 @@ class GoogleAuthController extends Controller
             ]);
         }
 
-        $state = Str::random(40);
         $verifier = Str::random(64);
+        $payload = json_encode([
+            'nonce' => Str::random(32),
+            'verifier' => $verifier,
+            'ts' => time(),
+        ]);
+        $state = Crypt::encryptString($payload);
+
         request()->session()->put([
             'google_oauth_state' => $state,
             'google_oauth_code_verifier' => $verifier,
         ]);
+        request()->session()->save();
 
         $query = http_build_query([
             'client_id' => $clientId,
@@ -47,19 +55,50 @@ class GoogleAuthController extends Controller
 
     public function callback(Request $request): RedirectResponse
     {
-        $expectedState = $request->session()->pull('google_oauth_state');
-        $verifier = $request->session()->pull('google_oauth_code_verifier');
         $state = $request->query('state');
         $code = $request->query('code');
 
-        if (! is_string($expectedState)
-            || ! is_string($state)
-            || ! hash_equals($expectedState, $state)
-            || ! is_string($verifier)
-            || ! is_string($code)
-            || $code === '') {
+        if (! is_string($state) || $state === '' || ! is_string($code) || $code === '') {
+            return $this->failedSignIn('Missing OAuth state or authorization code from Google callback.');
+        }
+
+        $verifier = null;
+
+        // 1. Primary verification: Self-contained cryptographically signed state token.
+        // Immunizes the OAuth flow against session drops on cross-domain / shared hostings (Hostinger).
+        try {
+            $decrypted = Crypt::decryptString($state);
+            $payload = json_decode($decrypted, true);
+
+            if (is_array($payload) && ! empty($payload['verifier']) && is_string($payload['verifier'])) {
+                $timestamp = (int) ($payload['ts'] ?? 0);
+                if ($timestamp > 0 && abs(time() - $timestamp) <= 900) {
+                    $verifier = $payload['verifier'];
+                } else {
+                    Log::warning('Google OAuth signed state token expired', ['ts' => $timestamp, 'now' => time()]);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Non-encrypted state or decryption failed - fallback to session
+        }
+
+        // 2. Fallback verification: Session-stored state (preserves test mocks and standard session state)
+        if ($verifier === null) {
+            $expectedState = $request->session()->pull('google_oauth_state');
+            $sessionVerifier = $request->session()->pull('google_oauth_code_verifier');
+
+            if (is_string($expectedState)
+                && is_string($sessionVerifier)
+                && hash_equals($expectedState, $state)) {
+                $verifier = $sessionVerifier;
+            }
+        }
+
+        if ($verifier === null) {
             return $this->failedSignIn('Invalid OAuth state or authorization code mismatch.');
         }
+
+        $request->session()->forget(['google_oauth_state', 'google_oauth_code_verifier']);
 
         try {
             $tokenResponse = Http::asForm()->timeout(10)->post('https://oauth2.googleapis.com/token', [
@@ -111,7 +150,7 @@ class GoogleAuthController extends Controller
         }
 
         $email = Str::lower(trim($email));
-        $user = User::where('email', $email)->first();
+        $user = User::whereRaw('LOWER(TRIM(email)) = ?', [$email])->first();
 
         if (! $user) {
             $name = $profile['name'] ?? Str::before($email, '@');
@@ -124,7 +163,7 @@ class GoogleAuthController extends Controller
             ]);
             $user->forceFill(['email_verified_at' => now()])->save();
         } else {
-            // Existing user (registered normally with email/password or previously)
+            // Existing user (registered normally with email/password or previously or directly in DB)
             // Google OAuth proves email ownership: ensure account is verified & clear pending OTPs
             if ($user->email_verified_at === null) {
                 $user->email_verified_at = now();
@@ -133,6 +172,10 @@ class GoogleAuthController extends Controller
             $user->email_otp_expires_at = null;
             $user->login_otp_code = null;
             $user->login_otp_expires_at = null;
+            if (empty($user->role)) {
+                $user->role = 'customer';
+            }
+            $user->email = $email;
             $user->save();
         }
 

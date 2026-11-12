@@ -2,8 +2,10 @@
 
 use App\Models\User;
 use App\Rules\ValidTurnstileToken;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 test('login screen can be rendered', function () {
     $response = $this->get('/login');
@@ -58,6 +60,85 @@ test('Google sign in rejects an invalid oauth state', function () {
     $response->assertRedirect(route('login', absolute: false));
     $response->assertSessionHasErrors('google');
     Http::assertNothingSent();
+});
+
+test('Google sign in succeeds using cryptographically signed state token without session cookie', function () {
+    config([
+        'services.google.client_id' => 'google-client-id',
+        'services.google.client_secret' => 'google-client-secret',
+        'services.google.redirect' => 'http://localhost/auth/google/callback',
+    ]);
+    Mail::fake();
+
+    $codeVerifier = Str::random(64);
+    $signedState = Crypt::encryptString(json_encode([
+        'nonce' => Str::random(32),
+        'verifier' => $codeVerifier,
+        'ts' => time(),
+    ]));
+
+    Http::fake([
+        'https://oauth2.googleapis.com/token' => Http::response(['access_token' => 'signed-access-token']),
+        'https://openidconnect.googleapis.com/v1/userinfo' => Http::response([
+            'sub' => 'google-user-789',
+            'email' => 'hostinger.user@example.com',
+            'email_verified' => true,
+            'name' => 'Hostinger User',
+        ]),
+    ]);
+
+    // Request arrives with completely empty session (simulating session loss across third-party redirect)
+    $response = $this->get(route('google.callback', [
+        'code' => 'authorization-code',
+        'state' => $signedState,
+    ], absolute: false));
+
+    $response->assertRedirect(route('home', absolute: false));
+    $user = User::where('email', 'hostinger.user@example.com')->firstOrFail();
+    $this->assertAuthenticatedAs($user);
+});
+
+test('Google sign in matches existing user case-insensitively and logs in directly', function () {
+    $existing = User::factory()->create([
+        'email' => 'Existing.User@example.com',
+        'email_verified_at' => null,
+        'login_otp_code' => '999999',
+    ]);
+
+    config([
+        'services.google.client_id' => 'google-client-id',
+        'services.google.client_secret' => 'google-client-secret',
+        'services.google.redirect' => 'http://localhost/auth/google/callback',
+    ]);
+    Mail::fake();
+
+    $codeVerifier = Str::random(64);
+    $signedState = Crypt::encryptString(json_encode([
+        'nonce' => Str::random(32),
+        'verifier' => $codeVerifier,
+        'ts' => time(),
+    ]));
+
+    Http::fake([
+        'https://oauth2.googleapis.com/token' => Http::response(['access_token' => 'signed-access-token-2']),
+        'https://openidconnect.googleapis.com/v1/userinfo' => Http::response([
+            'sub' => 'google-user-existing',
+            'email' => 'existing.user@example.com',
+            'email_verified' => true,
+            'name' => 'Existing User',
+        ]),
+    ]);
+
+    $response = $this->get(route('google.callback', [
+        'code' => 'authorization-code',
+        'state' => $signedState,
+    ], absolute: false));
+
+    $response->assertRedirect(route('home', absolute: false));
+    $this->assertAuthenticatedAs($existing);
+    $existing->refresh();
+    expect($existing->email_verified_at)->not->toBeNull();
+    expect($existing->login_otp_code)->toBeNull();
 });
 
 test('login requires a valid turnstile response when captcha is configured', function () {
